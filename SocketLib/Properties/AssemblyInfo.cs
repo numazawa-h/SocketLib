@@ -33,4 +33,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 
-[assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "./log/log4net.xml")]
+[assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "./log4net.xml")]

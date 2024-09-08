@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <log4net>
+    <appender name="DebugLogDailyAppender" type="log4net.Appender.RollingFileAppender">
+      <!-- ログ・ファイル名の先頭部分 -->
+      <param name="File" value=".\log\Log_" />
+      <!-- ファイル名の日付部分 -->
+      <param name="DatePattern" value='yyyyMMdd".log"' />
+      <!-- 日付ごとにファイルを作成することを指定 -->
+      <param name="RollingStyle" value="date" />
+      <!-- ログ・ファイル名が固定ではないので“false”を指定 -->
+      <param name="StaticLogFileName" value="false" />
+      <!-- 追加書き込み -->
+      <param name="AppendToFile" value="true" />
+      <lockingModel type="log4net.Appender.FileAppender+MinimalLock" />
+      
+      <!-- 全てのログ・レベルとする -->
+      <filter type="log4net.Filter.LevelRangeFilter">
+         <param name="LevelMax" value="FATAL" />
+         <param name="LevelMin" value="DEBUG" />
+      </filter>
+      
+      <!-- rollingStyle がSizeまたはCompositeの時の最大ファイルサイズ -->
+      <param name="MaximumFileSize" value="10MB" />
+      <!-- ファイルを切替えるマックス数。ここでは3世代まで管理する -->
+      <param name="MaxSizeRollBackups" value="3" />
+      
+      <!-- ログの出力書式 -->
+      <layout type="log4net.Layout.PatternLayout">
+        <ConversionPattern value="%date [%thread] [%-5method] %message%n" />
+      </layout>
+    </appender>
+    <root>
+      <!-- デバッグ以上のログを出力したい場合 -->
+      <level value="Debug" />
+      <!-- どのログ出力先を使用するか -->
+      <appender-ref ref="DebugLogDailyAppender" />
+    </root>
+  </log4net>
+</configuration>
