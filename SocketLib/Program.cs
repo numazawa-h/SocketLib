@@ -16,6 +16,8 @@ namespace SocketLib
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Log.Init();
+            Log.Info("Aplication Started*******************************************");
             Application.Run(new MainForm());
         }
     }
