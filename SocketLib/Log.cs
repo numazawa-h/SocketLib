@@ -1,4 +1,6 @@
-﻿using System;
+﻿using log4net.Core;
+using log4net.Repository.Hierarchy;
+using System;
 using System.Runtime.CompilerServices;
 [assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "./log4net.xml")]
 
@@ -22,9 +24,12 @@ namespace SocketLib
         }
 
         static private log4net.ILog _logger = null;
+        static bool _isTrace = false;
         static public void  Init()
         {
             _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+            var rootLogger = ((Hierarchy)_logger.Logger.Repository).Root;
+            _isTrace =(rootLogger.Level == Level.Trace);
         }
 
 
@@ -62,6 +67,8 @@ namespace SocketLib
 
         static public void Trace(string arg = null, [CallerMemberName] string callerMethodName = null, [CallerLineNumber] int line = -1)
         {
+            if (_isTrace == false) return;
+
             if (callerMethodName !=null)
             {
                 if(arg != null)

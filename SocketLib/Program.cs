@@ -19,6 +19,14 @@ namespace SocketLib
             Log.Init();
             Log.Info("Aplication Started*******************************************");
             Application.Run(new MainForm());
+
+            TraceLogTest("Trace Test");
+        }
+
+        static void TraceLogTest(string message)
+        {
+            Log.Trace();
+            Log.Trace(message);
         }
     }
 }
