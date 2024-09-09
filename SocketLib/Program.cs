@@ -22,13 +22,26 @@ namespace SocketLib
             Log.Info("Aplication Started*******************************************");
             Application.Run(new MainForm());
 
-            TraceLogTest("Trace Test");
+            ByteArrayTest("[ 1234 5678 9abc def0 ]");
         }
 
-        static void TraceLogTest(string message)
+        static void ByteArrayTest(string bcd)
         {
-            Log.Trace();
-            Log.Trace(message);
+            Log.Trace(bcd);
+            ByteArray ba1 = new ByteArray(bcd);
+            ByteArray ba2 = new ByteArray("[  31323334 c1c2c3c4 41424344]");
+
+            ba1.Append(ba1);
+            ba1.Append(ba2);
+            Log.Debug("ByteArrayTest:[" + ba1.ToString() +"]");
+
+            ba1.SetSeparator(null, " ", "    ");
+            Log.Debug("ByteArrayTest:[" + ba1.ToString() + "]");
+            ba1.SetSeparator(" ", "  ", "]  [");
+            Log.Debug("ByteArrayTest:[" + ba1.ToString() + "]");
+
+            Log.Debug("ByteArrayTest:[" + ba1.to_hex() + "]");
+            Log.Debug("ByteArrayTest:[" + ba2.to_text() + "]");
         }
     }
 }
