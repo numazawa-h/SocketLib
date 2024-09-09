@@ -4,7 +4,7 @@ using System;
 using System.Runtime.CompilerServices;
 [assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "./log4net.xml")]
 
-namespace SocketLib
+namespace NCommonUtility
 {
     internal class Log
     {

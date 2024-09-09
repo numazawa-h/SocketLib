@@ -1,4 +1,4 @@
-﻿namespace SocketLib
+﻿namespace SampleMain
 {
     partial class MainForm
     {
