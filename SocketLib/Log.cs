@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+[assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "./log4net.xml")]
 
 namespace SocketLib
 {
     internal class Log
-    {        
+    {
+
         // シングルトン
         static private Log _instance = null;
         static public Log GetInstance()
