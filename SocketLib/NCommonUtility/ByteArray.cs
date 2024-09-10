@@ -125,7 +125,10 @@ namespace NCommonUtility
         /// <summary>
         /// 文字列の長さ
         /// </summary>
-        /// <returns>データをUTF16と仮定して2バイトの0x0000が出現するまでの長さを返却</returns>
+        /// <returns>
+        /// データをUTF16と仮定して2バイトの0x0000が出現するまでの長さをバイト数で返却
+        /// （UTF16の文字数の2倍になる）
+        /// </returns>
         public int str_len()
         {
             for (int i = 0; i < _dat.Length; i += 2)
@@ -138,6 +141,7 @@ namespace NCommonUtility
                 }
                 if (_dat[i]==0x00 && _dat[j] == 0x00)
                 {
+                    // 0x0000が見つかったらそこまでの長さ
                     return i;
                 }
             }
@@ -155,7 +159,7 @@ namespace NCommonUtility
         /// <param name="ofs">offset</param>
         /// <param name="len">length</param>
         /// <param name="sep">separator</param>
-        /// <returns><16進文字列/returns>
+        /// <returns>16進文字列/<returns>
         public string to_hex(int ofs=0, int len = 0, string sep=null)
         {
             StringBuilder sb = new StringBuilder();
