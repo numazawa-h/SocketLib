@@ -25,10 +25,10 @@ namespace SocketLib
             ByteArrayTest("[ 1234 5678 9abc def0 ]");
         }
 
-        static void ByteArrayTest(string bcd)
+        static void ByteArrayTest(string hex)
         {
-            Log.Trace(bcd);
-            ByteArray ba1 = new ByteArray(ByteArray.ParseHex(bcd));
+            Log.Trace(hex);
+            ByteArray ba1 = new ByteArray(ByteArray.ParseHex(hex));
             ByteArray ba2 = new ByteArray(ByteArray.ParseHex("[  31323334 c1c2c3c4 41424344]"));
             ByteArray ba3 = new ByteArray("テスト");
             ByteArray ba4 = new ByteArray("あいうえお", System.Text.Encoding.GetEncoding("Shift_JIS"));
@@ -60,6 +60,17 @@ namespace SocketLib
             Log.Debug("ByteArrayTest:(-4,  8)[" + ba.to_hex() + "]");
             ba = new ByteArray(ba2, -4, 20);
             Log.Debug("ByteArrayTest:(-4, 20)[" + ba.to_hex() + "]");
+
+            ba = new ByteArray(ba3, 0, 20);
+            Log.Debug("ByteArrayTest:[" + ba.to_hex() + "]");
+            int len = ba.str_len();
+            Log.Debug("ByteArrayTest:str_len =" + len.ToString());
+            ba = new ByteArray(ba3, 0, len);
+            Log.Debug("ByteArrayTest:[" + ba.to_text() + "]");
+
+
+
+
 
         }
     }

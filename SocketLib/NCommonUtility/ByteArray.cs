@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace NCommonUtility
 {
@@ -11,9 +12,14 @@ namespace NCommonUtility
     {
         private byte[] _dat;
 
-        public ByteArray() 
+        public ByteArray()
         {
             _dat = System.Array.Empty<byte>();
+        }
+
+        public ByteArray(int len)
+        {
+            _dat = new byte[len];
         }
 
         public ByteArray(byte[] dat)
@@ -77,6 +83,9 @@ namespace NCommonUtility
             }
         }
 
+        /// <summary>
+        /// 指定された文字コードで文字列を変換するコンストラクター
+        /// </summary>
         public ByteArray(string text, Encoding enc=null )
         {
             if(enc==null)
@@ -106,6 +115,33 @@ namespace NCommonUtility
             Buffer.BlockCopy(_dat, 0, buf, 0, _dat.Length);
 
             return buf;
+        }
+
+        public int Length()
+        {
+            return _dat.Length;
+        }
+
+        /// <summary>
+        /// 文字列の長さ
+        /// </summary>
+        /// <returns>データをUTF16と仮定して2バイトの0x0000が出現するまでの長さを返却</returns>
+        public int str_len()
+        {
+            for (int i = 0; i < _dat.Length; i += 2)
+            {
+                int j = i + 1;
+                if(j == _dat.Length)
+                {
+                    // データが奇数で終わっている時 
+                    return j;
+                }
+                if (_dat[i]==0x00 && _dat[j] == 0x00)
+                {
+                    return i;
+                }
+            }
+            return _dat.Length;
         }
 
         public override string ToString() 
