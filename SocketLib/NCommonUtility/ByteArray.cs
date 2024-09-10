@@ -11,10 +11,21 @@ namespace NCommonUtility
     {
         private byte[] _dat;
 
-        public ByteArray(byte[] dat) 
+        public ByteArray() 
+        {
+            _dat = System.Array.Empty<byte>();
+        }
+
+        public ByteArray(byte[] dat)
         {
             _dat = new byte[dat.Length];
             Buffer.BlockCopy(dat, 0, _dat, 0, dat.Length);
+        }
+        
+        public ByteArray(ByteArray othher)
+        {
+            _dat = new byte[othher._dat.Length];
+            Buffer.BlockCopy(othher._dat, 0, _dat, 0, othher._dat.Length);
         }
 
         public ByteArray(string text, Encoding enc=null )
