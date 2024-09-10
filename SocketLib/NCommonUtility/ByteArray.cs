@@ -21,11 +21,60 @@ namespace NCommonUtility
             _dat = new byte[dat.Length];
             Buffer.BlockCopy(dat, 0, _dat, 0, dat.Length);
         }
-        
-        public ByteArray(ByteArray othher)
+
+        /// <summary>
+        /// コピーコンストラクタ
+        /// </summary>
+        /// <remarks>
+        /// データの長さに0を指定した場合、コピー元全体が対象になります。
+        /// データの長さにマイナスを指定した場合、オフセットからの相対データが対象となります。
+        /// データの長さにマイナスを指定した場合、オフセットが0なら末尾データが対象となります。
+        /// コピー元データのオフセットにマイナスを指定した場合、コピー先のオフセットがずれます。
+        /// </remarks>
+        /// <param name="othher">コピー元オブジェクト</param>
+        /// <param name="ofs">コピー元データのオフセット</param>
+        /// <param name="len">データの長さ</param>
+        public ByteArray(ByteArray othher, int ofs=0, int len=0)
         {
-            _dat = new byte[othher._dat.Length];
-            Buffer.BlockCopy(othher._dat, 0, _dat, 0, othher._dat.Length);
+            if (len < 0)
+            {
+                len = -len;
+                if (ofs == 0)
+                {
+                    // 長さがマイナスでオフセットが0なら末尾のデータを対象とする
+                    ofs = othher._dat.Length - len;
+                }
+                else
+                {
+                    // 長さがマイナスでオフセットが0以外ならofsより前のデータを対象とする
+                    ofs -= len;
+                }
+            }
+            if (len == 0)
+            {
+                len = othher._dat.Length - ofs;
+            }
+            _dat = new byte[len];
+
+            int dst = 0;
+            if (ofs < 0)
+            {
+                // オフセットがマイナスならコピー先の先頭をずらす
+                dst = -ofs;
+                len = len - dst;
+                ofs = 0;
+            }
+            if ((ofs+len) > othher._dat.Length)
+            {
+                // コピー元のデータの長さが指定の長さより短ければコピー元の長さに合わせる
+                // （残りの部分は0x00で初期化される）
+                len = othher._dat.Length - ofs;
+            }
+            if(len > 0)
+            {
+                // 最終的にコピーすべきデータがあればコピーする
+                Buffer.BlockCopy(othher._dat, ofs, _dat, dst, len);
+            }
         }
 
         public ByteArray(string text, Encoding enc=null )

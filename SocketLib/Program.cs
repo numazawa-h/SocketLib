@@ -33,6 +33,7 @@ namespace SocketLib
             ByteArray ba3 = new ByteArray("テスト");
             ByteArray ba4 = new ByteArray("あいうえお", System.Text.Encoding.GetEncoding("Shift_JIS"));
 
+
             ba1.Append(ba1);
             ba1.Append(ba2);
             ba1.Append(ba4);
@@ -45,6 +46,21 @@ namespace SocketLib
 
             Log.Debug("ByteArrayTest:[" + ba3.to_text() + "]");
             Log.Debug("ByteArrayTest:[" + ba3.to_hex() + "]");
+
+            ByteArray ba;
+            ba = new ByteArray(ba2);
+            Log.Debug("ByteArrayTest:( 0,  0)[" + ba.to_hex() + "]");
+            ba = new ByteArray(ba2, 8, 16);
+            Log.Debug("ByteArrayTest:( 8, 16)[" + ba.to_hex() + "]");
+            ba = new ByteArray(ba2, 0, -16);
+            Log.Debug("ByteArrayTest:( 0,-16)[" + ba.to_hex() + "]");
+            ba = new ByteArray(ba2, 0, -4);
+            Log.Debug("ByteArrayTest:( 0, -4)[" + ba.to_hex() + "]");
+            ba = new ByteArray(ba2, -4, 8);
+            Log.Debug("ByteArrayTest:(-4,  8)[" + ba.to_hex() + "]");
+            ba = new ByteArray(ba2, -4, 20);
+            Log.Debug("ByteArrayTest:(-4, 20)[" + ba.to_hex() + "]");
+
         }
     }
 }
