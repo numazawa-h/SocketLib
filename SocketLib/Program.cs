@@ -28,20 +28,23 @@ namespace SocketLib
         static void ByteArrayTest(string bcd)
         {
             Log.Trace(bcd);
-            ByteArray ba1 = new ByteArray(bcd);
-            ByteArray ba2 = new ByteArray("[  31323334 c1c2c3c4 41424344]");
+            ByteArray ba1 = new ByteArray(ByteArray.ParseHex(bcd));
+            ByteArray ba2 = new ByteArray(ByteArray.ParseHex("[  31323334 c1c2c3c4 41424344]"));
+            ByteArray ba3 = new ByteArray("テスト");
+            ByteArray ba4 = new ByteArray("あいうえお", System.Text.Encoding.GetEncoding("Shift_JIS"));
 
             ba1.Append(ba1);
             ba1.Append(ba2);
+            ba1.Append(ba4);
+
             Log.Debug("ByteArrayTest:[" + ba1.ToString() +"]");
+            Log.Debug("ByteArrayTest:[" + ba1.to_hex(4,0,"-") + "]");
+            Log.Debug("ByteArrayTest:[" + ba1.to_text_ascii(0, 0, " ") + "]");
+            Log.Debug("ByteArrayTest:[" + ba1.to_text_utf8(24) + "]");
+            Log.Debug("ByteArrayTest:[" + ba1.to_text_sjis(24) + "]");
 
-            ba1.SetSeparator(null, " ", "    ");
-            Log.Debug("ByteArrayTest:[" + ba1.ToString() + "]");
-            ba1.SetSeparator(" ", "  ", "]  [");
-            Log.Debug("ByteArrayTest:[" + ba1.ToString() + "]");
-
-            Log.Debug("ByteArrayTest:[" + ba1.to_hex() + "]");
-            Log.Debug("ByteArrayTest:[" + ba2.to_text() + "]");
+            Log.Debug("ByteArrayTest:[" + ba3.to_text() + "]");
+            Log.Debug("ByteArrayTest:[" + ba3.to_hex() + "]");
         }
     }
 }
