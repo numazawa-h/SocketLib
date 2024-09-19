@@ -20,9 +20,13 @@ namespace SocketLib
             Application.SetCompatibleTextRenderingDefault(false);
             Log.Init();
             Log.Info("Aplication Started*******************************************");
+
+            JsonTest();
+            ByteArrayTest("[ 1234 5678 9abc def0 ]");
+
+
             Application.Run(new MainForm());
 
-            ByteArrayTest("[ 1234 5678 9abc def0 ]");
         }
 
         static void ByteArrayTest(string hex)
@@ -68,9 +72,29 @@ namespace SocketLib
             ba = new ByteArray(ba3, 0, len);
             Log.Debug("ByteArrayTest:[" + ba.to_text() + "]");
 
+        }
 
+        static void JsonTest()
+        {
+            try
+            {
+                JsonConfig.RootNode root = JsonConfig.ReadJson(".\\config\\test.json");
 
+                int max_datasize = (int?)root["max_datasize"] is int v ? v: 0;
+                int auto_send = root["initdis"]["自動送信"];
+                int? _ = root["initdis"]["１系"]["受信側"]["xxx"];
 
+                foreach (JsonConfig.Node node in root["remort"]["server"])
+                {
+                    string id = node["id"];
+                    string ip = node["ip"];
+                    string xxx = node["xxx"];         
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error("JsonTestでエラー", e);
+            }
 
         }
     }
