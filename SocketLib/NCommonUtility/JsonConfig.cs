@@ -182,6 +182,19 @@ namespace NCommonUtility
                 return ((RootNode)node).FilePath;
             }
 
+            private string _Format = null;
+            public Node SetFormat(string fmt)
+            {
+                _Format = fmt;
+                return this;
+            }
+
+
+            public static implicit operator Required(Node node)
+            {
+                return new Required(node);
+            }
+
             public static implicit operator int?(Node node)
             {
                 int? val = null;
@@ -193,7 +206,14 @@ namespace NCommonUtility
                         {
                             throw new Exception("整数項目ではありません");
                         }
-                        val = node._jsonNode.GetValue<int>();
+                        try
+                        {
+                            val = node._jsonNode.GetValue<int>();
+                        }
+                        catch (System.FormatException)
+                        {
+                            throw new Exception("整数項目ではありません");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -201,10 +221,6 @@ namespace NCommonUtility
                     throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
                 }
                 return val;
-            }
-            public static implicit operator int(Node node)
-            {
-                return (int?)node is int v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
             }
 
             public static implicit operator string(Node node)
@@ -227,6 +243,61 @@ namespace NCommonUtility
                 }
                 return val;
             }
+
+            public static implicit operator DateTime?(Node node)
+            {
+                DateTime? val = null;
+                string fmt = node._Format is string v? v:"yyyy/MM/dd HH:mm:ss";
+                try
+                {
+                    if (node._jsonNode != null)
+                    {
+                        if (node._jsonNode.GetValueKind() != JsonValueKind.String)
+                        {
+                            throw new Exception("文字列項目ではありません");
+                        }
+                        try
+                        {
+                            val = DateTime.ParseExact(node._jsonNode.GetValue<string>(), fmt, null);
+                        }
+                        catch (System.FormatException)
+                        {
+                            throw new Exception($"フォーマットエラー({fmt})");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
+                }
+                return val;
+            }
         }
     }
+
+    /// <summary>
+    /// 必須項目クラス
+    /// </summary>
+    public class Required
+    {
+        private Node _node;
+        public Required(Node node) { _node = node; }
+        public static implicit operator string(Required rqw) 
+        {
+            Node node = rqw._node;
+            return (string)node is string v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+        }
+        public static implicit operator int(Required rqw)
+        {
+            Node node = rqw._node;
+            return (int?)node is int v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+        }
+        public static implicit operator DateTime(Required rqw)
+        {
+            Node node = rqw._node;
+            return (DateTime?)node is DateTime v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+        }
+    }
+
+
 }

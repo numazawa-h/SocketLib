@@ -80,15 +80,16 @@ namespace SocketLib
             {
                 JsonConfig.RootNode root = JsonConfig.ReadJson(".\\config\\test.json");
 
+                DateTime dt = (Required)root["日付"].SetFormat("yyyy/MM/dd");
                 int max_datasize = (int?)root["max_datasize"] is int v ? v: 0;
-                int auto_send = root["initdis"]["自動送信"];
+                int auto_send = (Required)root["initdis"]["自動送信"];
                 int? _ = root["initdis"]["１系"]["受信側"]["xxx"];
 
                 foreach (JsonConfig.Node node in root["remort"]["server"])
                 {
                     string id = node["id"];
                     string ip = node["ip"];
-                    string xxx = node["xxx"];         
+                    int xxx = (Required)node["xxx"];         
                 }
             }
             catch (Exception e)
