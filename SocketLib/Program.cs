@@ -3,6 +3,8 @@ using SampleMain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -74,23 +76,50 @@ namespace SocketLib
 
         }
 
+        public enum Week
+        {
+            nodata =0,
+            Monday = 1,
+            Tuesday = 2,
+            Wednesday = 3,
+            Thursday = 4,
+            Friday = 5,
+            Saturday = 6,
+            Sunday = 7,
+        }
+
+
         static void JsonTest()
         {
+
+            Type t = typeof(Week);
+            string[] w =Enum.GetNames(t);
+            Week w1 = (Week)Enum.Parse(t, w[1]);
+
+
             try
             {
                 JsonConfig.RootNode root = JsonConfig.ReadJson(".\\config\\test.json");
 
-                DateTime dt = (Required)root["日付"].SetFormat("yyyy/MM/dd");
+                DateTime dt = root["日付"].SetFormat("yyyy/MM/dd").Required();
+                int h1 = root["H1"].Required();
+                int h2 = root["H2"].Required();
+                int? h3 = root["H3"];
+                Week W1 = root["W1"].Required().Enum<Week>();
+                Week W2 = root["W2"].Enum<Week>();
+
+
                 int max_datasize = (int?)root["max_datasize"] is int v ? v: 0;
-                bool auto_send = (Required)root["initdis"]["自動送信"];
-                bool auto_resp = (Required)root["initdis"]["自動応答"];
+                bool? auto_send = root["initdis"]["自動送信"];
+                bool auto_resp = root["initdis"]["自動応答"].Required();
                 int? _ = root["initdis"]["１系"]["受信側"]["xxx"];
+
+
 
                 foreach (JsonConfig.Node node in root["remort"]["server"])
                 {
-                    string id = node["id"];
-                    string ip = node["ip"];
-                    int xxx = (Required)node["xxx"];         
+                    Addr addr = node.Class<Addr>();
+                    Addr addr2 = new Addr(node["id"].Required(), node["ip"].Required());
                 }
             }
             catch (Exception e)
@@ -99,5 +128,16 @@ namespace SocketLib
             }
 
         }
+        public class Addr
+        {
+            public string id;
+            public string ip;
+            public Addr(string id, string ip) 
+            {
+                this.id = id;
+                this.ip = ip;
+            }
+        }
+
     }
 }

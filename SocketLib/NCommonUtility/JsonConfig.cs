@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,14 +10,19 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Tasks;
+using static log4net.Appender.ColoredConsoleAppender;
 using static NCommonUtility.JsonConfig;
+using static SocketLib.Program;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace NCommonUtility
 {
+
+
     public class JsonConfig
     {
         static public RootNode ReadJson(string path)
@@ -71,6 +77,7 @@ namespace NCommonUtility
             Node _parent;
             string _name;
             JsonNode _jsonNode;
+            bool _isRequired = false;
 
             public string PropertyName
             {
@@ -89,12 +96,17 @@ namespace NCommonUtility
 
             public Node this[string name]
             {
-                get
+                get 
                 {
                     JsonNode node = _jsonNode.AsObject().ContainsKey(name) ? _jsonNode[name] : null;
 
                     return new Node(this, node, name);
                 }
+            }
+
+            override public string ToString()
+            {
+                return _jsonNode.ToString();
             }
 
             class Enumerator : IEnumerator
@@ -189,10 +201,83 @@ namespace NCommonUtility
                 return this;
             }
 
-
-            public static implicit operator Required(Node node)
+            public T Enum<T>() where T : System.Enum
             {
-                return new Required(node);
+                System.Enum val =null;
+                try
+                {
+                    if (_jsonNode != null)
+                    {
+                        switch (_jsonNode.GetValueKind() )
+                        {
+                            case JsonValueKind.String:
+                                val = (T)System.Enum.Parse(typeof(T), _jsonNode.ToString());
+                                break;
+                            case JsonValueKind.Number:
+                                val = (T)System.Enum.ToObject(typeof(T), _jsonNode.GetValue<int>());
+                                break;
+                            default:
+                                throw new Exception("Enumに変換できません");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"値の取得に失敗しました({this.PropertyName}) in {this.GetFilePath()}", ex);
+                }
+
+                if (val is null)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({this.PropertyName}) in {this.GetFilePath()}");
+                }
+                return (T)val;
+            }
+
+            public T Class<T>() where T : class
+            {
+                T val = null;
+                try
+                {
+                    if (_jsonNode != null)
+                    {
+                        var options = new JsonSerializerOptions
+                        {
+                            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+                            IncludeFields = true,
+                        };
+
+                        switch (_jsonNode.GetValueKind())
+                        {
+                            case JsonValueKind.Object:
+                                val =JsonSerializer.Deserialize<T>(_jsonNode, options);
+                                break;
+                            default:
+                                throw new Exception("オブジェクト項目ではありません");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"値の取得に失敗しました({this.PropertyName}) in {this.GetFilePath()}", ex);
+                }
+
+                if (val is null && this._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({this.PropertyName}) in {this.GetFilePath()}");
+                }
+                return val;
+            }
+
+
+            public Node Required()
+            {
+                _isRequired = true;
+                return this;
+            }
+
+            public static implicit operator int(Node node)
+            {
+                return node._isRequired ? (int)(int?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyName}) in {node.GetFilePath()}");
             }
 
             public static implicit operator int?(Node node)
@@ -202,23 +287,45 @@ namespace NCommonUtility
                 {
                     if (node._jsonNode != null)
                     {
-                        if (node._jsonNode.GetValueKind() != JsonValueKind.Number)
+                        string hex = null;
+                        switch (node._jsonNode.GetValueKind())
                         {
-                            throw new Exception("整数項目ではありません");
+                            case JsonValueKind.Number:
+                                break;
+                            case JsonValueKind.String:
+                                string s = node.ToString();
+                                if (s.Length > 2 && s.Substring(0, 2) == "0x")
+                                {
+                                    hex = s.Substring(2);
+                                }
+                                break;
+                            default:
+                                throw new Exception("整数項目ではありません");
                         }
                         try
                         {
-                            val = node._jsonNode.GetValue<int>();
+                            if (hex is null)
+                            {
+                                val = node._jsonNode.GetValue<int>();
+                            }
+                            else
+                            {
+                                val = int.Parse(hex, System.Globalization.NumberStyles.HexNumber);
+                            }
                         }
                         catch (System.FormatException)
                         {
-                            throw new Exception("整数項目ではありません");
+                            throw new Exception("整数に変換できません");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
+                }
+                if (val == null && node._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
                 }
                 return val;
             }
@@ -241,7 +348,16 @@ namespace NCommonUtility
                 {
                     throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
                 }
+                if (val == null && node._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+                }
                 return val;
+            }
+
+            public static implicit operator bool(Node node)
+            {
+                return node._isRequired ? (bool)(bool?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyName}) in {node.GetFilePath()}");
             }
 
             public static implicit operator bool?(Node node)
@@ -266,7 +382,16 @@ namespace NCommonUtility
                 {
                     throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
                 }
+                if (val == null && node._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+                }
                 return val;
+            }
+
+            public static implicit operator DateTime(Node node)
+            {
+                return node._isRequired ? (DateTime)(DateTime?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyName}) in {node.GetFilePath()}");
             }
 
             public static implicit operator DateTime?(Node node)
@@ -295,39 +420,12 @@ namespace NCommonUtility
                 {
                     throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
                 }
+                if (val == null && node._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+                }
                 return val;
             }
         }
     }
-
-    /// <summary>
-    /// 必須項目クラス
-    /// </summary>
-    public class Required
-    {
-        private Node _node;
-        public Required(Node node) { _node = node; }
-        public static implicit operator int(Required rqw)
-        {
-            Node node = rqw._node;
-            return (int?)node is int v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
-        }
-        public static implicit operator string(Required rqw) 
-        {
-            Node node = rqw._node;
-            return (string)node is string v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
-        }
-        public static implicit operator bool(Required rqw)
-        {
-            Node node = rqw._node;
-            return (bool?)node is bool v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
-        }
-        public static implicit operator DateTime(Required rqw)
-        {
-            Node node = rqw._node;
-            return (DateTime?)node is DateTime v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
-        }
-    }
-
-
 }
