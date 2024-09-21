@@ -244,6 +244,31 @@ namespace NCommonUtility
                 return val;
             }
 
+            public static implicit operator bool?(Node node)
+            {
+                bool? val = null;
+                try
+                {
+                    if (node._jsonNode != null)
+                    {
+                        switch(node._jsonNode.GetValueKind())
+                        {
+                            case JsonValueKind.True:
+                            case JsonValueKind.False:
+                                break;
+                            default:
+                                throw new Exception("真偽値項目ではありません");
+                        }
+                        val = node._jsonNode.GetValue<bool>();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
+                }
+                return val;
+            }
+
             public static implicit operator DateTime?(Node node)
             {
                 DateTime? val = null;
@@ -282,15 +307,20 @@ namespace NCommonUtility
     {
         private Node _node;
         public Required(Node node) { _node = node; }
+        public static implicit operator int(Required rqw)
+        {
+            Node node = rqw._node;
+            return (int?)node is int v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+        }
         public static implicit operator string(Required rqw) 
         {
             Node node = rqw._node;
             return (string)node is string v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
         }
-        public static implicit operator int(Required rqw)
+        public static implicit operator bool(Required rqw)
         {
             Node node = rqw._node;
-            return (int?)node is int v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+            return (bool?)node is bool v ? v : throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
         }
         public static implicit operator DateTime(Required rqw)
         {

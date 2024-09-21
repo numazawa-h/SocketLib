@@ -82,7 +82,8 @@ namespace SocketLib
 
                 DateTime dt = (Required)root["日付"].SetFormat("yyyy/MM/dd");
                 int max_datasize = (int?)root["max_datasize"] is int v ? v: 0;
-                int auto_send = (Required)root["initdis"]["自動送信"];
+                bool auto_send = (Required)root["initdis"]["自動送信"];
+                bool auto_resp = (Required)root["initdis"]["自動応答"];
                 int? _ = root["initdis"]["１系"]["受信側"]["xxx"];
 
                 foreach (JsonConfig.Node node in root["remort"]["server"])
