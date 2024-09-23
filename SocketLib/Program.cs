@@ -108,7 +108,8 @@ namespace SocketLib
                 Week W1 = root["W1"].Required().GetEnum<Week>();
                 Week W2 = root["W2"].GetEnum<Week>();
                 Week W3 = root["W3"].GetEnum<Week>();
-
+                double d1 = root["dbl"].Required();
+                float f1 = root["flt"].Required();
 
                 int max_datasize = (int?)root["max_datasize"] is int v ? v: 0;
                 bool? auto_send = root["initdis"]["自動送信"];

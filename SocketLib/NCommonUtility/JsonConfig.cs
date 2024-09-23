@@ -397,6 +397,85 @@ namespace NCommonUtility
                 return val;
             }
 
+            public static implicit operator double(Node node)
+            {
+                return node._isRequired ? (double)(double?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyNames}) in {node.FilePath}");
+            }
+
+            public static implicit operator double?(Node node)
+            {
+                double? val = null;
+                try
+                {
+                    if (node._jsonNode != null)
+                    {
+                        switch (node._jsonNode.GetValueKind())
+                        {
+                            case JsonValueKind.Number:
+                                break;
+                            default:
+                                throw new Exception("数値項目ではありません");
+                        }
+                        try
+                        {
+                            val = node._jsonNode.GetValue<double>();
+                        }
+                        catch (System.FormatException)
+                        {
+                            throw new Exception("doubleに変換できません");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
+                }
+                if (val == null && node._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyNames}) in {node.FilePath}");
+                }
+                return val;
+            }
+            public static implicit operator float(Node node)
+            {
+                return node._isRequired ? (float)(float?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyNames}) in {node.FilePath}");
+            }
+
+            public static implicit operator float?(Node node)
+            {
+                float? val = null;
+                try
+                {
+                    if (node._jsonNode != null)
+                    {
+                        switch (node._jsonNode.GetValueKind())
+                        {
+                            case JsonValueKind.Number:
+                                break;
+                            default:
+                                throw new Exception("数値項目ではありません");
+                        }
+                        try
+                        {
+                            val = node._jsonNode.GetValue<float>();
+                        }
+                        catch (System.FormatException)
+                        {
+                            throw new Exception("floatに変換できません");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
+                }
+                if (val == null && node._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyNames}) in {node.FilePath}");
+                }
+                return val;
+            }
+
             public static implicit operator string(Node node)
             {
                 string val = null;
