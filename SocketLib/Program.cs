@@ -123,7 +123,6 @@ namespace SocketLib
                 foreach (JsonConfig.Node node in root["remort"]["server"])
                 {
                     Addr addr = node.GetObject<Addr>();
-                    Addr addr2 = new Addr(node["id"].Required(), node["ip"].Required());
                 }
             }
             catch (Exception e)
@@ -134,13 +133,14 @@ namespace SocketLib
         }
         public class Addr
         {
-            public string id;
-            public string ip;
-            public Addr(string id, string ip) 
-            {
-                this.id = id;
-                this.ip = ip;
-            }
+            [JsonInclude]
+            public string id { get; private set; }
+            public string ip { get; set; }
+
+
+            [JsonConstructor]
+            public Addr(string id, string ip) => (this.id , this.ip) = (id,ip);
+            public Addr(string ip) => (this.id, this.ip) = (id, null);
         }
 
     }

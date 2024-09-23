@@ -292,6 +292,7 @@ namespace NCommonUtility
                         {
                             Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
                             IncludeFields = true,
+                            IgnoreReadOnlyFields = true,
                         };
 
                         switch (_jsonNode.GetValueKind())
