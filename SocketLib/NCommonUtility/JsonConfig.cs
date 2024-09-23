@@ -25,6 +25,12 @@ namespace NCommonUtility
 
     public class JsonConfig
     {
+        /// <summary>
+        /// Jsonファイルの読み込み
+        /// </summary>
+        /// <param name="path">ファイルパス</param>
+        /// <returns>RootNode</returns>
+        /// <exception cref="Exception"></exception>
         static public RootNode ReadJson(string path)
         {
             // Config用オプションの設定
@@ -136,6 +142,11 @@ namespace NCommonUtility
                 _name = name;
             }
 
+            override public string ToString()
+            {
+                return _jsonNode.ToString();
+            }
+
             /// <summary>
             /// 子Nodeの読み込み
             /// </summary>
@@ -151,12 +162,15 @@ namespace NCommonUtility
                 }
             }
 
-            override public string ToString()
+            #region IEnumerator
+            public IEnumerator GetEnumerator()
             {
-                return _jsonNode.ToString();
+                return new Enumerator(this);
             }
 
-            #region IEnumerator
+            /// <summary>
+            /// IEnumeratorの実装
+            /// </summary>
             class Enumerator : IEnumerator
             {
                 Node _parent;
@@ -220,19 +234,6 @@ namespace NCommonUtility
             }
             #endregion
 
-            public IEnumerator GetEnumerator()
-            {
-                return new Enumerator(this);
-            }
-
-
-            private string _Format = null;
-            public Node SetFormat(string fmt)
-            {
-                _Format = fmt;
-                return this;
-            }
-
             /// <summary>
             /// 値をEnum型に変換する
             /// </summary>
@@ -242,12 +243,12 @@ namespace NCommonUtility
             public T GetEnum<T>() where T : System.Enum
             {
                 bool isDefalt = true;
-                System.Enum val =default(T);
+                System.Enum val = default(T);
                 try
                 {
                     if (_jsonNode != null)
                     {
-                        switch (_jsonNode.GetValueKind() )
+                        switch (_jsonNode.GetValueKind())
                         {
                             case JsonValueKind.String:
                                 val = (T)System.Enum.Parse(typeof(T), _jsonNode.ToString());
@@ -267,7 +268,7 @@ namespace NCommonUtility
                     throw new InvalidOperationException($"値の取得に失敗しました({this.PropertyNames}) in {this.FilePath}", ex);
                 }
 
-                if ( isDefalt && this._isRequired)
+                if (isDefalt && this._isRequired)
                 {
                     throw new InvalidOperationException($"項目が存在しません({this.PropertyNames}) in {this.FilePath}");
                 }
@@ -296,7 +297,7 @@ namespace NCommonUtility
                         switch (_jsonNode.GetValueKind())
                         {
                             case JsonValueKind.Object:
-                                val =JsonSerializer.Deserialize<T>(_jsonNode, options);
+                                val = JsonSerializer.Deserialize<T>(_jsonNode, options);
                                 break;
                             default:
                                 throw new Exception("オブジェクト項目ではありません");
@@ -315,7 +316,25 @@ namespace NCommonUtility
                 return val;
             }
 
+            #region 暗黙の型変換
 
+            private string _Format = null;
+            /// <summary>
+            /// 暗黙の型変換において、変換に使用するフォーマットを指定する
+            /// </summary>
+            /// <remarks>DateTime型のみに影響する</remarks>
+            /// <param name="fmt">フォーマット</param>
+            /// <returns>this</returns>
+            public Node SetFormat(string fmt)
+            {
+                _Format = fmt;
+                return this;
+            }
+
+            /// <summary>
+            /// 暗黙の型変換において、存在しない項目の時例外を発生させるフラグをOnにする
+            /// </summary>
+            /// <returns>this</returns>
             public Node Required()
             {
                 _isRequired = true;
@@ -473,6 +492,8 @@ namespace NCommonUtility
                 }
                 return val;
             }
+
+            #endregion
         }
     }
 }
