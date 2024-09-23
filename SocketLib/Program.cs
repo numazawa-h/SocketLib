@@ -118,7 +118,7 @@ namespace SocketLib
 
                 foreach (JsonConfig.Node node in root["remort"]["server"])
                 {
-                    Addr addr = node.Class<Addr>();
+                    Addr addr = node.GetObject<Addr>();
                     Addr addr2 = new Addr(node["id"].Required(), node["ip"].Required());
                 }
             }

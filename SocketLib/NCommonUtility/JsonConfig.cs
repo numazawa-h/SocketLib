@@ -266,7 +266,7 @@ namespace NCommonUtility
             /// <typeparam name="T">任意のクラス</typeparam>
             /// <returns>指定されたクラスのオブジェクト</returns>
             /// <exception cref="InvalidOperationException"></exception>
-            public T Class<T>() where T : class
+            public T GetObject<T>() where T : class
             {
                 T val = null;
                 try
