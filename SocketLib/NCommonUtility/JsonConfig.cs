@@ -60,12 +60,12 @@ namespace NCommonUtility
         public class RootNode : Node
         {
             string _fpath;
-            public string FilePath => _fpath;
 
             public RootNode(JsonNode jsonNode, string path) : base(null, jsonNode, "$")
             {
                 _fpath = path;
             }
+            public string GetFilePath() { return _fpath; }
         }
 
         /// <summary>
@@ -79,14 +79,56 @@ namespace NCommonUtility
             JsonNode _jsonNode;
             bool _isRequired = false;
 
-            public string PropertyName
+            /// <summary>
+            /// Property名
+            /// </summary>
+            /// <remarks>RootNodeから自NodeまでのProperty名を連結</remarks>
+            public string PropertyNames
             {
                 get
                 {
-                    return GetPropertyName();
+                    var names = new List<string>();
+                    Node node = this;
+                    while (node._parent != null)
+                    {
+                        names.Add(node._name);
+                        node = node._parent;
+                    }
+
+                    var sb = new StringBuilder();
+                    for (int i = names.Count - 1; i >= 0; --i)
+                    {
+                        sb.Append($"[{names[i]}]");
+                    }
+
+                    return sb.ToString();
                 }
             }
 
+            /// <summary>
+            /// Jsonファイルパス
+            /// </summary>
+            public string FilePath
+            {
+                get
+                {
+                    // RootNode(親Nodeがnull)になるまでNodeを遡る
+                    Node node = this;
+                    while (node._parent != null)
+                    {
+                        node = node._parent;
+                    }
+
+                    return ((RootNode)node).GetFilePath();
+                } 
+            }
+
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            /// <param name="parent">親Node</param>
+            /// <param name="jsonNode">JsonNode</param>
+            /// <param name="name">Property名</param>
             public Node(Node parent, JsonNode jsonNode, string name)
             {
                 _parent = parent;
@@ -94,6 +136,11 @@ namespace NCommonUtility
                 _name = name;
             }
 
+            /// <summary>
+            /// 子Nodeの読み込み
+            /// </summary>
+            /// <param name="name">Property名</param>
+            /// <returns>Node</returns>
             public Node this[string name]
             {
                 get 
@@ -109,6 +156,7 @@ namespace NCommonUtility
                 return _jsonNode.ToString();
             }
 
+            #region IEnumerator
             class Enumerator : IEnumerator
             {
                 Node _parent;
@@ -152,6 +200,8 @@ namespace NCommonUtility
                     _array.Reset();
                 }
             }
+            #endregion
+
             public IEnumerator GetEnumerator()
             {
                 try
@@ -160,39 +210,10 @@ namespace NCommonUtility
                 }
                 catch (System.Exception ex)
                 {
-                    throw new InvalidOperationException($"Enumerateに失敗しました({this.PropertyName}) in {this.GetFilePath()}", ex);
+                    throw new InvalidOperationException($"Enumerateに失敗しました({this.PropertyNames}) in {this.FilePath}", ex);
                 }
             }
-        
-    
-            public string GetPropertyName()
-            {
-                List<string> names = new List<string>();
-                Node node = this;
-                while (node._parent != null)
-                {
-                    names.Add(node._name);
-                    node = node._parent;
-                }
 
-                StringBuilder sb = new StringBuilder();
-                for( int i=names.Count-1; i>=0; --i)
-                {
-                    sb.Append($"[{names[i]}]");
-                }
-
-                return sb.ToString();
-            }
-            public string GetFilePath()
-            {
-                Node node = this;
-                while (node._parent != null)
-                {
-                    node = node._parent;
-                }
-
-                return ((RootNode)node).FilePath;
-            }
 
             private string _Format = null;
             public Node SetFormat(string fmt)
@@ -201,6 +222,12 @@ namespace NCommonUtility
                 return this;
             }
 
+            /// <summary>
+            /// 値をEnum型に変換する
+            /// </summary>
+            /// <typeparam name="T">Enum型のクラス</typeparam>
+            /// <returns>指定されたEnum型の値</returns>
+            /// <exception cref="InvalidOperationException"></exception>
             public T Enum<T>() where T : System.Enum
             {
                 System.Enum val =null;
@@ -223,16 +250,22 @@ namespace NCommonUtility
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException($"値の取得に失敗しました({this.PropertyName}) in {this.GetFilePath()}", ex);
+                    throw new InvalidOperationException($"値の取得に失敗しました({this.PropertyNames}) in {this.FilePath}", ex);
                 }
 
                 if (val is null)
                 {
-                    throw new InvalidOperationException($"項目が存在しません({this.PropertyName}) in {this.GetFilePath()}");
+                    throw new InvalidOperationException($"項目が存在しません({this.PropertyNames}) in {this.FilePath}");
                 }
                 return (T)val;
             }
 
+            /// <summary>
+            /// JsonObjectから任意のクラスのオブジェクトを生成する
+            /// </summary>
+            /// <typeparam name="T">任意のクラス</typeparam>
+            /// <returns>指定されたクラスのオブジェクト</returns>
+            /// <exception cref="InvalidOperationException"></exception>
             public T Class<T>() where T : class
             {
                 T val = null;
@@ -258,12 +291,12 @@ namespace NCommonUtility
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException($"値の取得に失敗しました({this.PropertyName}) in {this.GetFilePath()}", ex);
+                    throw new InvalidOperationException($"値の取得に失敗しました({this.PropertyNames}) in {this.FilePath}", ex);
                 }
 
                 if (val is null && this._isRequired)
                 {
-                    throw new InvalidOperationException($"項目が存在しません({this.PropertyName}) in {this.GetFilePath()}");
+                    throw new InvalidOperationException($"項目が存在しません({this.PropertyNames}) in {this.FilePath}");
                 }
                 return val;
             }
@@ -277,7 +310,7 @@ namespace NCommonUtility
 
             public static implicit operator int(Node node)
             {
-                return node._isRequired ? (int)(int?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyName}) in {node.GetFilePath()}");
+                return node._isRequired ? (int)(int?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyNames}) in {node.FilePath}");
             }
 
             public static implicit operator int?(Node node)
@@ -321,11 +354,11 @@ namespace NCommonUtility
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
                 }
                 if (val == null && node._isRequired)
                 {
-                    throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyNames}) in {node.FilePath}");
                 }
                 return val;
             }
@@ -346,18 +379,18 @@ namespace NCommonUtility
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
                 }
                 if (val == null && node._isRequired)
                 {
-                    throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyNames}) in {node.FilePath}");
                 }
                 return val;
             }
 
             public static implicit operator bool(Node node)
             {
-                return node._isRequired ? (bool)(bool?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyName}) in {node.GetFilePath()}");
+                return node._isRequired ? (bool)(bool?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyNames}) in {node.FilePath}");
             }
 
             public static implicit operator bool?(Node node)
@@ -380,18 +413,18 @@ namespace NCommonUtility
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
                 }
                 if (val == null && node._isRequired)
                 {
-                    throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyNames}) in {node.FilePath}");
                 }
                 return val;
             }
 
             public static implicit operator DateTime(Node node)
             {
-                return node._isRequired ? (DateTime)(DateTime?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyName}) in {node.GetFilePath()}");
+                return node._isRequired ? (DateTime)(DateTime?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyNames}) in {node.FilePath}");
             }
 
             public static implicit operator DateTime?(Node node)
@@ -418,11 +451,11 @@ namespace NCommonUtility
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyName}) in {node.GetFilePath()}", ex);
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
                 }
                 if (val == null && node._isRequired)
                 {
-                    throw new InvalidOperationException($"項目が存在しません({node.PropertyName}) in {node.GetFilePath()}");
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyNames}) in {node.FilePath}");
                 }
                 return val;
             }
