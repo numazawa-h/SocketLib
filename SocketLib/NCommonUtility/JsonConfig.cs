@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.Remoting.Messaging;
+using System.Security.Policy;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -436,6 +438,7 @@ namespace NCommonUtility
                 }
                 return val;
             }
+
             public static implicit operator float(Node node)
             {
                 return node._isRequired ? (float)(float?)node : throw new InvalidOperationException($"null非許容へのキャストにはRequired()が必要です({node.PropertyNames}) in {node.FilePath}");
@@ -560,6 +563,56 @@ namespace NCommonUtility
                         {
                             throw new Exception($"フォーマットエラー({fmt})");
                         }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
+                }
+                if (val == null && node._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyNames}) in {node.FilePath}");
+                }
+                return val;
+            }
+
+            public static implicit operator IPAddress(Node node)
+            {
+                IPAddress val = null;
+                try
+                {
+                    if (node._jsonNode != null)
+                    {
+                        if (node._jsonNode.GetValueKind() != JsonValueKind.String)
+                        {
+                            throw new Exception("文字列項目ではありません");
+                        }
+                        val = IPAddress.Parse(node._jsonNode.GetValue<string>());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"値の取得に失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
+                }
+                if (val == null && node._isRequired)
+                {
+                    throw new InvalidOperationException($"項目が存在しません({node.PropertyNames}) in {node.FilePath}");
+                }
+                return val;
+            }
+
+            public static implicit operator Uri(Node node)
+            {
+                Uri val = null;
+                try
+                {
+                    if (node._jsonNode != null)
+                    {
+                        if (node._jsonNode.GetValueKind() != JsonValueKind.String)
+                        {
+                            throw new Exception("文字列項目ではありません");
+                        }
+                        val = new Uri(node._jsonNode.GetValue<string>());
                     }
                 }
                 catch (Exception ex)

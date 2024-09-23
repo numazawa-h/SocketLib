@@ -3,10 +3,12 @@ using SampleMain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static SocketLib.Program;
 
 namespace SocketLib
 {
@@ -102,6 +104,14 @@ namespace SocketLib
                 JsonConfig.RootNode root = JsonConfig.ReadJson(".\\config\\test.json");
 
                 DateTime dt = root["日付"].SetFormat("yyyy/MM/dd").Required();
+                DateTime? dt2 = root["xxx"].SetFormat("yyyy/MM/dd");
+
+                IPAddress iaddr = root["iaddr"].Required();
+                IPAddress iaddr2 = root["xxx"];
+
+                Uri uri = root["uri"].Required();
+                Uri uri2 = root["xxx"];
+
                 int h1 = root["H1"].Required();
                 int h2 = root["H2"].Required();
                 int? h3 = root["H3"];
