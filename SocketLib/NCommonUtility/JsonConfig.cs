@@ -228,9 +228,10 @@ namespace NCommonUtility
             /// <typeparam name="T">Enum型のクラス</typeparam>
             /// <returns>指定されたEnum型の値</returns>
             /// <exception cref="InvalidOperationException"></exception>
-            public T Enum<T>() where T : System.Enum
+            public T GetEnum<T>() where T : System.Enum
             {
-                System.Enum val =null;
+                bool isDefalt = true;
+                System.Enum val =default(T);
                 try
                 {
                     if (_jsonNode != null)
@@ -239,9 +240,11 @@ namespace NCommonUtility
                         {
                             case JsonValueKind.String:
                                 val = (T)System.Enum.Parse(typeof(T), _jsonNode.ToString());
+                                isDefalt = false;
                                 break;
                             case JsonValueKind.Number:
                                 val = (T)System.Enum.ToObject(typeof(T), _jsonNode.GetValue<int>());
+                                isDefalt = false;
                                 break;
                             default:
                                 throw new Exception("Enumに変換できません");
@@ -253,7 +256,7 @@ namespace NCommonUtility
                     throw new InvalidOperationException($"値の取得に失敗しました({this.PropertyNames}) in {this.FilePath}", ex);
                 }
 
-                if (val is null)
+                if ( isDefalt && this._isRequired)
                 {
                     throw new InvalidOperationException($"項目が存在しません({this.PropertyNames}) in {this.FilePath}");
                 }
