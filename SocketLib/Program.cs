@@ -105,8 +105,9 @@ namespace SocketLib
                 int h1 = root["H1"].Required();
                 int h2 = root["H2"].Required();
                 int? h3 = root["H3"];
-                Week W1 = root["W1"].Required().Enum<Week>();
-                Week W2 = root["W2"].Enum<Week>();
+                Week W1 = root["W1"].Required().GetEnum<Week>();
+                Week W2 = root["W2"].GetEnum<Week>();
+                Week W3 = root["W3"].GetEnum<Week>();
 
 
                 int max_datasize = (int?)root["max_datasize"] is int v ? v: 0;
