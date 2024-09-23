@@ -166,24 +166,41 @@ namespace NCommonUtility
                 {
                     if (node._jsonNode == null)
                     {
-                        throw new Exception("項目がありません");
+                        if (node._isRequired)
+                        {
+                            throw new InvalidOperationException($"項目がありません({node.PropertyNames}) in {node.FilePath}");
+                        }
+                        _parent = null;
+                        _array = null;
                     }
-                    if (node._jsonNode.GetValueKind() != JsonValueKind.Array)
+                    else
                     {
-                        throw new Exception("配列ではありません");
+                        if (node._jsonNode.GetValueKind() != JsonValueKind.Array)
+                        {
+                            throw new InvalidOperationException($"配列ではありません({node.PropertyNames}) in {node.FilePath}");
+                        }
+                        try
+                        {
+                            _parent = node;
+                            _array = node._jsonNode.AsArray().GetEnumerator();
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new InvalidOperationException($"Enumerateに失敗しました({node.PropertyNames}) in {node.FilePath}", ex);
+                        }
                     }
-                    _parent = node;
-                    _array = node._jsonNode.AsArray().GetEnumerator();
                 }
                 public Object Current {
                     get
                     {  
+                        if (_array == null) return null;
                         JsonNode node = (JsonNode)_array.Current;
                         return new Node(_parent, node, _idx.ToString());
                     }
                 }
                 public bool MoveNext() 
                 {
+                    if (_array == null) return false;
                     if (_array.MoveNext())
                     {
                         ++_idx;
@@ -195,7 +212,8 @@ namespace NCommonUtility
                     }
                 }
                 public void Reset() 
-                { 
+                {
+                    if (_array == null) return;
                     _idx = -1;
                     _array.Reset();
                 }
@@ -204,14 +222,7 @@ namespace NCommonUtility
 
             public IEnumerator GetEnumerator()
             {
-                try
-                {
-                    return new Enumerator(this);
-                }
-                catch (System.Exception ex)
-                {
-                    throw new InvalidOperationException($"Enumerateに失敗しました({this.PropertyNames}) in {this.FilePath}", ex);
-                }
+                return new Enumerator(this);
             }
 
 

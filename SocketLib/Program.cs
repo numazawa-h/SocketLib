@@ -115,7 +115,10 @@ namespace SocketLib
                 bool auto_resp = root["initdis"]["自動応答"].Required();
                 int? _ = root["initdis"]["１系"]["受信側"]["xxx"];
 
-
+                foreach (JsonConfig.Node node in root["remort"]["server2"])
+                {
+                    throw new NotImplementedException("空配列なのに実行");
+                }
 
                 foreach (JsonConfig.Node node in root["remort"]["server"])
                 {
