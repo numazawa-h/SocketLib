@@ -1,6 +1,7 @@
 ﻿using log4net.Core;
 using log4net.Repository.Hierarchy;
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 [assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "./log4net.xml")]
 
@@ -25,11 +26,13 @@ namespace NCommonUtility
 
         static private log4net.ILog _logger = null;
         static bool _isTrace = false;
-        static public void  Init()
+        static private int _traceLevel = -1;
+        static public void  Init(int traceLevel=-1)
         {
             _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
             var rootLogger = ((Hierarchy)_logger.Logger.Repository).Root;
             _isTrace =(rootLogger.Level == Level.Trace);
+            _traceLevel = traceLevel;
         }
 
 
@@ -65,9 +68,11 @@ namespace NCommonUtility
             Log._logger.Error("\r\n");
         }
 
-        static public void Trace(string arg = null, [CallerMemberName] string callerMethodName = null, [CallerLineNumber] int line = -1)
+        static public void Trace(string arg = null, int trace_type =-1, [CallerMemberName] string callerMethodName = null, [CallerLineNumber] int line = -1)
         {
             if (_isTrace == false) return;
+            if (_traceLevel ==0) return;
+            if ((trace_type & _traceLevel) == 0) return;
 
             if (callerMethodName !=null)
             {

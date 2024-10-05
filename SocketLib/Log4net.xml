@@ -32,7 +32,7 @@
     </appender>
     <root>
       <!-- デバッグ以上のログを出力したい場合 -->
-      <level value="Debug" />
+      <level value="Trace" />
       <!-- どのログ出力先を使用するか -->
       <appender-ref ref="DebugLogDailyAppender" />
     </root>

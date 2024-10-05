@@ -22,7 +22,7 @@ namespace SocketLib
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Log.Init();
+            Log.Init(0);
             Log.Info("Aplication Started*******************************************");
 
             JsonTest();
@@ -35,7 +35,8 @@ namespace SocketLib
 
         static void ByteArrayTest(string hex)
         {
-            Log.Trace(hex);
+            Log.Trace(null,1);
+            Log.Trace(hex,2);
             ByteArray ba1 = new ByteArray(ByteArray.ParseHex(hex));
             ByteArray ba2 = new ByteArray(ByteArray.ParseHex("[  31323334 c1c2c3c4 41424344]"));
             ByteArray ba3 = new ByteArray("テスト");
