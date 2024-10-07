@@ -32,10 +32,8 @@ namespace SampleMain
             listensocket.OnExceptionEvent += OnException;
             listensocket.OnFailListenEvent += OnFailListen;
             listensocket.OnAcceptEvent += OnAccept;
-            if (txt_ipAddr.Text.Trim() != "")
-            {
-                listensocket.SetSelfEndPoint(txt_ipAddr.Text.Trim(), txt_portno.Text.Trim());
-            }
+
+            listensocket.SetSelfEndPoint(txt_ipAddr1.Text.Trim(), txt_portno1.Text.Trim());
             DisplayLog($"listen [{listensocket.SelfIPAddress} Port#{listensocket.SelfPortno}]");
             listensocket.Listen();
         }
@@ -48,8 +46,8 @@ namespace SampleMain
             socket.OnFailConnectEvent += OnFailConnect;
             socket.OnDisConnectEvent += OnDisConnect;
 
-            socket.Connect(txt_ipAddr.Text, txt_portno.Text);
-
+            socket.SetSelfEndPoint(txt_ipAddr1.Text.Trim(), txt_portno1.Text.Trim());
+            socket.Connect(txt_ipAddr2.Text, txt_portno2.Text);
         }
 
 
@@ -61,7 +59,11 @@ namespace SampleMain
                 return;
             }
 
-            MessageBox.Show(args.Exception.Message);
+            DisplayLog(args.Exception.Message);
+            if(args.Exception.InnerException != null)
+            {
+                DisplayLog(args.Exception.InnerException.Message);
+            }
         }
 
         private void OnDisConnect(object sender, DisConnectEventArgs args)
@@ -71,9 +73,7 @@ namespace SampleMain
                 this.Invoke(new DisConnectEventHandler(OnDisConnect), new object[] { sender, args });
                 return;
             }
-
             DisplayLog($"OnDisConnect {args.SocketBase.RemoteIPAddress}:{args.SocketBase.RemotePortno}");
-
         }
 
         private void OnAccept(object sender, AcceptEventArgs args)
@@ -84,12 +84,12 @@ namespace SampleMain
                 return;
             }
 
-            NSocket listensocket = args.ListenSocket;
             ServerSocket socket = args.ServerSocket;
             socket.OnExceptionEvent += OnException;
             socket.OnDisConnectEvent += OnDisConnect;
 
             DisplayLog($"OnAccept {socket.RemoteIPAddress}:{socket.RemotePortno}");
+            new SocketForm(socket).Show();
         }
 
         private void OnFailListen(object sender, ListenEventArgs args)
@@ -110,7 +110,7 @@ namespace SampleMain
                 return;
             }
             DisplayLog($"OnConnect {args.ClientSocket.RemoteIPAddress}:{args.ClientSocket.RemotePortno}");
-
+            new SocketForm(args.ClientSocket).Show();
         }
         private void OnFailConnect(object sender, ConnectEventArgs args)
         {
