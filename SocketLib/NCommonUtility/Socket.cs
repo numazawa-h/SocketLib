@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static SocketLib.Program;
 
 namespace SocketLib.NCommonUtility
 {
@@ -20,14 +21,20 @@ namespace SocketLib.NCommonUtility
         protected IPEndPoint _self_EndPoint = null;
         protected IPEndPoint _remote_EndPoint = null;
 
+        public IPAddress SelfIPAddress { get { return _self_EndPoint?.Address; } }
+        public int? SelfPortno { get { return _self_EndPoint?.Port; } }
+
+        public IPAddress RemoteIPAddress { get { return _remote_EndPoint?.Address; } }
+        public int? RemotePortno { get { return _remote_EndPoint?.Port; } }
+
         public event ThreadExceptionEventHandler OnExceptionEvent;
         public event DisConnectEventHandler OnDisConnectEvent;
         public event FailListenEventHandler OnFailListenEvent;
         public event AcceptEventHandler OnAcceptEvent;
 
-        
 
-        public void OnException(Exception e)
+
+        protected void OnException(Exception e)
         {
             if (OnExceptionEvent == null)
             {
@@ -35,7 +42,7 @@ namespace SocketLib.NCommonUtility
             }
             OnExceptionEvent.Invoke(this, new ThreadExceptionEventArgs(e));
         }
-        public void OnDisConnect()
+        protected void OnDisConnect()
         {
             lock (this)
             {
@@ -47,20 +54,14 @@ namespace SocketLib.NCommonUtility
         protected void OnAccept(ServerSocket serverSocket)
         {
             OnAcceptEvent?.Invoke(this, new AcceptEventArgs(this, serverSocket));
+            serverSocket.StartRecvThred();
             lock (this)
             {
                 _Socket?.BeginAccept(new AsyncCallback(AcceptCallback), this);
             }
-            lock (serverSocket)
-            {
-                if (_Socket != null)
-                {
-                    //TODO:受信スレッド開始
-                }
-            }
         }
 
-        public void OnFailListen()
+        protected void OnFailListen()
         {
             lock (this)
             {
@@ -69,25 +70,40 @@ namespace SocketLib.NCommonUtility
             }
             OnFailListenEvent?.Invoke(this, new ListenEventArgs(this));
         }
+        protected void OnRecv()
+        {
+            //TODO:受信処理
+            byte[] buf = new byte[1024];
+            _Socket.Receive(buf);
+        }
 
+
+        public void SetSelfEndPoint(string iaddr, string portno)
+        {
+            SetSelfEndPoint(IPAddress.Parse(iaddr), int.Parse(portno));
+        }
+        public void SetSelfEndPoint(string iaddr, int portno = 0)
+        {
+            SetSelfEndPoint(IPAddress.Parse(iaddr), portno);
+        }
         public void SetSelfEndPoint(IPAddress iaddr, int portno = 0)
         {
             IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
             if (!ipHostInfo.AddressList.Contains<IPAddress>(iaddr))
             {
-                new Exception("指定されたIPアドレスがホストに存在しません");
+                throw new Exception("指定されたIPアドレスがホストに存在しません");
             }
             _self_EndPoint = new IPEndPoint(iaddr, portno);
         }
 
         public void Listen()
         {
-            if (_self_EndPoint == null)
-            {
-                new Exception("EndPointが指定されていません");
-            }
             try
             {
+                if (_self_EndPoint == null)
+                {
+                    throw new Exception("EndPointが指定されていません");
+                }
                 lock (this)
                 {
                     if (_Socket == null)
@@ -106,7 +122,7 @@ namespace SocketLib.NCommonUtility
             }
         }
 
-        public void AcceptCallback(IAsyncResult ar)
+        protected virtual void AcceptCallback(IAsyncResult ar)
         {
             NSocket listensocket = (NSocket)ar.AsyncState;
             lock (listensocket)
@@ -124,6 +140,39 @@ namespace SocketLib.NCommonUtility
                 {
                     OnException(ex);
                 }
+            }
+        }
+
+        protected void StartRecvThred()
+        {
+            Task.Run(() => recvProc(this));
+        }
+
+        /// <summary>
+        /// 受信スレッド
+        /// </summary>
+        /// <param name="_this"></param>
+        static private void recvProc(NSocket _this)
+        {
+            try
+            {
+                while (true)
+                {
+                    if (_this._Socket.Connected == false)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        _this.OnRecv();
+                    }
+                }
+                _this.OnDisConnect();
+            }
+            catch (Exception ex)
+            {
+                _this.OnDisConnect();
+                _this.OnException(new Exception("ソケット切断", ex));
             }
         }
     }
@@ -157,39 +206,23 @@ namespace SocketLib.NCommonUtility
             {
                 if (_Socket != null)
                 {
-                    //TODO:受信スレッド開始
+                    StartRecvThred();
                 }
             }
         }
 
-        public void OnFailConnect()
+        protected void OnFailConnect()
         {
             OnFailConnectEvent?.Invoke(this, new ConnectEventArgs(this));
         }
 
         public void Connect(string iaddr, string portno)
         {
-            try
-            {
-                Connect(IPAddress.Parse(iaddr), int.Parse(portno));
-            }
-            catch (Exception ex)
-            {
-                OnFailConnect();
-                OnException(ex);
-            }
+            Connect(IPAddress.Parse(iaddr), int.Parse(portno));
         }
         public void Connect(string iaddr, int portno)
         {
-            try
-            {
-                Connect(IPAddress.Parse(iaddr), portno);
-            }
-            catch (Exception ex)
-            {
-                OnFailConnect();
-                OnException(ex);
-            }
+            Connect(IPAddress.Parse(iaddr), portno);
         }
         public void Connect(IPAddress iaddr, int portno)
         {
@@ -221,7 +254,10 @@ namespace SocketLib.NCommonUtility
             {
                 if (socket._Socket == null)
                 {
-                    //TODO:
+                    return;
+                }
+                if (socket._Socket != this._Socket)
+                {
                     return;
                 }
                 try

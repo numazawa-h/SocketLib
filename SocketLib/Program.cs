@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static SocketLib.Program;
@@ -20,6 +21,8 @@ namespace SocketLib
         [STAThread]
         static void Main()
         {
+            Application.ThreadException += Application_ThreadException;
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Log.Init(0);
@@ -32,7 +35,10 @@ namespace SocketLib
             Application.Run(new MainForm());
 
         }
-
+        private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            MessageBox.Show(e.Exception.Message);
+        }
         static void ByteArrayTest(string hex)
         {
             Log.Trace(null,1);
