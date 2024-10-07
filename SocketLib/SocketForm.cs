@@ -41,7 +41,7 @@ namespace SampleMain
 
         private void DisplayLog(string message)
         {
-            txt_log.Text += $"{DateTime.Now}{message}\r\n";
+            txt_log.Text += $"{DateTime.Now} {message}\r\n";
         }
 
         private void OnDisConnect(object sender, DisConnectEventArgs args)
@@ -60,9 +60,8 @@ namespace SampleMain
                 this.Invoke(new RecvEventHandler(OnReceive), new object[] { sender, args });
                 return;
             }
-            ByteArray dat = new ByteArray(args.SocketBase.RecvBuffer);
-            string recvdata = dat.to_text(0, args.SocketBase.RecvBuffSize);
-            DisplayLog(recvdata);
+            ByteArray dat = new ByteArray(args.SocketBase.RecvBuffer, args.SocketBase.RecvBuffSize);
+            DisplayLog($"RECV {dat.to_text()}");
         }
 
 

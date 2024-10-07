@@ -27,6 +27,16 @@ namespace NCommonUtility
             _dat = new byte[dat.Length];
             Buffer.BlockCopy(dat, 0, _dat, 0, dat.Length);
         }
+        public ByteArray(byte[] dat, int len)
+        {
+            _dat = new byte[len];
+            Buffer.BlockCopy(dat, 0, _dat, 0, len);
+        }
+        public ByteArray(byte[] dat, int ofs, int len)
+        {
+            _dat = new byte[len];
+            Buffer.BlockCopy(dat, ofs, _dat, 0, len);
+        }
 
         /// <summary>
         /// コピーコンストラクタ
