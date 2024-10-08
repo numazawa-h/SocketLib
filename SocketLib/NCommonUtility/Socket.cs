@@ -12,34 +12,61 @@ using static SocketLib.Program;
 
 namespace SocketLib.NCommonUtility
 {
+
+    public delegate void NSocketEventHandler(Object sender, NSocketEventArgs args);
+    public class NSocketEventArgs : EventArgs
+    {
+        public NSocket Socket { get; private set; }
+        public NSocketEventArgs(NSocket socket)
+        {
+            Socket = socket;
+        }
+    }
+
+    public delegate void SendRecvEventHandler(Object sender, SendRecvEventArgs args);
+    public class SendRecvEventArgs : EventArgs
+    {
+        public NSocket socket { get; private set; }
+        public byte[] dat { get; private set; }
+
+        public SendRecvEventArgs(NSocket socket, byte[] dat)
+        {
+            this.socket = socket;
+            this.dat = dat;
+        }
+    }
+
     /// <summary>
     /// NSocketクラス
     /// </summary>
     public class NSocket
     {
         protected Socket _soc = null;
-        protected IPEndPoint _self_EndPoint = null;
-        protected IPEndPoint _remote_EndPoint = null;
+        protected IPEndPoint _self_EndPoint = null;     // バインドするためのEndPoint
         protected byte[] _dat = new byte[1024];
         public int DataSize { 
             get { return _dat.Length; } 
             set { _dat = new byte[value];  } 
         }
 
-        public IPAddress SelfIPAddress { get { return _self_EndPoint?.Address; } }
-        public int? SelfPortno { get { return _self_EndPoint?.Port; } }
+        public bool isOpen {  get { return _soc != null; } }
 
-        public IPAddress RemoteIPAddress { get { return _remote_EndPoint?.Address; } }
-        public int? RemotePortno { get { return _remote_EndPoint?.Port; } }
+        public IPAddress LocalIPAddress { get { return ((IPEndPoint)_soc?.LocalEndPoint)?.Address; } }
+        public int? LocalPortno { get { return ((IPEndPoint)_soc?.LocalEndPoint)?.Port; } }
+
+
+        public IPAddress RemoteIPAddress { get { return ((IPEndPoint)_soc?.RemoteEndPoint)?.Address; } }
+        public int? RemotePortno { get { return ((IPEndPoint)_soc?.RemoteEndPoint)?.Port; } }
+
 
         public event ThreadExceptionEventHandler OnExceptionEvent;
-        public event DisConnectEventHandler OnDisConnectEvent;
-        public event FailListenEventHandler OnFailListenEvent;
-        public event AcceptEventHandler OnAcceptEvent;
+        public event NSocketEventHandler OnDisConnectEvent;
+        public event NSocketEventHandler OnFailListenEvent;
+        public event NSocketEventHandler OnAcceptEvent;
         public event SendRecvEventHandler OnRecvEvent;
         public event SendRecvEventHandler OnSendEvent;
 
-
+        private IAsyncResult _asyncListenResult;
 
 
         protected void OnException(Exception e)
@@ -58,28 +85,23 @@ namespace SocketLib.NCommonUtility
                 _soc?.Close();
                 _soc = null;
             }
-            OnDisConnectEvent?.Invoke(this, new DisConnectEventArgs(this));
+            OnDisConnectEvent?.Invoke(this, new NSocketEventArgs(this));
         }
 
-        protected void OnAccept(ServerSocket serverSocket)
+        protected void OnAccept(ServerSocket socket)
         {
-            OnAcceptEvent?.Invoke(this, new AcceptEventArgs(this, serverSocket));
+            OnAcceptEvent?.Invoke(this, new NSocketEventArgs(socket));
 
             // 受信スレッド起動
-            serverSocket.StartRecvThread();
+            socket.StartRecvThread();
 
-            // Acceptの処理が終わったら引き続きlisten処理を実行する
-            Listen();
+            // Acceptの処理が終わったら引き続きAcceptを待つ
+            _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
         }
 
         protected void OnFailListen()
         {
-            lock (this)
-            {
-                _soc?.Close();
-                _soc = null;
-            }
-            OnFailListenEvent?.Invoke(this, new ListenEventArgs(this));
+            OnFailListenEvent?.Invoke(this, new NSocketEventArgs(this));
         }
 
         protected void OnRecv()
@@ -122,29 +144,60 @@ namespace SocketLib.NCommonUtility
             }
         }
 
+        public void Listen(string str_iaddr, string str_portno)
+        {
+            IPAddress iaddr;
+            try
+            {
+                iaddr = IPAddress.Parse(str_iaddr);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("IPAddress指定が不正です", e));
+                return;
+            }
+            int portno;
+            try
+            {
+                portno = int.Parse(str_portno);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("PortNo指定が不正です", e));
+                return;
+            }
+            Listen(iaddr, portno);
+        }
+        public void Listen(string str_iaddr, int portno)
+        {
+            IPAddress iaddr;
+            try
+            {
+                iaddr = IPAddress.Parse(str_iaddr);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("IPAddress指定が不正です", e));
+                return;
+            }
 
-        public void Listen()
+            Listen(iaddr, portno);
+        }
+        public void Listen(IPAddress iaddr, int portno)
         {
             try
             {
-                if (_self_EndPoint == null)
-                {
-                    throw new Exception("EndPointが指定されていません");
-                }
                 lock (this)
                 {
-                    if (_soc == null)
+                    if (_soc != null)
                     {
-                        _soc = new Socket(_self_EndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                        _soc.Bind(_self_EndPoint);
-                        _soc.Listen(1);     // 一度に一個だけ受け付ける
-                        _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
+                        throw new Exception("既にListen中です");
                     }
-                    else
-                    {
-                        // 2回目以降
-                        _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
-                    }
+                    SetSelfEndPoint(iaddr, portno);
+                    _soc = new Socket(_self_EndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    _soc.Bind(_self_EndPoint);
+                    _soc.Listen(1);     // 一度に一個だけ受け付ける
+                    _asyncListenResult = _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
                 }
             }
             catch (Exception ex)
@@ -166,9 +219,9 @@ namespace SocketLib.NCommonUtility
                 try
                 {
                     Socket soc = socket._soc.EndAccept(ar);
-                    OnAccept(new ServerSocket(soc, socket._self_EndPoint));
+                    OnAccept(new ServerSocket(soc));
                 }
-                catch (System.ObjectDisposedException ex)
+                catch (Exception ex)
                 {
                     OnException(ex);
                 }
@@ -252,11 +305,9 @@ namespace SocketLib.NCommonUtility
     /// <remarks>Acceptで生成されるソケットクラスです。</remarks>
     public class ServerSocket : NSocket
     {
-        public ServerSocket(Socket soc, IPEndPoint self_EndPoint=null)
+        public ServerSocket(Socket soc)
         {
             _soc = soc;
-            _remote_EndPoint = (IPEndPoint)soc.RemoteEndPoint;
-            _self_EndPoint = self_EndPoint;
         }
     }
 
@@ -266,12 +317,12 @@ namespace SocketLib.NCommonUtility
     /// <remarks>Connectで生成されるソケットを管理するクラスです。</remarks>
     public class ClientSocket : NSocket
     {
-        public event ConnectEventHandler OnConnectEvent;
-        public event ConnectEventHandler OnFailConnectEvent;
+        public event NSocketEventHandler OnConnectEvent;
+        public event NSocketEventHandler OnFailConnectEvent;
 
         protected void OnConnect()
         {
-            OnConnectEvent?.Invoke(this, new ConnectEventArgs(this));
+            OnConnectEvent?.Invoke(this, new NSocketEventArgs(this));
             lock (this)
             {
                 if (_soc != null)
@@ -283,60 +334,109 @@ namespace SocketLib.NCommonUtility
 
         protected void OnFailConnect()
         {
-            OnFailConnectEvent?.Invoke(this, new ConnectEventArgs(this));
+            OnFailConnectEvent?.Invoke(this, new NSocketEventArgs(this));
         }
 
-        public void Connect(string iaddr, string portno)
+        public void Connect(string str_iaddr, string str_portno)
         {
-            Connect(IPAddress.Parse(iaddr), int.Parse(portno));
+            IPAddress iaddr;
+            try
+            {
+                iaddr = IPAddress.Parse(str_iaddr);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("IPAddress指定が不正です", e));
+                return;
+            }
+            int portno;
+            try
+            {
+                portno = int.Parse(str_portno);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("PortNo指定が不正です", e));
+                return;
+            }
+
+            Connect(iaddr, portno);
         }
-        public void Connect(string iaddr, int portno)
+        public void Connect(string str_iaddr, int portno)
         {
-            Connect(IPAddress.Parse(iaddr), portno);
+            IPAddress iaddr;
+            try
+            {
+                iaddr = IPAddress.Parse(str_iaddr);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("IPAddress指定が不正です", e));
+                return;
+            }
+            Connect(iaddr, portno);
         }
         public void Connect(IPAddress iaddr, int portno)
         {
-            try
+            lock (this)
             {
-                if(_soc != null)
+                try
                 {
-                    //Todo: 
+                    if (_soc != null)
+                    {
+                        _soc?.Close();
+                        _soc = null;
+                    }
+                    IPEndPoint endPoint = new IPEndPoint(iaddr, portno);
+                    _soc = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    if (_self_EndPoint != null)
+                    {
+                        _soc.Bind(_self_EndPoint);
+                    }
+                    _soc.BeginConnect(endPoint, new AsyncCallback(ConnectCallback), this);
                 }
-                _remote_EndPoint = new IPEndPoint(iaddr, portno);
-                _soc = new Socket(_remote_EndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                if (_self_EndPoint != null)
+                catch (Exception ex)
                 {
-                    _soc.Bind(_self_EndPoint);
+                    if (_soc != null)
+                    {
+                        _soc?.Close();
+                        _soc = null;
+                    }
+                    OnFailConnect();
+                    OnException(ex);
                 }
-                _soc.BeginConnect(_remote_EndPoint, new AsyncCallback(ConnectCallback), this);
-            }
-            catch (Exception ex)
-            {
-                OnFailConnect();
-                OnException(ex);
             }
         }
 
         private void ConnectCallback(IAsyncResult ar)
         {
             ClientSocket socket = (ClientSocket)ar.AsyncState;
-            lock (socket)
+            lock (_soc)
             {
                 if (socket._soc == null)
-                {
-                    return;
-                }
-                if (socket._soc != this._soc)
                 {
                     return;
                 }
                 try
                 {
                     socket._soc.EndConnect(ar);
-                    OnConnect();
+                    if (socket._soc == this._soc)
+                    {
+                        OnConnect();
+                    }
+                    else
+                    {
+                        socket._soc.Close();
+                        socket._soc = null;
+                    }
                 }
                 catch (Exception ex)
                 {
+                    if (_soc != null)
+                    {
+                        _soc?.Close();
+                        _soc = null;
+                    }
                     OnFailConnect();
                     OnException(ex);
                 }
@@ -348,60 +448,6 @@ namespace SocketLib.NCommonUtility
 
     #region EventHandler定義
 
-    public delegate void FailListenEventHandler(Object sender, ListenEventArgs args);
-    public class ListenEventArgs : EventArgs
-    {
-        public NSocket NSocket { get; private set; }
-        public ListenEventArgs(NSocket socket)
-        {
-            NSocket = socket;
-        }
-    }
-
-    public delegate void AcceptEventHandler(Object sender, AcceptEventArgs args);
-    public class AcceptEventArgs : EventArgs
-    {
-        public NSocket ListenSocket { get; private set; }
-        public ServerSocket ServerSocket { get; private set; }
-        public AcceptEventArgs(NSocket listensocket, ServerSocket serverSocket)
-        {
-            ListenSocket = listensocket;
-            ServerSocket = serverSocket;
-        }
-    }
-
-    public delegate void ConnectEventHandler(Object sender, ConnectEventArgs args);
-    public class ConnectEventArgs : EventArgs
-    {
-        public ClientSocket ClientSocket {  get; private set; }
-        public ConnectEventArgs(ClientSocket socket)
-        {
-            ClientSocket = socket;
-        }
-    }
-
-    public delegate void DisConnectEventHandler(Object sender, DisConnectEventArgs args);
-    public class DisConnectEventArgs : EventArgs
-    {
-        public NSocket SocketBase { get; private set; }
-        public DisConnectEventArgs(NSocket socket)
-        {
-            SocketBase = socket;
-        }
-    }
-
-    public delegate void SendRecvEventHandler(Object sender, SendRecvEventArgs args);
-    public class SendRecvEventArgs : EventArgs
-    {
-        public NSocket socket { get; private set; }
-        public byte[] dat { get; private set; }
-
-        public SendRecvEventArgs(NSocket socket, byte[] dat)
-        {
-            this.socket = socket;
-            this.dat = dat;
-        }
-    }
 
     #endregion
 }

@@ -58,12 +58,12 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(800, 256);
+            this.panel1.Size = new System.Drawing.Size(822, 256);
             this.panel1.TabIndex = 0;
             // 
             // btn_send
             // 
-            this.btn_send.Location = new System.Drawing.Point(650, 192);
+            this.btn_send.Location = new System.Drawing.Point(651, 192);
             this.btn_send.Name = "btn_send";
             this.btn_send.Size = new System.Drawing.Size(124, 45);
             this.btn_send.TabIndex = 9;
@@ -77,7 +77,7 @@
             this.txt_sendData.Multiline = true;
             this.txt_sendData.Name = "txt_sendData";
             this.txt_sendData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txt_sendData.Size = new System.Drawing.Size(762, 95);
+            this.txt_sendData.Size = new System.Drawing.Size(795, 95);
             this.txt_sendData.TabIndex = 8;
             // 
             // groupBox1
@@ -88,10 +88,10 @@
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Location = new System.Drawing.Point(12, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(345, 82);
+            this.groupBox1.Size = new System.Drawing.Size(386, 82);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Self";
+            this.groupBox1.Text = "Local";
             // 
             // txt_ipAddr1
             // 
@@ -106,7 +106,7 @@
             this.txt_portNo1.Enabled = false;
             this.txt_portNo1.Location = new System.Drawing.Point(282, 30);
             this.txt_portNo1.Name = "txt_portNo1";
-            this.txt_portNo1.Size = new System.Drawing.Size(54, 31);
+            this.txt_portNo1.Size = new System.Drawing.Size(83, 31);
             this.txt_portNo1.TabIndex = 3;
             // 
             // label1
@@ -133,9 +133,9 @@
             this.groupBox2.Controls.Add(this.txt_portNo2);
             this.groupBox2.Controls.Add(this.label3);
             this.groupBox2.Controls.Add(this.label4);
-            this.groupBox2.Location = new System.Drawing.Point(374, 3);
+            this.groupBox2.Location = new System.Drawing.Point(413, 3);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(345, 82);
+            this.groupBox2.Size = new System.Drawing.Size(378, 82);
             this.groupBox2.TabIndex = 7;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Remote";
@@ -153,7 +153,7 @@
             this.txt_portNo2.Enabled = false;
             this.txt_portNo2.Location = new System.Drawing.Point(282, 30);
             this.txt_portNo2.Name = "txt_portNo2";
-            this.txt_portNo2.Size = new System.Drawing.Size(54, 31);
+            this.txt_portNo2.Size = new System.Drawing.Size(80, 31);
             this.txt_portNo2.TabIndex = 3;
             // 
             // label3
@@ -180,7 +180,7 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(0, 256);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(800, 318);
+            this.panel2.Size = new System.Drawing.Size(822, 318);
             this.panel2.TabIndex = 1;
             // 
             // txt_log
@@ -190,14 +190,14 @@
             this.txt_log.Multiline = true;
             this.txt_log.Name = "txt_log";
             this.txt_log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txt_log.Size = new System.Drawing.Size(800, 318);
+            this.txt_log.Size = new System.Drawing.Size(822, 318);
             this.txt_log.TabIndex = 1;
             // 
             // SocketForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 574);
+            this.ClientSize = new System.Drawing.Size(822, 574);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "SocketForm";

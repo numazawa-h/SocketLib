@@ -11,31 +11,45 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NCommonUtility;
 using SocketLib.NCommonUtility;
+using static SocketLib.Program;
 
 namespace SampleMain
 {
     public partial class MainForm : Form
     {
+        NSocket listensocket = new NSocket();
+
         public MainForm()
         {
             InitializeComponent();
+            listensocket.OnExceptionEvent += OnException;
+            listensocket.OnFailListenEvent += OnFailListen;
+            listensocket.OnAcceptEvent += OnAccept;
         }
 
         private void DisplayLog(string message)
         {
-            txt_log.Text += $"{DateTime.Now}{message}\r\n";
+            txt_log.Text += $"{DateTime.Now}  {message}\r\n";
         }
 
         private void btn_listen_Click(object sender, EventArgs e)
         {
-            NSocket listensocket = new NSocket();
-            listensocket.OnExceptionEvent += OnException;
-            listensocket.OnFailListenEvent += OnFailListen;
-            listensocket.OnAcceptEvent += OnAccept;
-
-            listensocket.SetSelfEndPoint(txt_ipAddr1.Text.Trim(), txt_portno1.Text.Trim());
-            DisplayLog($"listen [{listensocket.SelfIPAddress} Port#{listensocket.SelfPortno}]");
-            listensocket.Listen();
+            string iaddr1 = txt_ipAddr1.Text.Trim();
+            string portno1 = txt_portNo1.Text.Trim();
+            DisplayLog($"listen [{iaddr1} Port#{portno1}]");
+            listensocket.Listen(iaddr1, portno1);
+        }
+        private void btn_stopListen_Click(object sender, EventArgs e)
+        {
+            if (listensocket.isOpen == false)
+            {
+                DisplayLog($"listen is NOT started");
+                return;
+            }
+            string iaddr1 = listensocket.LocalIPAddress.ToString();
+            string portno1 = listensocket.LocalPortno.ToString();
+            DisplayLog($"listen STOP [{iaddr1} Port#{portno1}]");
+            listensocket.Close();
         }
 
         private void btn_connect_Click(object sender, EventArgs e)
@@ -46,8 +60,24 @@ namespace SampleMain
             socket.OnFailConnectEvent += OnFailConnect;
             socket.OnDisConnectEvent += OnDisConnect;
 
-            socket.SetSelfEndPoint(txt_ipAddr1.Text.Trim(), txt_portno1.Text.Trim());
-            socket.Connect(txt_ipAddr2.Text, txt_portno2.Text);
+            string iaddr1 = txt_ipAddr1.Text.Trim();
+            string portno1 = txt_portNo1.Text.Trim();
+            if (iaddr1.Length > 0)
+            {
+                try
+                {
+                    socket.SetSelfEndPoint(iaddr1, portno1);
+                }
+                catch (Exception ex)
+                {
+                    OnException(this, new ThreadExceptionEventArgs(new Exception("Local ipアドレスの指定が不正です。", ex)));
+                    socket.Close();
+                    return;
+                }
+            }
+            string iaddr2 = txt_ipAddr2.Text.Trim();
+            string portno2 = txt_portNo2.Text.Trim();
+            socket.Connect(iaddr2, portno2);
         }
 
 
@@ -66,25 +96,25 @@ namespace SampleMain
             }
         }
 
-        private void OnDisConnect(object sender, DisConnectEventArgs args)
+        private void OnDisConnect(object sender, NSocketEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new DisConnectEventHandler(OnDisConnect), new object[] { sender, args });
+                this.Invoke(new NSocketEventHandler(OnDisConnect), new object[] { sender, args });
                 return;
             }
-            DisplayLog($"OnDisConnect {args.SocketBase.RemoteIPAddress}:{args.SocketBase.RemotePortno}");
+            DisplayLog($"OnDisConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
         }
 
-        private void OnAccept(object sender, AcceptEventArgs args)
+        private void OnAccept(object sender, NSocketEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new AcceptEventHandler(OnAccept), new object[] { sender, args });
+                this.Invoke(new NSocketEventHandler(OnAccept), new object[] { sender, args });
                 return;
             }
 
-            ServerSocket socket = args.ServerSocket;
+            NSocket socket = (NSocket)args.Socket;
             socket.OnExceptionEvent += OnException;
             socket.OnDisConnectEvent += OnDisConnect;
 
@@ -92,34 +122,35 @@ namespace SampleMain
             new SocketForm(socket).Show();
         }
 
-        private void OnFailListen(object sender, ListenEventArgs args)
+        private void OnFailListen(object sender, NSocketEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new FailListenEventHandler(OnFailListen), new object[] { sender, args });
+                this.Invoke(new NSocketEventHandler(OnFailListen), new object[] { sender, args });
                 return;
             }
-            DisplayLog($"OnFailListen {args.NSocket.RemoteIPAddress}:{args.NSocket.RemotePortno}");
+            DisplayLog($"OnFailListen {args.Socket.LocalIPAddress}:{args.Socket.LocalPortno}");
         }
 
-        private void OnConnect(object sender, ConnectEventArgs args)
+        private void OnConnect(object sender, NSocketEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new ConnectEventHandler(OnConnect), new object[] { sender, args });
+                this.Invoke(new NSocketEventHandler(OnConnect), new object[] { sender, args });
                 return;
             }
-            DisplayLog($"OnConnect {args.ClientSocket.RemoteIPAddress}:{args.ClientSocket.RemotePortno}");
-            new SocketForm(args.ClientSocket).Show();
+            DisplayLog($"OnConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
+            new SocketForm(args.Socket).Show();
         }
-        private void OnFailConnect(object sender, ConnectEventArgs args)
+
+        private void OnFailConnect(object sender, NSocketEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new ConnectEventHandler(OnFailConnect), new object[] { sender, args });
+                this.Invoke(new NSocketEventHandler(OnFailConnect), new object[] { sender, args });
                 return;
             }
-            DisplayLog($"OnFailConnect {args.ClientSocket.RemoteIPAddress}:{args.ClientSocket.RemotePortno}");
+            DisplayLog($"OnFailConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
         }
 
     }

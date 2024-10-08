@@ -25,8 +25,9 @@ namespace SampleMain
             _Socket.OnSendEvent += OnSend;
 
             InitializeComponent();
-            txt_ipAddr1.Text = socket.SelfIPAddress.ToString();
-            txt_portNo1.Text = socket.SelfPortno.ToString();
+
+            txt_ipAddr1.Text = socket.LocalIPAddress?.ToString();
+            txt_portNo1.Text = socket.LocalPortno?.ToString();
             txt_ipAddr2.Text = socket.RemoteIPAddress.ToString();
             txt_portNo2.Text = socket.RemotePortno.ToString();
 
@@ -45,11 +46,11 @@ namespace SampleMain
             txt_log.Text += $"{DateTime.Now} {message}\r\n";
         }
 
-        private void OnDisConnect(object sender, DisConnectEventArgs args)
+        private void OnDisConnect(object sender, NSocketEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new DisConnectEventHandler(OnDisConnect), new object[] { sender, args });
+                this.Invoke(new NSocketEventHandler(OnDisConnect), new object[] { sender, args });
                 return;
             }
             this.Close();
