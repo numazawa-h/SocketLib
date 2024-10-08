@@ -7,10 +7,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using static SocketLib.Program;
 
-namespace SocketLib.NCommonUtility
+namespace NCommonUtility
 {
 
     public delegate void NSocketEventHandler(Object sender, NSocketEventArgs args);

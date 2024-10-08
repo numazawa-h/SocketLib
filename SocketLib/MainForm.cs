@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NCommonUtility;
-using SocketLib.NCommonUtility;
 using static SocketLib.Program;
 
 namespace SampleMain
