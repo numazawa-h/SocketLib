@@ -61,7 +61,6 @@ namespace SocketLib.NCommonUtility
 
         public event ThreadExceptionEventHandler OnExceptionEvent;
         public event NSocketEventHandler OnDisConnectEvent;
-        public event NSocketEventHandler OnFailListenEvent;
         public event NSocketEventHandler OnAcceptEvent;
         public event SendRecvEventHandler OnRecvEvent;
         public event SendRecvEventHandler OnSendEvent;
@@ -91,17 +90,17 @@ namespace SocketLib.NCommonUtility
         protected void OnAccept(ServerSocket socket)
         {
             OnAcceptEvent?.Invoke(this, new NSocketEventArgs(socket));
-
-            // 受信スレッド起動
-            socket.StartRecvThread();
+            lock (socket)
+            {
+                if (socket._soc != null)
+                {
+                    // 受信スレッド起動
+                    socket.StartRecvThread();
+                }
+            }
 
             // Acceptの処理が終わったら引き続きAcceptを待つ
             _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
-        }
-
-        protected void OnFailListen()
-        {
-            OnFailListenEvent?.Invoke(this, new NSocketEventArgs(this));
         }
 
         protected void OnRecv()
@@ -185,12 +184,14 @@ namespace SocketLib.NCommonUtility
         }
         public void Listen(IPAddress iaddr, int portno)
         {
-            try
+            lock (this)
             {
-                lock (this)
+                bool needDisconnect = true;
+                try
                 {
                     if (_soc != null)
                     {
+                        needDisconnect = false;
                         throw new Exception("既にListen中です");
                     }
                     SetSelfEndPoint(iaddr, portno);
@@ -199,11 +200,14 @@ namespace SocketLib.NCommonUtility
                     _soc.Listen(1);     // 一度に一個だけ受け付ける
                     _asyncListenResult = _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
                 }
-            }
-            catch (Exception ex)
-            {
-                OnFailListen();
-                OnException(ex);
+                catch (Exception ex)
+                {
+                    if (needDisconnect)
+                    {
+                        OnDisConnect();
+                    }
+                    OnException(ex);
+                }
             }
         }
 
@@ -223,6 +227,7 @@ namespace SocketLib.NCommonUtility
                 }
                 catch (Exception ex)
                 {
+                    OnDisConnect();
                     OnException(ex);
                 }
             }
@@ -318,7 +323,6 @@ namespace SocketLib.NCommonUtility
     public class ClientSocket : NSocket
     {
         public event NSocketEventHandler OnConnectEvent;
-        public event NSocketEventHandler OnFailConnectEvent;
 
         protected void OnConnect()
         {
@@ -327,14 +331,10 @@ namespace SocketLib.NCommonUtility
             {
                 if (_soc != null)
                 {
+                    // 受信スレッド起動
                     StartRecvThread();
                 }
             }
-        }
-
-        protected void OnFailConnect()
-        {
-            OnFailConnectEvent?.Invoke(this, new NSocketEventArgs(this));
         }
 
         public void Connect(string str_iaddr, string str_portno)
@@ -384,8 +384,7 @@ namespace SocketLib.NCommonUtility
                 {
                     if (_soc != null)
                     {
-                        _soc?.Close();
-                        _soc = null;
+                        throw new Exception("Connect中にConnectしました");
                     }
                     IPEndPoint endPoint = new IPEndPoint(iaddr, portno);
                     _soc = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -397,13 +396,8 @@ namespace SocketLib.NCommonUtility
                 }
                 catch (Exception ex)
                 {
-                    if (_soc != null)
-                    {
-                        _soc?.Close();
-                        _soc = null;
-                    }
-                    OnFailConnect();
-                    OnException(ex);
+                    OnDisConnect();
+                    OnException(new Exception("Connect処理でエラー発生", ex));
                 }
             }
         }
@@ -411,7 +405,7 @@ namespace SocketLib.NCommonUtility
         private void ConnectCallback(IAsyncResult ar)
         {
             ClientSocket socket = (ClientSocket)ar.AsyncState;
-            lock (_soc)
+            lock (socket)
             {
                 if (socket._soc == null)
                 {
@@ -420,34 +414,14 @@ namespace SocketLib.NCommonUtility
                 try
                 {
                     socket._soc.EndConnect(ar);
-                    if (socket._soc == this._soc)
-                    {
-                        OnConnect();
-                    }
-                    else
-                    {
-                        socket._soc.Close();
-                        socket._soc = null;
-                    }
+                    OnConnect();
                 }
                 catch (Exception ex)
                 {
-                    if (_soc != null)
-                    {
-                        _soc?.Close();
-                        _soc = null;
-                    }
-                    OnFailConnect();
-                    OnException(ex);
+                    OnDisConnect();
+                    OnException(new Exception("Connect中にエラー発生", ex));
                 }
             }
         }
     }
-
-
-
-    #region EventHandler定義
-
-
-    #endregion
 }

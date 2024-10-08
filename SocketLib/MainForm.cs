@@ -23,8 +23,8 @@ namespace SampleMain
         {
             InitializeComponent();
             listensocket.OnExceptionEvent += OnException;
-            listensocket.OnFailListenEvent += OnFailListen;
             listensocket.OnAcceptEvent += OnAccept;
+            listensocket.OnDisConnectEvent += OnDisConnect;
         }
 
         private void DisplayLog(string message)
@@ -57,7 +57,6 @@ namespace SampleMain
             ClientSocket socket = new ClientSocket();
             socket.OnExceptionEvent += OnException;
             socket.OnConnectEvent += OnConnect;
-            socket.OnFailConnectEvent += OnFailConnect;
             socket.OnDisConnectEvent += OnDisConnect;
 
             string iaddr1 = txt_ipAddr1.Text.Trim();
@@ -141,16 +140,6 @@ namespace SampleMain
             }
             DisplayLog($"OnConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
             new SocketForm(args.Socket).Show();
-        }
-
-        private void OnFailConnect(object sender, NSocketEventArgs args)
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new NSocketEventHandler(OnFailConnect), new object[] { sender, args });
-                return;
-            }
-            DisplayLog($"OnFailConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
         }
 
     }
