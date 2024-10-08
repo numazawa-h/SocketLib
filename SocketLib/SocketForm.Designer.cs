@@ -58,12 +58,12 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(800, 200);
+            this.panel1.Size = new System.Drawing.Size(800, 256);
             this.panel1.TabIndex = 0;
             // 
             // btn_send
             // 
-            this.btn_send.Location = new System.Drawing.Point(650, 149);
+            this.btn_send.Location = new System.Drawing.Point(650, 192);
             this.btn_send.Name = "btn_send";
             this.btn_send.Size = new System.Drawing.Size(124, 45);
             this.btn_send.TabIndex = 9;
@@ -76,7 +76,8 @@
             this.txt_sendData.Location = new System.Drawing.Point(12, 91);
             this.txt_sendData.Multiline = true;
             this.txt_sendData.Name = "txt_sendData";
-            this.txt_sendData.Size = new System.Drawing.Size(762, 52);
+            this.txt_sendData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txt_sendData.Size = new System.Drawing.Size(762, 95);
             this.txt_sendData.TabIndex = 8;
             // 
             // groupBox1
@@ -177,9 +178,9 @@
             // 
             this.panel2.Controls.Add(this.txt_log);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 200);
+            this.panel2.Location = new System.Drawing.Point(0, 256);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(800, 374);
+            this.panel2.Size = new System.Drawing.Size(800, 318);
             this.panel2.TabIndex = 1;
             // 
             // txt_log
@@ -189,7 +190,7 @@
             this.txt_log.Multiline = true;
             this.txt_log.Name = "txt_log";
             this.txt_log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txt_log.Size = new System.Drawing.Size(800, 374);
+            this.txt_log.Size = new System.Drawing.Size(800, 318);
             this.txt_log.TabIndex = 1;
             // 
             // SocketForm

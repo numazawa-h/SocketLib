@@ -22,6 +22,7 @@ namespace SampleMain
             _Socket = socket;
             _Socket.OnDisConnectEvent += OnDisConnect;
             _Socket.OnRecvEvent += OnReceive;
+            _Socket.OnSendEvent += OnSend;
 
             InitializeComponent();
             txt_ipAddr1.Text = socket.SelfIPAddress.ToString();
@@ -53,15 +54,27 @@ namespace SampleMain
             }
             this.Close();
         }
-        private void OnReceive(object sender, RecvEventArgs args)
+
+        private void OnReceive(object sender, SendRecvEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new RecvEventHandler(OnReceive), new object[] { sender, args });
+                this.Invoke(new SendRecvEventHandler(OnReceive), new object[] { sender, args });
                 return;
             }
-            ByteArray dat = new ByteArray(args.SocketBase.RecvBuffer, args.SocketBase.RecvBuffSize);
+            ByteArray dat = new ByteArray(args.dat);
             DisplayLog($"RECV {dat.to_text()}");
+        }
+
+        private void OnSend(object sender, SendRecvEventArgs args)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new SendRecvEventHandler(OnSend), new object[] { sender, args });
+                return;
+            }
+            ByteArray dat = new ByteArray(args.dat);
+            DisplayLog($"SEND {dat.to_text()}");
         }
 
 
@@ -73,7 +86,7 @@ namespace SampleMain
         private void btn_send_Click(object sender, EventArgs e)
         {
             ByteArray senddat = new ByteArray(txt_sendData.Text);
-            _Socket.Send(senddat.GetData(), senddat.Length());
+            _Socket.Send(senddat.GetData());
         }
     }
 }

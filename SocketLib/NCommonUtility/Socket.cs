@@ -20,23 +20,25 @@ namespace SocketLib.NCommonUtility
         protected Socket _soc = null;
         protected IPEndPoint _self_EndPoint = null;
         protected IPEndPoint _remote_EndPoint = null;
-        protected byte[] _buffer = new byte[1024];
-        protected int _bufferSize = 0;
+        protected byte[] _dat = new byte[1024];
+        public int DataSize { 
+            get { return _dat.Length; } 
+            set { _dat = new byte[value];  } 
+        }
 
         public IPAddress SelfIPAddress { get { return _self_EndPoint?.Address; } }
         public int? SelfPortno { get { return _self_EndPoint?.Port; } }
 
         public IPAddress RemoteIPAddress { get { return _remote_EndPoint?.Address; } }
         public int? RemotePortno { get { return _remote_EndPoint?.Port; } }
-        public byte[] RecvBuffer { get { return _buffer; } }
-        public int RecvBuffSize { get { return _bufferSize; } }
 
         public event ThreadExceptionEventHandler OnExceptionEvent;
         public event DisConnectEventHandler OnDisConnectEvent;
         public event FailListenEventHandler OnFailListenEvent;
         public event AcceptEventHandler OnAcceptEvent;
-        public event RecvEventHandler OnRecvEvent;
-        
+        public event SendRecvEventHandler OnRecvEvent;
+        public event SendRecvEventHandler OnSendEvent;
+
 
 
 
@@ -64,7 +66,7 @@ namespace SocketLib.NCommonUtility
             OnAcceptEvent?.Invoke(this, new AcceptEventArgs(this, serverSocket));
 
             // 受信スレッド起動
-            serverSocket.StartRecvThred();
+            serverSocket.StartRecvThread();
 
             // Acceptの処理が終わったら引き続きlisten処理を実行する
             Listen();
@@ -79,12 +81,19 @@ namespace SocketLib.NCommonUtility
             }
             OnFailListenEvent?.Invoke(this, new ListenEventArgs(this));
         }
+
         protected void OnRecv()
         {
-            _bufferSize =_soc.Receive(_buffer);
-            OnRecvEvent?.Invoke(this, new RecvEventArgs(this));
+            int len =_soc.Receive(_dat);
+            byte[] buf = new byte[len];
+            Buffer.BlockCopy(_dat, 0, buf, 0, len);
+            OnRecvEvent?.Invoke(this, new SendRecvEventArgs(this, buf));
         }
 
+        protected void OnSend(byte[] buf)
+        {
+            OnSendEvent?.Invoke(this, new SendRecvEventArgs(this, buf));
+        }
 
         public void SetSelfEndPoint(string iaddr, string portno)
         {
@@ -113,10 +122,6 @@ namespace SocketLib.NCommonUtility
             }
         }
 
-        public void Send(byte[] dat,  int len)
-        {
-            _soc.Send(dat, len, SocketFlags.None);
-        }
 
         public void Listen()
         {
@@ -132,11 +137,12 @@ namespace SocketLib.NCommonUtility
                     {
                         _soc = new Socket(_self_EndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                         _soc.Bind(_self_EndPoint);
-                        _soc.Listen(1);
+                        _soc.Listen(1);     // 一度に一個だけ受け付ける
                         _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
                     }
                     else
                     {
+                        // 2回目以降
                         _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
                     }
                 }
@@ -150,17 +156,17 @@ namespace SocketLib.NCommonUtility
 
         protected virtual void AcceptCallback(IAsyncResult ar)
         {
-            NSocket listensocket = (NSocket)ar.AsyncState;
-            lock (listensocket)
+            NSocket socket = (NSocket)ar.AsyncState;
+            lock (socket)
             {
-                if (listensocket._soc == null)
+                if (socket._soc == null)
                 {
                     return;
                 }
                 try
                 {
-                    Socket soc = listensocket._soc.EndAccept(ar);
-                    OnAccept(new ServerSocket(soc, listensocket._self_EndPoint));
+                    Socket soc = socket._soc.EndAccept(ar);
+                    OnAccept(new ServerSocket(soc, socket._self_EndPoint));
                 }
                 catch (System.ObjectDisposedException ex)
                 {
@@ -169,16 +175,16 @@ namespace SocketLib.NCommonUtility
             }
         }
 
-        protected void StartRecvThred()
+        protected void StartRecvThread()
         {
-            Task.Run(() => recvProc(this));
+            Task.Run(() => recvThread(this));
         }
 
         /// <summary>
         /// 受信スレッド
         /// </summary>
         /// <param name="_this"></param>
-        static private void recvProc(NSocket _this)
+        static private void recvThread(NSocket _this)
         {
             try
             {
@@ -201,9 +207,42 @@ namespace SocketLib.NCommonUtility
             }
         }
 
-        public void Send(byte[] data)
+        public void Send(byte[] dat)
         {
-            _soc.Send(data);
+            try
+            {
+                byte[] buf = new byte[dat.Length];
+                Buffer.BlockCopy(dat, 0, buf, 0, dat.Length);
+
+                _soc.BeginSend(buf, 0, buf.Length, SocketFlags.None, new AsyncCallback(SendCallback), (this, buf));
+            }
+            catch (Exception e)
+            {
+                OnDisConnect();
+                OnException(new Exception("送信中に例外発生", e));
+            }
+        }
+
+        protected void SendCallback(IAsyncResult ar)
+        {
+            var (socket, buf) = ((NSocket, byte[]))ar.AsyncState;
+            lock (socket)
+            {
+                if (socket._soc == null)
+                {
+                    return;
+                }
+                try
+                {
+                    socket._soc.EndSend(ar);
+                    OnSend(buf);
+                }
+                catch (System.ObjectDisposedException ex)
+                {
+                    OnDisConnect();
+                    OnException(new Exception("ソケット送信エラー", ex));
+                }
+            }
         }
     }
 
@@ -213,7 +252,7 @@ namespace SocketLib.NCommonUtility
     /// <remarks>Acceptで生成されるソケットクラスです。</remarks>
     public class ServerSocket : NSocket
     {
-        public ServerSocket(Socket soc, IPEndPoint self_EndPoint)
+        public ServerSocket(Socket soc, IPEndPoint self_EndPoint=null)
         {
             _soc = soc;
             _remote_EndPoint = (IPEndPoint)soc.RemoteEndPoint;
@@ -237,7 +276,7 @@ namespace SocketLib.NCommonUtility
             {
                 if (_soc != null)
                 {
-                    StartRecvThred();
+                    StartRecvThread();
                 }
             }
         }
@@ -351,13 +390,16 @@ namespace SocketLib.NCommonUtility
         }
     }
 
-    public delegate void RecvEventHandler(Object sender, RecvEventArgs args);
-    public class RecvEventArgs : EventArgs
+    public delegate void SendRecvEventHandler(Object sender, SendRecvEventArgs args);
+    public class SendRecvEventArgs : EventArgs
     {
-        public NSocket SocketBase { get; private set; }
-        public RecvEventArgs(NSocket socket)
+        public NSocket socket { get; private set; }
+        public byte[] dat { get; private set; }
+
+        public SendRecvEventArgs(NSocket socket, byte[] dat)
         {
-            SocketBase = socket;
+            this.socket = socket;
+            this.dat = dat;
         }
     }
 
