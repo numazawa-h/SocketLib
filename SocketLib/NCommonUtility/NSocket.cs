@@ -49,6 +49,11 @@ namespace NCommonUtility
 
         public bool isOpen {  get { return _soc != null; } }
 
+        private int _type = 0;
+        public bool isServer { get { return _type == 1; } }
+        public bool isClient { get { return _type == 2; } }
+
+
         public IPAddress LocalIPAddress { get { return ((IPEndPoint)_soc?.LocalEndPoint)?.Address; } }
         public int? LocalPortno { get { return ((IPEndPoint)_soc?.LocalEndPoint)?.Port; } }
 
@@ -60,11 +65,22 @@ namespace NCommonUtility
         public event ThreadExceptionEventHandler OnExceptionEvent;
         public event NSocketEventHandler OnDisConnectEvent;
         public event NSocketEventHandler OnAcceptEvent;
+        public event NSocketEventHandler OnConnectEvent;
         public event SendRecvEventHandler OnRecvEvent;
         public event SendRecvEventHandler OnSendEvent;
 
         private IAsyncResult _asyncListenResult;
 
+        public NSocket()
+        {
+            _type = 0;
+        }
+        protected NSocket(Socket soc)
+        {
+            // Acceptした時に生成されるサーバーソケット
+            _soc = soc;
+            _type = 1;
+        }
 
         protected void OnException(Exception e)
         {
@@ -85,7 +101,7 @@ namespace NCommonUtility
             OnDisConnectEvent?.Invoke(this, new NSocketEventArgs(this));
         }
 
-        protected void OnAccept(ServerSocket socket)
+        protected void OnAccept(NSocket socket)
         {
             OnAcceptEvent?.Invoke(this, new NSocketEventArgs(socket));
             lock (socket)
@@ -99,6 +115,19 @@ namespace NCommonUtility
 
             // Acceptの処理が終わったら引き続きAcceptを待つ
             _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
+        }
+
+        protected void OnConnect()
+        {
+            OnConnectEvent?.Invoke(this, new NSocketEventArgs(this));
+            lock (this)
+            {
+                if (_soc != null)
+                {
+                    // 受信スレッド起動
+                    StartRecvThread();
+                }
+            }
         }
 
         protected virtual void OnRecv()
@@ -209,6 +238,72 @@ namespace NCommonUtility
             }
         }
 
+        public void Connect(string str_iaddr, string str_portno)
+        {
+            IPAddress iaddr;
+            try
+            {
+                iaddr = IPAddress.Parse(str_iaddr);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("IPAddress指定が不正です", e));
+                return;
+            }
+            int portno;
+            try
+            {
+                portno = int.Parse(str_portno);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("PortNo指定が不正です", e));
+                return;
+            }
+
+            Connect(iaddr, portno);
+        }
+        public void Connect(string str_iaddr, int portno)
+        {
+            IPAddress iaddr;
+            try
+            {
+                iaddr = IPAddress.Parse(str_iaddr);
+            }
+            catch (Exception e)
+            {
+                OnException(new Exception("IPAddress指定が不正です", e));
+                return;
+            }
+            Connect(iaddr, portno);
+        }
+        public void Connect(IPAddress iaddr, int portno)
+        {
+            lock (this)
+            {
+                try
+                {
+                    if (_soc != null)
+                    {
+                        throw new Exception("Connect中にConnectしました");
+                    }
+                    IPEndPoint endPoint = new IPEndPoint(iaddr, portno);
+                    _soc = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    if (_self_EndPoint != null)
+                    {
+                        _soc.Bind(_self_EndPoint);
+                    }
+                    _soc.BeginConnect(endPoint, new AsyncCallback(ConnectCallback), this);
+                }
+                catch (Exception ex)
+                {
+                    OnDisConnect();
+                    OnException(new Exception("Connect処理でエラー発生", ex));
+                }
+            }
+        }
+
+
         protected virtual void AcceptCallback(IAsyncResult ar)
         {
             NSocket socket = (NSocket)ar.AsyncState;
@@ -221,12 +316,34 @@ namespace NCommonUtility
                 try
                 {
                     Socket soc = socket._soc.EndAccept(ar);
-                    OnAccept(new ServerSocket(soc));
+                    OnAccept(new NSocket(soc));
                 }
                 catch (Exception ex)
                 {
                     OnDisConnect();
                     OnException(ex);
+                }
+            }
+        }
+
+        private void ConnectCallback(IAsyncResult ar)
+        {
+            NSocket socket = (NSocket)ar.AsyncState;
+            lock (socket)
+            {
+                if (socket._soc == null)
+                {
+                    return;
+                }
+                try
+                {
+                    socket._soc.EndConnect(ar);
+                    OnConnect();
+                }
+                catch (Exception ex)
+                {
+                    OnDisConnect();
+                    OnException(new Exception("Connect中にエラー発生", ex));
                 }
             }
         }
@@ -297,127 +414,6 @@ namespace NCommonUtility
                 {
                     OnDisConnect();
                     OnException(new Exception("ソケット送信エラー", ex));
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// サーバーSocket
-    /// </summary>
-    /// <remarks>Acceptで生成されるソケットクラスです。</remarks>
-    public class ServerSocket : NSocket
-    {
-        public ServerSocket(Socket soc)
-        {
-            _soc = soc;
-        }
-    }
-
-    /// <summary>
-    /// クライアントSocket
-    /// </summary>
-    /// <remarks>Connectで生成されるソケットを管理するクラスです。</remarks>
-    public class ClientSocket : NSocket
-    {
-        public event NSocketEventHandler OnConnectEvent;
-
-        protected void OnConnect()
-        {
-            OnConnectEvent?.Invoke(this, new NSocketEventArgs(this));
-            lock (this)
-            {
-                if (_soc != null)
-                {
-                    // 受信スレッド起動
-                    StartRecvThread();
-                }
-            }
-        }
-
-        public void Connect(string str_iaddr, string str_portno)
-        {
-            IPAddress iaddr;
-            try
-            {
-                iaddr = IPAddress.Parse(str_iaddr);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("IPAddress指定が不正です", e));
-                return;
-            }
-            int portno;
-            try
-            {
-                portno = int.Parse(str_portno);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("PortNo指定が不正です", e));
-                return;
-            }
-
-            Connect(iaddr, portno);
-        }
-        public void Connect(string str_iaddr, int portno)
-        {
-            IPAddress iaddr;
-            try
-            {
-                iaddr = IPAddress.Parse(str_iaddr);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("IPAddress指定が不正です", e));
-                return;
-            }
-            Connect(iaddr, portno);
-        }
-        public void Connect(IPAddress iaddr, int portno)
-        {
-            lock (this)
-            {
-                try
-                {
-                    if (_soc != null)
-                    {
-                        throw new Exception("Connect中にConnectしました");
-                    }
-                    IPEndPoint endPoint = new IPEndPoint(iaddr, portno);
-                    _soc = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                    if (_self_EndPoint != null)
-                    {
-                        _soc.Bind(_self_EndPoint);
-                    }
-                    _soc.BeginConnect(endPoint, new AsyncCallback(ConnectCallback), this);
-                }
-                catch (Exception ex)
-                {
-                    OnDisConnect();
-                    OnException(new Exception("Connect処理でエラー発生", ex));
-                }
-            }
-        }
-
-        private void ConnectCallback(IAsyncResult ar)
-        {
-            ClientSocket socket = (ClientSocket)ar.AsyncState;
-            lock (socket)
-            {
-                if (socket._soc == null)
-                {
-                    return;
-                }
-                try
-                {
-                    socket._soc.EndConnect(ar);
-                    OnConnect();
-                }
-                catch (Exception ex)
-                {
-                    OnDisConnect();
-                    OnException(new Exception("Connect中にエラー発生", ex));
                 }
             }
         }
