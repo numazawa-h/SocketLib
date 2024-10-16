@@ -41,10 +41,10 @@ namespace NCommonUtility
     {
         protected Socket _soc = null;
         protected IPEndPoint _self_EndPoint = null;     // バインドするためのEndPoint
-        protected byte[] _dat = new byte[1024];
-        public int DataSize { 
-            get { return _dat.Length; } 
-            set { _dat = new byte[value];  } 
+        protected byte[] _recv_buf = new byte[1024];
+        public int RecvBuffSize { 
+            get { return _recv_buf.Length; } 
+            set { _recv_buf = new byte[value];  } 
         }
 
         public bool isOpen {  get { return _soc != null; } }
@@ -105,7 +105,7 @@ namespace NCommonUtility
         {
             int len =_soc.Receive(_dat);
             byte[] buf = new byte[len];
-            Buffer.BlockCopy(_dat, 0, buf, 0, len);
+            Buffer.BlockCopy(_recv_buf, 0, buf, 0, len);
             OnRecvEvent?.Invoke(this, new SendRecvEventArgs(this, buf));
         }
 
