@@ -29,7 +29,7 @@ namespace NCommonUtility
         public int DataLenOffset { get; private set; }
         public int DataLenSize { get; private set; }
 
-
+        public event SendRecvExEventHandler OnSendExEvent;
         public event SendRecvExEventHandler OnRecvExEvent;
 
 
@@ -90,6 +90,11 @@ namespace NCommonUtility
                     _data_length = -1;
                 }
             }
+        }
+
+        protected virtual void OnSend(byte[] hed, byte[] dat)
+        {
+            OnSendExEvent?.Invoke(this, new SendRecvExEventArgs(this, hed, dat));
         }
 
         private void receiveHead()
@@ -158,5 +163,50 @@ namespace NCommonUtility
 
             return BitConverter.ToInt32(dlen, 0);
         }
+
+        public void Send(byte[] hed, byte[] dat)
+        {
+            try
+            {
+                byte[] h = new byte[hed.Length];
+                byte[] d = new byte[dat.Length];
+                byte[] buf = new byte[hed.Length+dat.Length];
+
+                Buffer.BlockCopy(hed, 0, h, 0, dat.Length);
+                Buffer.BlockCopy(dat, 0, d, 0, dat.Length);
+                Buffer.BlockCopy(hed, 0, buf, 0, hed.Length);
+                Buffer.BlockCopy(dat, 0, buf, hed.Length, dat.Length);
+
+                _soc.BeginSend(buf, 0, buf.Length, SocketFlags.None, new AsyncCallback(SendCallback), (this, h,d));
+            }
+            catch (Exception e)
+            {
+                OnDisConnect();
+                OnException(new Exception("送信中に例外発生", e));
+            }
+        }
+
+        protected void SendCallbackEx(IAsyncResult ar)
+        {
+            var (socket, hed, dat) = ((NSocketEx, byte[], byte[]))ar.AsyncState;
+            lock (socket)
+            {
+                if (socket._soc == null)
+                {
+                    return;
+                }
+                try
+                {
+                    socket._soc.EndSend(ar);
+                    OnSend(hed, dat);
+                }
+                catch (System.ObjectDisposedException ex)
+                {
+                    OnDisConnect();
+                    OnException(new Exception("ソケット送信エラー", ex));
+                }
+            }
+        }
+
     }
 }
