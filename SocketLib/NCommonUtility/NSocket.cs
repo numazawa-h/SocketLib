@@ -101,15 +101,15 @@ namespace NCommonUtility
             _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
         }
 
-        protected void OnRecv()
+        protected virtual void OnRecv()
         {
-            int len =_soc.Receive(_dat);
+            int len =_soc.Receive(_recv_buf);
             byte[] buf = new byte[len];
             Buffer.BlockCopy(_recv_buf, 0, buf, 0, len);
             OnRecvEvent?.Invoke(this, new SendRecvEventArgs(this, buf));
         }
 
-        protected void OnSend(byte[] buf)
+        protected virtual void OnSend(byte[] buf)
         {
             OnSendEvent?.Invoke(this, new SendRecvEventArgs(this, buf));
         }
