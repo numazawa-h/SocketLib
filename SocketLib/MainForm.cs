@@ -16,7 +16,7 @@ namespace SampleMain
 {
     public partial class MainForm : Form
     {
-        NSocket listensocket = new NSocket();
+        NSocketEx listensocket = new NSocketEx(2, 0, 2);
         Point ShowFormPoint = new Point(-1, -1);
 
         public MainForm()
@@ -54,7 +54,7 @@ namespace SampleMain
 
         private void btn_connect_Click(object sender, EventArgs e)
         {
-            NSocket socket = new NSocket();
+            NSocketEx socket = new NSocketEx(2, 0, 2);
             socket.OnExceptionEvent += OnException;
             socket.OnConnectEvent += OnConnect;
             socket.OnDisConnectEvent += OnDisConnect;
@@ -113,7 +113,7 @@ namespace SampleMain
                 return;
             }
 
-            NSocket socket = (NSocket)args.Socket;
+            NSocketEx socket = (NSocketEx)args.Socket;
             socket.OnExceptionEvent += OnException;
             socket.OnDisConnectEvent += OnDisConnect;
 
@@ -147,7 +147,7 @@ namespace SampleMain
                 return;
             }
             DisplayLog($"OnConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
-            var frm = new SocketForm(args.Socket);
+            var frm = new SocketForm((NSocketEx)args.Socket);
             if (ShowFormPoint.X < 0)
             {
                 ShowFormPoint = new Point(this.Location.X, this.Location.Y);

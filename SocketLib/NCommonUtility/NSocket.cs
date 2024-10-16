@@ -104,30 +104,22 @@ namespace NCommonUtility
         protected void OnAccept(NSocket socket)
         {
             OnAcceptEvent?.Invoke(this, new NSocketEventArgs(socket));
-            lock (socket)
+            // 受信スレッド起動
+            socket.StartRecvThread();
+
+            lock (this)
             {
-                if (socket._soc != null)
-                {
-                    // 受信スレッド起動
-                    socket.StartRecvThread();
-                }
+                // Acceptの処理が終わったら引き続きAcceptを待つ
+                _soc?.BeginAccept(new AsyncCallback(AcceptCallback), this);
             }
 
-            // Acceptの処理が終わったら引き続きAcceptを待つ
-            _soc.BeginAccept(new AsyncCallback(AcceptCallback), this);
         }
 
         protected void OnConnect()
         {
             OnConnectEvent?.Invoke(this, new NSocketEventArgs(this));
-            lock (this)
-            {
-                if (_soc != null)
-                {
-                    // 受信スレッド起動
-                    StartRecvThread();
-                }
-            }
+            // 受信スレッド起動
+            StartRecvThread();
         }
 
         protected virtual void OnRecv()
@@ -279,9 +271,9 @@ namespace NCommonUtility
         }
         public void Connect(IPAddress iaddr, int portno)
         {
-            lock (this)
+            try
             {
-                try
+                lock (this)
                 {
                     if (_soc != null)
                     {
@@ -295,11 +287,11 @@ namespace NCommonUtility
                     }
                     _soc.BeginConnect(endPoint, new AsyncCallback(ConnectCallback), this);
                 }
-                catch (Exception ex)
-                {
-                    OnDisConnect();
-                    OnException(new Exception("Connect処理でエラー発生", ex));
-                }
+            }
+            catch (Exception ex)
+            {
+                OnDisConnect();
+                OnException(new Exception("Connect処理でエラー発生", ex));
             }
         }
 
@@ -307,44 +299,38 @@ namespace NCommonUtility
         protected virtual void AcceptCallback(IAsyncResult ar)
         {
             NSocket socket = (NSocket)ar.AsyncState;
-            lock (socket)
+            if (socket._soc == null)
             {
-                if (socket._soc == null)
-                {
-                    return;
-                }
-                try
-                {
-                    Socket soc = socket._soc.EndAccept(ar);
-                    OnAccept(new NSocket(soc));
-                }
-                catch (Exception ex)
-                {
-                    OnDisConnect();
-                    OnException(ex);
-                }
+                return;
+            }
+            try
+            {
+                Socket soc = socket._soc.EndAccept(ar);
+                OnAccept(new NSocket(soc));
+            }
+            catch (Exception ex)
+            {
+                OnDisConnect();
+                OnException(ex);
             }
         }
 
-        private void ConnectCallback(IAsyncResult ar)
+        protected virtual void ConnectCallback(IAsyncResult ar)
         {
             NSocket socket = (NSocket)ar.AsyncState;
-            lock (socket)
+            if (socket._soc == null)
             {
-                if (socket._soc == null)
-                {
-                    return;
-                }
-                try
-                {
-                    socket._soc.EndConnect(ar);
-                    OnConnect();
-                }
-                catch (Exception ex)
-                {
-                    OnDisConnect();
-                    OnException(new Exception("Connect中にエラー発生", ex));
-                }
+                return;
+            }
+            try
+            {
+                socket._soc.EndConnect(ar);
+                OnConnect();
+            }
+            catch (Exception ex)
+            {
+                OnDisConnect();
+                OnException(new Exception("Connect中にエラー発生", ex));
             }
         }
 
@@ -387,7 +373,7 @@ namespace NCommonUtility
                 byte[] buf = new byte[dat.Length];
                 Buffer.BlockCopy(dat, 0, buf, 0, dat.Length);
 
-                _soc.BeginSend(buf, 0, buf.Length, SocketFlags.None, new AsyncCallback(SendCallback), (this, buf));
+                _soc?.BeginSend(buf, 0, buf.Length, SocketFlags.None, new AsyncCallback(SendCallback), (this, buf));
             }
             catch (Exception e)
             {
@@ -396,25 +382,22 @@ namespace NCommonUtility
             }
         }
 
-        protected void SendCallback(IAsyncResult ar)
+        protected virtual void SendCallback(IAsyncResult ar)
         {
             var (socket, buf) = ((NSocket, byte[]))ar.AsyncState;
-            lock (socket)
+            if (socket._soc == null)
             {
-                if (socket._soc == null)
-                {
-                    return;
-                }
-                try
-                {
-                    socket._soc.EndSend(ar);
-                    OnSend(buf);
-                }
-                catch (System.ObjectDisposedException ex)
-                {
-                    OnDisConnect();
-                    OnException(new Exception("ソケット送信エラー", ex));
-                }
+                return;
+            }
+            try
+            {
+                socket._soc.EndSend(ar);
+                OnSend(buf);
+            }
+            catch (System.ObjectDisposedException ex)
+            {
+                OnDisConnect();
+                OnException(new Exception("ソケット送信エラー", ex));
             }
         }
     }

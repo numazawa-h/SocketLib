@@ -14,14 +14,14 @@ namespace SampleMain
 {
     public partial class SocketForm : Form
     {
-        NSocket _Socket;
+        NSocketEx _Socket;
 
-        public SocketForm(NSocket socket)
+        public SocketForm(NSocketEx socket)
         {
             _Socket = socket;
             _Socket.OnDisConnectEvent += OnDisConnect;
-            _Socket.OnRecvEvent += OnReceive;
-            _Socket.OnSendEvent += OnSend;
+            _Socket.OnRecvExEvent += OnReceive;
+            _Socket.OnSendExEvent += OnSend;
 
             InitializeComponent();
 
@@ -55,25 +55,25 @@ namespace SampleMain
             this.Close();
         }
 
-        private void OnReceive(object sender, SendRecvEventArgs args)
+        private void OnReceive(object sender, SendRecvExEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new SendRecvEventHandler(OnReceive), new object[] { sender, args });
+                this.Invoke(new SendRecvExEventHandler(OnReceive), new object[] { sender, args });
                 return;
             }
-            ByteArray dat = new ByteArray(args.dat);
+            ByteArray dat = new ByteArray(args.Comm_data);
             DisplayLog($"RECV {dat.to_text()}");
         }
 
-        private void OnSend(object sender, SendRecvEventArgs args)
+        private void OnSend(object sender, SendRecvExEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new SendRecvEventHandler(OnSend), new object[] { sender, args });
+                this.Invoke(new SendRecvExEventHandler(OnSend), new object[] { sender, args });
                 return;
             }
-            ByteArray dat = new ByteArray(args.dat);
+            ByteArray dat = new ByteArray(args.Comm_data);
             DisplayLog($"SEND {dat.to_text()}");
         }
 
@@ -85,8 +85,9 @@ namespace SampleMain
 
         private void btn_send_Click(object sender, EventArgs e)
         {
-            ByteArray senddat = new ByteArray(txt_sendData.Text);
-            _Socket.Send(senddat.GetData());
+            ByteArray comm_dat = new ByteArray(txt_sendData.Text);
+            ByteArray comm_hed = new ByteArray((UInt16)comm_dat.Length());
+            _Socket.Send(comm_hed.GetData(), comm_dat.GetData());
         }
     }
 }

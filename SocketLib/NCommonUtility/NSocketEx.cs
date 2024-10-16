@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -41,7 +42,17 @@ namespace NCommonUtility
 
         public NSocketEx(int hsize, int dlen_ofs, int dlen_size=2)
         {
-            if (dlen_ofs <0 )
+            init(hsize, dlen_ofs, dlen_size);
+        }
+
+        public NSocketEx(Socket soc, int hsize, int dlen_ofs, int dlen_size = 2) : base(soc)
+        {
+            init(hsize, dlen_ofs, dlen_size);
+        }
+
+        private void init(int hsize, int dlen_ofs, int dlen_size)
+        {
+            if (dlen_ofs < 0)
             {
                 throw new ArgumentException("データ長オフセットは、0以上で指定してください");
             }
@@ -49,7 +60,7 @@ namespace NCommonUtility
             {
                 throw new ArgumentException("データ長サイズは、1,2,4のいずれかで指定してください");
             }
-            if (hsize< (dlen_ofs+dlen_size))
+            if (hsize < (dlen_ofs + dlen_size))
             {
                 throw new ArgumentException("ヘッダサイズが小さすぎます");
             }
@@ -80,9 +91,9 @@ namespace NCommonUtility
 
             if (_data_recv_cnt == _data_length)
             {
+                OnRecvExEvent?.Invoke(this, new SendRecvExEventArgs(this, _comm_header, _comm_data));
                 lock (this)
                 {
-                    OnRecvExEvent?.Invoke(this, new SendRecvExEventArgs(this, _comm_header, _comm_data));
                     _comm_header = null;
                     _comm_data = null;
                     _head_recv_cnt = -1;
@@ -92,49 +103,38 @@ namespace NCommonUtility
             }
         }
 
-        protected virtual void OnSend(byte[] hed, byte[] dat)
-        {
-            OnSendExEvent?.Invoke(this, new SendRecvExEventArgs(this, hed, dat));
-        }
-
         private void receiveHead()
         {
-            lock (this)
+            if (_head_recv_cnt < 0)
             {
-                if (_head_recv_cnt < 0)
-                {
-                    // ヘッダ受信の準備
-                    _comm_header = new byte[HeaderSize];
-                    _head_recv_cnt = 0;
-                }
-
-                int rcnt = _soc.Receive(_comm_header, _head_recv_cnt, HeaderSize - _head_recv_cnt, SocketFlags.None);
-                if (rcnt <= 0)
-                {
-                    throw new Exception($"socket receive error({rcnt})");
-                }
-                _head_recv_cnt += rcnt;
+                // ヘッダ受信の準備
+                _comm_header = new byte[HeaderSize];
+                _head_recv_cnt = 0;
             }
+
+            int rcnt = _soc.Receive(_comm_header, _head_recv_cnt, HeaderSize - _head_recv_cnt, SocketFlags.None);
+            if (rcnt <= 0)
+            {
+                throw new Exception($"socket receive error({rcnt})");
+            }
+            _head_recv_cnt += rcnt;
         }
 
         private void receiveData()
         {
-            lock (this)
+            if (_data_recv_cnt < 0)
             {
-                if (_data_recv_cnt < 0)
-                {
-                    // データ受信の準備
-                    _comm_data = new byte[_data_length];
-                    _data_recv_cnt = 0;
-                }
-
-                int rcnt = _soc.Receive(_comm_data, _data_recv_cnt, _data_length - _data_recv_cnt, SocketFlags.None);
-                if (rcnt <= 0)
-                {
-                    throw new Exception($"socket receive error({rcnt})");
-                }
-                _data_recv_cnt += rcnt;
+                // データ受信の準備
+                _comm_data = new byte[_data_length];
+                _data_recv_cnt = 0;
             }
+
+            int rcnt = _soc.Receive(_comm_data, _data_recv_cnt, _data_length - _data_recv_cnt, SocketFlags.None);
+            if (rcnt <= 0)
+            {
+                throw new Exception($"socket receive error({rcnt})");
+            }
+            _data_recv_cnt += rcnt;
         }
 
         private int getDataLength()
@@ -164,6 +164,11 @@ namespace NCommonUtility
             return BitConverter.ToInt32(dlen, 0);
         }
 
+        protected virtual void OnSend(byte[] hed, byte[] dat)
+        {
+            OnSendExEvent?.Invoke(this, new SendRecvExEventArgs(this, hed, dat));
+        }
+
         public void Send(byte[] hed, byte[] dat)
         {
             try
@@ -172,7 +177,7 @@ namespace NCommonUtility
                 byte[] d = new byte[dat.Length];
                 byte[] buf = new byte[hed.Length+dat.Length];
 
-                Buffer.BlockCopy(hed, 0, h, 0, dat.Length);
+                Buffer.BlockCopy(hed, 0, h, 0, hed.Length);
                 Buffer.BlockCopy(dat, 0, d, 0, dat.Length);
                 Buffer.BlockCopy(hed, 0, buf, 0, hed.Length);
                 Buffer.BlockCopy(dat, 0, buf, hed.Length, dat.Length);
@@ -186,27 +191,42 @@ namespace NCommonUtility
             }
         }
 
-        protected void SendCallbackEx(IAsyncResult ar)
+        protected override void AcceptCallback(IAsyncResult ar)
         {
-            var (socket, hed, dat) = ((NSocketEx, byte[], byte[]))ar.AsyncState;
-            lock (socket)
+            NSocketEx socket = (NSocketEx)ar.AsyncState;
+            if (socket._soc == null)
             {
-                if (socket._soc == null)
-                {
-                    return;
-                }
-                try
-                {
-                    socket._soc.EndSend(ar);
-                    OnSend(hed, dat);
-                }
-                catch (System.ObjectDisposedException ex)
-                {
-                    OnDisConnect();
-                    OnException(new Exception("ソケット送信エラー", ex));
-                }
+                return;
+            }
+            try
+            {
+                Socket soc = socket._soc.EndAccept(ar);
+                OnAccept(new NSocketEx(soc, this.HeaderSize, this.DataLenOffset, this.DataLenSize));
+            }
+            catch (Exception ex)
+            {
+                OnDisConnect();
+                OnException(ex);
             }
         }
 
+        protected override void SendCallback(IAsyncResult ar)
+        {
+            var (socket, hed, dat) = ((NSocketEx, byte[], byte[]))ar.AsyncState;
+            if (socket._soc == null)
+            {
+                return;
+            }
+            try
+            {
+                socket._soc.EndSend(ar);
+                OnSend(hed, dat);
+            }
+            catch (System.ObjectDisposedException ex)
+            {
+                OnDisConnect();
+                OnException(new Exception("ソケット送信エラー", ex));
+            }
+        }
     }
 }
