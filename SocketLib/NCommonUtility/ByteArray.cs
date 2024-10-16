@@ -16,6 +16,21 @@ namespace NCommonUtility
         {
             _dat = System.Array.Empty<byte>();
         }
+        public ByteArray(UInt16 num)
+        {
+            _dat = BitConverter.GetBytes(num);
+            Array.Reverse(_dat);
+        }
+        public ByteArray(UInt32 num)
+        {
+            _dat = BitConverter.GetBytes(num);
+            Array.Reverse(_dat);
+        }
+        public ByteArray(UInt64 num)
+        {
+            _dat = BitConverter.GetBytes(num);
+            Array.Reverse(_dat);
+        }
 
         public ByteArray(int len)
         {
