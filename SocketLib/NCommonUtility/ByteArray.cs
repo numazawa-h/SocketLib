@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace NCommonUtility
 {
@@ -176,6 +177,63 @@ namespace NCommonUtility
         public override string ToString() 
         { 
             return to_hex();
+        }
+
+        public int to_int()
+        {
+            if (_dat.Length > 4 || _dat.Length < 1)
+            {
+                throw new Exception($"バイト長が{_dat.Length}なのでintに変換できません");
+            }
+
+            byte[] val = new byte[4];
+            Buffer.BlockCopy(_dat, 0, val, 4 - _dat.Length, _dat.Length);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(val);
+            }
+
+            return BitConverter.ToInt32(val, 0);
+        }
+        public long to_long()
+        {
+            if (_dat.Length > 8 || _dat.Length < 1)
+            {
+                throw new Exception($"バイト長が{_dat.Length}なのでlongに変換できません");
+            }
+
+            byte[] val = new byte[8];
+            Buffer.BlockCopy(_dat, 0, val, 8 - _dat.Length, _dat.Length);
+
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(val);
+            }
+
+            return BitConverter.ToInt64(val, 0);
+        }
+
+        public DateTime to_dateTime()
+        {
+            DateTime val;
+            string bcd = to_hex();
+            switch (bcd.Length)
+            {
+                case 8:
+                    val = DateTime.ParseExact(bcd, "yyyyMMdd", null);
+                    break;
+                case 12:
+                    val = DateTime.ParseExact(bcd, "yyyyMMddHHmm", null);
+                    break;
+                case 14:
+                    val = DateTime.ParseExact(bcd, "yyyyMMddHHmmss", null);
+                    break;
+                default:
+                    val = DateTime.MinValue;
+                    break;
+            }
+
+            return val;
         }
 
         /// <summary>
