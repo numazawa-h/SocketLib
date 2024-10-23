@@ -83,7 +83,7 @@ namespace NCommonUtility
         public class Node : IEnumerable
         {
             Node _parent;
-            string _name;
+            public string _name { get; private set; }
             JsonNode _jsonNode;
             bool _isRequired = false;
 
@@ -162,6 +162,29 @@ namespace NCommonUtility
 
                     return new Node(this, node, name);
                 }
+            }
+
+            public bool ContainsKey(string name)
+            {
+                bool found = false;
+                if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
+                {
+                    found = _jsonNode.AsObject().ContainsKey(name);
+                }
+                return found;
+            }
+
+            public Dictionary<string, string> GetDict()
+            {
+                Dictionary<string, string> dic = new Dictionary<string, string>();
+                if(_jsonNode !=null && _jsonNode.GetValueKind() == JsonValueKind.Object)
+                {
+                    foreach (var pair in _jsonNode.AsObject())
+                    {
+                        dic.Add(pair.Key, pair.Value.ToString());
+                    }
+                }
+                return dic;
             }
 
             #region IEnumerator
