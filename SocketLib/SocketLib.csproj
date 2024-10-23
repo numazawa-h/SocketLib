@@ -79,6 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config\CommDataDefine.cs" />
     <Compile Include="NCommonUtility\NSocketEx.cs" />
     <Compile Include="SocketForm.cs">
       <SubType>Form</SubType>
@@ -132,5 +133,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
