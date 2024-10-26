@@ -37,12 +37,14 @@ namespace SampleMain.Config
         {
             RootNode root = JsonConfig.ReadJson(path);
 
+            // 先に値定義を読む（フィールド定義に"name"がなければ値定義の"name"をフィールド名とするため）
             _values_def.Clear();
             foreach (Node def in root["values-def"])
             {
                 _values_def.Add(def["id"], new ValuesDefine(def));
             }
 
+            // メッセージ定義読み込み
             _message_def.Clear();
             foreach (Node def in root["message-def"])
             {
@@ -57,6 +59,12 @@ namespace SampleMain.Config
                 throw new Exception($"定義されていないデータ種別({dtype})");
             }
             return new MessageDefine(_message_def[dtype]);
+        }
+
+        public ValuesDefine GetValuesDefine(string id)
+        {
+
+            return _values_def[id];
         }
 
         public string GetValueDescription(string fldid, string val)
@@ -74,74 +82,72 @@ namespace SampleMain.Config
             return "？？？";
         }
 
-        public ValuesDefine GetValues(string id)
-        {
-            return _values_def[id];
-        }
-
+        /// <summary>
+        /// 通信電文定義
+        /// </summary>
         public class MessageDefine
         {
-            string _dtype;
-            string _name;
-            int _data_len;
-            int _data_minlen;
+            // 電文種別
+            public string DType { get; private set; }
+            // 電文名
+            public string DName { get; private set; }
+            // データ長（可変長の時、-1）
+            public int DLength {  get; private set; }
+            // データ長（可変長の時の固定部の長さ）
+            public int MinLength { get; private set; }
 
-            public string DType { get { return _dtype; } }
-            public string Name { get { return _name; } }
-            public int Length {  get { return _data_len; } }
-            public int MinLength { get { return _data_minlen; } }
+            // フィールド定義
+            private Dictionary<string, FieldDefine> _fields_def = new Dictionary<string, FieldDefine>();  
 
-            Dictionary<string, FieldDefine> _fld_def_list = new Dictionary<string, FieldDefine>();
-            public Dictionary<string, FieldDefine> Fld_List { get {  return _fld_def_list; } }  
-
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            /// <param name="def">Json定義</param>
             public MessageDefine(Node def)
             {
-                _dtype = def["id"];
-                _name = def["name"];
-                _data_len = def["len"];
-                _data_minlen = (int?)def["minlen"] is int v ? v : 0;
+                DType = def["id"];
+                DName = def["name"];
+                DLength = def["len"];
+                MinLength = (int?)def["minlen"] is int v ? v : 0;
 
                 foreach (Node node in def["flds"])
                 {
-                    _fld_def_list.Add(node["id"], new FieldDefine(node));
+                    _fields_def.Add(node["id"], new FieldDefine(node));
                 }
             }
-
 
             // コピーコンストラクタ
             public MessageDefine(MessageDefine other)
             {
-                _dtype = other._dtype;
-                _name = other._name;
-                _data_len = other._data_len;
-                _data_minlen = other._data_minlen;
-                foreach (KeyValuePair<string, FieldDefine> pair in other._fld_def_list)
+                DType = other.DType;
+                DName = other.DName;
+                DLength = other.DLength;
+                MinLength = other.MinLength;
+                foreach (KeyValuePair<string, FieldDefine> pair in other._fields_def)
                 {
-                    _fld_def_list.Add(pair.Key, pair.Value);
+                    _fields_def.Add(pair.Key, pair.Value);
                 }
             }
 
-            public void AddFldDefine(string id, FieldDefine fld)
+            public string[] GetFldNames()
             {
-                _fld_def_list.Add(id, fld);
+                return _fields_def.Keys.ToArray();
             }
-
 
             public string GetFldName(string fldid)
             {
-                return _fld_def_list[fldid].FldName;
+                return _fields_def[fldid].FldName;
             }
 
             public int GetFldOffset(string fldid)
             {
-                return _fld_def_list[fldid].FldOffset;
+                return _fields_def[fldid].FldOffset;
             }
 
             public int GetFldLength(string fldid)
             {
-                return _fld_def_list[fldid].FldLength;
+                return _fields_def[fldid].FldLength;
             }
-
         }
 
         public class FieldDefine
