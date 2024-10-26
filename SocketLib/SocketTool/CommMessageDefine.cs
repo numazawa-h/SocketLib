@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Web.UI;
 using static NCommonUtility.JsonConfig;
 
-namespace SampleMain.Config
+namespace SocketTool
 {
     public class CommMessageDefine
     {
