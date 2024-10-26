@@ -23,7 +23,7 @@ namespace SampleMain.Config
             }
             return _instance;
         }
-        private CommMessageDefine():base()
+        private CommMessageDefine() : base()
         {
         }
 
@@ -48,13 +48,13 @@ namespace SampleMain.Config
             _message_def.Clear();
             foreach (Node def in root["message-def"])
             {
-                _message_def.Add(def["id"], new MessageDefine(def) );
+                _message_def.Add(def["id"], new MessageDefine(def));
             }
         }
 
         public MessageDefine GetMessageDefine(string dtype)
         {
-            if (_message_def.ContainsKey(dtype)==false)
+            if (_message_def.ContainsKey(dtype) == false)
             {
                 throw new Exception($"定義されていないデータ種別({dtype})");
             }
@@ -67,7 +67,7 @@ namespace SampleMain.Config
             return _values_def[id];
         }
 
-        public string GetValueDescription(string fldid, string val)
+        public string GetValueDescription(string fldid, byte[] dat)
         {
             string valid = fldid;
             if (valid.Contains("_"))
@@ -75,8 +75,8 @@ namespace SampleMain.Config
                 valid = valid.Substring(0, valid.IndexOf("_"));
             }
             if (_values_def.ContainsKey(valid))
-            { 
-                return _values_def[valid][val];
+            {
+                return _values_def[valid][dat];
             }
 
             return "？？？";
@@ -92,12 +92,12 @@ namespace SampleMain.Config
             // 電文名
             public string DName { get; private set; }
             // データ長（可変長の時、-1）
-            public int DLength {  get; private set; }
+            public int DLength { get; private set; }
             // データ長（可変長の時の固定部の長さ）
             public int MinLength { get; private set; }
 
             // フィールド定義
-            private Dictionary<string, FieldDefine> _fields_def = new Dictionary<string, FieldDefine>();  
+            private Dictionary<string, FieldDefine> _fields_def = new Dictionary<string, FieldDefine>();
 
             /// <summary>
             /// コンストラクタ
@@ -201,20 +201,28 @@ namespace SampleMain.Config
             public string FldName { get; private set; }
 
             Dictionary<string, string> _values_def = null;
-            Node _format_def = null;
+            Format _format_def = null;
 
             public ValuesDefine(Node def)
             {
                 FldId = def["id"];
                 FldName = def["name"];
 
-                if( def.ContainsKey("values"))
+                if (def.ContainsKey("values"))
                 {
                     _values_def = def["values"].GetDict();
                 }
                 if (def.ContainsKey("format"))
                 {
-                    _format_def = def["format"];
+                    switch ((string)def["format"]["type"])
+                    {
+                        case "int":
+                            _format_def = new FormatInt(def["format"]);
+                            break;
+                        case "datetime":
+                            _format_def = new FormatDateTime(def["format"]);
+                            break;
+                    }
                 }
             }
 
@@ -223,37 +231,19 @@ namespace SampleMain.Config
             /// </summary>
             /// <param name="val">値（16進文字列）</param>
             /// <returns>値の説明</returns>
-            public string this[string val]
+            public string this[byte[] val]
             {
                 get
                 {
-                    if (_values_def.ContainsKey(val))
+                    string bcd = new ByteArray(val).to_hex();
+                    if (_values_def.ContainsKey(bcd))
                     {
                         // 値の一覧に存在すれば対応する値を返却する
-                        return _values_def[val];
+                        return _values_def[bcd];
                     }
-                    if (_format_def.ContainsKey("type"))
+                    if (_format_def != null)
                     {
-                        // データ種類別のフォーマッティング
-                        string fmt =_format_def["fmt"];
-                        switch ((string)_format_def["type"])
-                        {
-                            case "int":
-                                int valint = new ByteArray(val).to_int();
-                                int min = (int?)_format_def["minvalue"] is int v1? v1:int.MinValue;
-                                int max = (int?)_format_def["maxvalue"] is int v2? v2:int.MaxValue;
-                                if (valint < min || valint > max)
-                                {
-                                    return string.Empty;
-                                }
-                                return string.Format(fmt, valint);
-                            case "datetime":
-                                DateTime valdt = new ByteArray(val).to_dateTime();
-                                return valdt.ToString(fmt);
-                            case "image":
-                                // ファイルパスを組み立てる
-                                return string.Format(fmt, val);
-                        }
+                        return _format_def.GetDescription(val);
                     }
                     return "？？？";
                 }
@@ -261,6 +251,54 @@ namespace SampleMain.Config
             public string[] Values
             {
                 get { return _values_def.Keys.ToArray<string>(); }
+            }
+        }
+
+        public abstract class Format
+        {
+            protected string _format_def;
+            public Format(Node def)
+            {
+                _format_def = def["fmt"];
+            }
+
+            public abstract string GetDescription(byte[] value);
+        }
+
+        public class FormatInt : Format
+        {
+            int _minvalue;
+            int _maxvalue;
+
+            public FormatInt(Node def): base(def)
+            {
+                _minvalue = (int?)def["minvalue"] is int v1 ? v1 : int.MinValue;
+                _maxvalue = (int?)def["maxvalue"] is int v2 ? v2 : int.MaxValue;
+            }
+
+            public override string GetDescription(byte[] dat)
+            {
+                string desc = string.Empty;
+                int value = new ByteArray(dat).to_int();
+                if (value >= _minvalue && value <= _maxvalue)
+                {
+                    string.Format(_format_def, value);
+                }
+                return desc;
+            }
+        }
+        public class FormatDateTime : Format
+        {
+            public FormatDateTime(Node def) : base(def)
+            {
+            }
+
+            public override string GetDescription(byte[] dat)
+            {
+                string desc = string.Empty;
+                DateTime dt = new ByteArray(dat).to_dateTime();
+                desc = dt.ToString(_format_def);
+                return desc;
             }
         }
     }
