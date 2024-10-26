@@ -11,24 +11,24 @@ using static NCommonUtility.JsonConfig;
 
 namespace SampleMain.Config
 {
-    public class CommDataDefine
+    public class CommMessageDefine
     {
         // シングルトン
-        static private CommDataDefine _instance = null;
-        static public CommDataDefine GetInstance()
+        static private CommMessageDefine _instance = null;
+        static public CommMessageDefine GetInstance()
         {
             if (_instance == null)
             {
-                _instance = new CommDataDefine();
+                _instance = new CommMessageDefine();
             }
             return _instance;
         }
-        private CommDataDefine():base()
+        private CommMessageDefine():base()
         {
         }
 
         // 通信メッセージ定義
-        protected Dictionary<string, CommMessageDefine> _message_def = new Dictionary<string, CommMessageDefine>();
+        protected Dictionary<string, MessageDefine> _message_def = new Dictionary<string, MessageDefine>();
 
         // データの値の説明定義
         protected Dictionary<string, ValuesDefine> _values_def = new Dictionary<string, ValuesDefine>();
@@ -40,23 +40,23 @@ namespace SampleMain.Config
             _values_def.Clear();
             foreach (Node def in root["values-def"])
             {
-                _values_def.Add(def["id"].ToString(), new ValuesDefine(def));
+                _values_def.Add(def["id"], new ValuesDefine(def));
             }
 
             _message_def.Clear();
-            foreach (Node node in root["message-def"])
+            foreach (Node def in root["message-def"])
             {
-                _message_def.Add(node["id"].ToString(), new CommMessageDefine(node) );
+                _message_def.Add(def["id"], new MessageDefine(def) );
             }
         }
 
-        public CommMessageDefine GetMessageDefine(string dtype)
+        public MessageDefine GetMessageDefine(string dtype)
         {
             if (_message_def.ContainsKey(dtype)==false)
             {
                 throw new Exception($"定義されていないデータ種別({dtype})");
             }
-            return new CommMessageDefine(_message_def[dtype]);
+            return new MessageDefine(_message_def[dtype]);
         }
 
         public string GetValueDescription(string fldid, string val)
@@ -79,7 +79,7 @@ namespace SampleMain.Config
             return _values_def[id];
         }
 
-        public class CommMessageDefine
+        public class MessageDefine
         {
             string _dtype;
             string _name;
@@ -94,7 +94,7 @@ namespace SampleMain.Config
             Dictionary<string, FieldDefine> _fld_def_list = new Dictionary<string, FieldDefine>();
             public Dictionary<string, FieldDefine> Fld_List { get {  return _fld_def_list; } }  
 
-            public CommMessageDefine(Node def)
+            public MessageDefine(Node def)
             {
                 _dtype = def["id"];
                 _name = def["name"];
@@ -109,7 +109,7 @@ namespace SampleMain.Config
 
 
             // コピーコンストラクタ
-            public CommMessageDefine(CommMessageDefine other)
+            public MessageDefine(MessageDefine other)
             {
                 _dtype = other._dtype;
                 _name = other._name;
@@ -165,9 +165,9 @@ namespace SampleMain.Config
                 }
                 else
                 {
-                    if (CommDataDefine.GetInstance()._values_def.ContainsKey(FldId))
+                    if (CommMessageDefine.GetInstance()._values_def.ContainsKey(FldId))
                     {
-                        FldName = CommDataDefine.GetInstance()._values_def[FldId].FldName;
+                        FldName = CommMessageDefine.GetInstance()._values_def[FldId].FldName;
                     }
                     else
                     {

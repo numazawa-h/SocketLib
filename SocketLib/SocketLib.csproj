@@ -79,7 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\CommDataDefine.cs" />
+    <Compile Include="Config\CommMessageDefine.cs" />
     <Compile Include="NCommonUtility\NSocketEx.cs" />
     <Compile Include="SocketForm.cs">
       <SubType>Form</SubType>
