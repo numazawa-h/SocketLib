@@ -17,7 +17,7 @@ namespace SampleMain
     public partial class MainForm : Form
     {
         NSocketEx listensocket = new NSocketEx(2, 0, 2);
-        Point ShowFormPoint = new Point(-1, -1);
+        Point SocketFormLocation = new Point(-1, -1);
 
         public MainForm()
         {
@@ -119,13 +119,13 @@ namespace SampleMain
 
             DisplayLog($"OnAccept {socket.RemoteIPAddress}:{socket.RemotePortno}");
             var frm = new SocketForm(socket);
-            if (ShowFormPoint.X < 0)
+            if (SocketFormLocation.X < 0)
             {
-                ShowFormPoint = new Point(this.Location.X, this.Location.Y);
+                SocketFormLocation = new Point(this.Location.X, this.Location.Y);
             }
-            ShowFormPoint.Offset(50, 30);
+            SocketFormLocation.Offset(50, 30);
             frm.StartPosition = FormStartPosition.Manual;
-            frm.Location = ShowFormPoint;
+            frm.Location = SocketFormLocation;
             frm.Show();
         }
 
@@ -148,13 +148,13 @@ namespace SampleMain
             }
             DisplayLog($"OnConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
             var frm = new SocketForm((NSocketEx)args.Socket);
-            if (ShowFormPoint.X < 0)
+            if (SocketFormLocation.X < 0)
             {
-                ShowFormPoint = new Point(this.Location.X, this.Location.Y);
+                SocketFormLocation = new Point(this.Location.X, this.Location.Y);
             }
-            ShowFormPoint.Offset(50, 30);
+            SocketFormLocation.Offset(50, 30);
             frm.StartPosition = FormStartPosition.Manual;
-            frm.Location = ShowFormPoint;
+            frm.Location = SocketFormLocation;
             frm.Show();
         }
 
