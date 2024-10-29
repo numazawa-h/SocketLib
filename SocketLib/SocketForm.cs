@@ -1,4 +1,5 @@
 ﻿using NCommonUtility;
+using SocketTool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,14 +15,14 @@ namespace SampleMain
 {
     public partial class SocketForm : Form
     {
-        NSocketEx _Socket;
+        CommSocket _Socket;
 
-        public SocketForm(NSocketEx socket)
+        public SocketForm(CommSocket socket)
         {
             _Socket = socket;
             _Socket.OnDisConnectEvent += OnDisConnect;
-            _Socket.OnRecvExEvent += OnReceive;
-            _Socket.OnSendExEvent += OnSend;
+            _Socket.OnRecvCommEvent += OnReceive;
+            _Socket.OnSendCommEvent += OnSend;
 
             InitializeComponent();
 
@@ -55,26 +56,26 @@ namespace SampleMain
             this.Close();
         }
 
-        private void OnReceive(object sender, SendRecvExEventArgs args)
+        private void OnReceive(object sender, CommMessageEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new SendRecvExEventHandler(OnReceive), new object[] { sender, args });
+                this.Invoke(new CommMessageEventHandler(OnReceive), new object[] { sender, args });
                 return;
             }
-            ByteArray dat = new ByteArray(args.Comm_data);
-            DisplayLog($"RECV {dat.to_text()}");
+            CommMessage msg = (args.CommMsg);
+            DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
         }
 
-        private void OnSend(object sender, SendRecvExEventArgs args)
+        private void OnSend(object sender, CommMessageEventArgs args)
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new SendRecvExEventHandler(OnSend), new object[] { sender, args });
+                this.Invoke(new CommMessageEventHandler(OnSend), new object[] { sender, args });
                 return;
             }
-            ByteArray dat = new ByteArray(args.Comm_data);
-            DisplayLog($"SEND {dat.to_text()}");
+            CommMessage msg = (args.CommMsg);
+            DisplayLog($"SEND {msg.DName}{msg.GetDescription()}");
         }
 
 
@@ -85,9 +86,14 @@ namespace SampleMain
 
         private void btn_send_Click(object sender, EventArgs e)
         {
-            ByteArray comm_dat = new ByteArray(txt_sendData.Text);
-            ByteArray comm_hed = new ByteArray((UInt16)comm_dat.Length());
-            _Socket.Send(comm_hed.GetData(), comm_dat.GetData());
+            CommMessage msg = new CommMessage("0103");
+            msg.SetHedValue("hdatm", new ByteArray(DateTime.Now, "yyyyMMddHHmmss"));
+            _Socket.Send(msg);
+            CommMessage msg2 = new CommMessage("0201");
+            msg2.SetFldValue("active-change", ByteArray.ParseHex("0001"));
+            _Socket.Send(msg2);
+            msg2.SetFldValue("active-change", ByteArray.ParseHex("0002"));
+            _Socket.Send(msg2);
         }
     }
 }

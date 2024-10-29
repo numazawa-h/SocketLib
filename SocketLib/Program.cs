@@ -1,5 +1,6 @@
 ﻿using NCommonUtility;
 using SampleMain;
+using SocketTool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,19 +26,28 @@ namespace SocketLib
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Log.Init(0);
-            Log.Info("Aplication Started*******************************************");
-
-            JsonTest();
-            ByteArrayTest("[ 1234 5678 9abc def0 ]");
-
-
+            try
+            {
+                Log.Init(0);
+                Log.Info("Aplication Started*******************************************");
+                //            JsonTest();
+                //            ByteArrayTest("[ 1234 5678 9abc def0 ]");
+                CommMessageDefine.GetInstance().ReadJson(".\\CommDataDef.json");
+            }
+            catch (Exception ex)
+            {
+                Log.Error("初期化エラー", ex);
+                Environment.Exit(1);
+            }
             Application.Run(new MainForm());
+
 
         }
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
             MessageBox.Show(e.Exception.Message);
+            Log.Error("内部エラー", e.Exception);
+
         }
         static void ByteArrayTest(string hex)
         {

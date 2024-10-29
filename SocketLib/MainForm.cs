@@ -10,13 +10,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using NCommonUtility;
+using SocketTool;
 using static SocketLib.Program;
 
 namespace SampleMain
 {
     public partial class MainForm : Form
     {
-        NSocketEx listensocket = new NSocketEx(2, 0, 2);
+        CommSocket listensocket = new CommSocket();
         Point SocketFormLocation = new Point(-1, -1);
 
         public MainForm()
@@ -54,7 +55,7 @@ namespace SampleMain
 
         private void btn_connect_Click(object sender, EventArgs e)
         {
-            NSocketEx socket = new NSocketEx(2, 0, 2);
+            CommSocket socket = new CommSocket();
             socket.OnExceptionEvent += OnException;
             socket.OnConnectEvent += OnConnect;
             socket.OnDisConnectEvent += OnDisConnect;
@@ -93,6 +94,7 @@ namespace SampleMain
             {
                 DisplayLog(args.Exception.InnerException.Message);
             }
+            Log.Warn(args.Exception.Message, args.Exception.InnerException);
         }
 
         private void OnDisConnect(object sender, NSocketEventArgs args)
@@ -113,7 +115,7 @@ namespace SampleMain
                 return;
             }
 
-            NSocketEx socket = (NSocketEx)args.Socket;
+            CommSocket socket = (CommSocket)args.Socket;
             socket.OnExceptionEvent += OnException;
             socket.OnDisConnectEvent += OnDisConnect;
 
@@ -147,7 +149,7 @@ namespace SampleMain
                 return;
             }
             DisplayLog($"OnConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
-            var frm = new SocketForm((NSocketEx)args.Socket);
+            var frm = new SocketForm((CommSocket)args.Socket);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);

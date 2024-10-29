@@ -67,7 +67,11 @@ namespace SocketTool
             return _values_def[id];
         }
 
-        public string GetValueDescription(string fldid, byte[] dat)
+        public string GetValueDescription(string fldid,ByteArray val)
+        {
+            return GetValueDescription(fldid, val.GetData());
+        }
+        public string GetValueDescription(string fldid, byte[] val)
         {
             string valid = fldid;
             if (valid.Contains("_"))
@@ -76,7 +80,7 @@ namespace SocketTool
             }
             if (_values_def.ContainsKey(valid))
             {
-                return _values_def[valid][dat];
+                return _values_def[valid][val];
             }
 
             return "？？？";
@@ -105,9 +109,9 @@ namespace SocketTool
             /// <param name="def">Json定義</param>
             public MessageDefine(Node def)
             {
-                DType = def["id"];
-                DName = def["name"];
-                DLength = def["len"];
+                DType = def["id"].Required();
+                DName = def["name"].Required();
+                DLength = def["len"].Required();
                 MinLength = (int?)def["minlen"] is int v ? v : 0;
 
                 foreach (Node node in def["flds"])
@@ -129,55 +133,49 @@ namespace SocketTool
                 }
             }
 
-            public string[] GetFldNames()
+            public string[] GetFldidList()
             {
                 return _fields_def.Keys.ToArray();
             }
 
-            public string GetFldName(string fldid)
+            public FieldDefine GetFldDefine(string fldid)
             {
-                return _fields_def[fldid].FldName;
-            }
-
-            public int GetFldOffset(string fldid)
-            {
-                return _fields_def[fldid].FldOffset;
-            }
-
-            public int GetFldLength(string fldid)
-            {
-                return _fields_def[fldid].FldLength;
+                if (_fields_def.ContainsKey(fldid) == false)
+                {
+                    throw new Exception($"フィールドの定義がありません({fldid})");
+                }
+                return _fields_def[fldid];
             }
         }
 
         public class FieldDefine
         {
             public string FldId { get; private set; }
-            public string FldName { get; private set; }
-            public int FldLength { get; private set; }
-            public int FldOffset { get; private set; }
+            public string Name { get; private set; }
+            public int Length { get; private set; }
+            public int Offset { get; private set; }
             public bool isDispDesc { get; private set; }
 
             public FieldDefine(Node def)
             {
-                FldId = def["id"];
-                FldOffset = def["ofs"];
-                FldLength = def["len"];
+                FldId = def["id"].Required();
+                Offset = def["ofs"].Required();
+                Length = def["len"].Required();
                 isDispDesc = (bool?)def["disp"] is bool v ? v : false;
 
                 if (def.ContainsKey("name"))
                 {
-                    FldName = def["name"];
+                    Name = def["name"];
                 }
                 else
                 {
                     if (CommMessageDefine.GetInstance()._values_def.ContainsKey(FldId))
                     {
-                        FldName = CommMessageDefine.GetInstance()._values_def[FldId].FldName;
+                        Name = CommMessageDefine.GetInstance()._values_def[FldId].FldName;
                     }
                     else
                     {
-                        FldName = FldId;
+                        Name = FldId;
                     }
                 }
             }
@@ -189,7 +187,7 @@ namespace SocketTool
             /// <param name="len"></param>
             public void SetFldLength(int len)
             {
-                FldLength = len;
+                Length = len;
             }
         }
 
@@ -205,8 +203,8 @@ namespace SocketTool
 
             public ValuesDefine(Node def)
             {
-                FldId = def["id"];
-                FldName = def["name"];
+                FldId = def["id"].Required();
+                FldName = def["name"].Required();
 
                 if (def.ContainsKey("values"))
                 {

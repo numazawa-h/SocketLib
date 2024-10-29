@@ -30,7 +30,6 @@
         {
             this.panel1 = new System.Windows.Forms.Panel();
             this.btn_send = new System.Windows.Forms.Button();
-            this.txt_sendData = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.txt_ipAddr1 = new System.Windows.Forms.TextBox();
             this.txt_portNo1 = new System.Windows.Forms.TextBox();
@@ -52,7 +51,6 @@
             // panel1
             // 
             this.panel1.Controls.Add(this.btn_send);
-            this.panel1.Controls.Add(this.txt_sendData);
             this.panel1.Controls.Add(this.groupBox1);
             this.panel1.Controls.Add(this.groupBox2);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -70,15 +68,6 @@
             this.btn_send.Text = "送信";
             this.btn_send.UseVisualStyleBackColor = true;
             this.btn_send.Click += new System.EventHandler(this.btn_send_Click);
-            // 
-            // txt_sendData
-            // 
-            this.txt_sendData.Location = new System.Drawing.Point(12, 91);
-            this.txt_sendData.Multiline = true;
-            this.txt_sendData.Name = "txt_sendData";
-            this.txt_sendData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txt_sendData.Size = new System.Drawing.Size(795, 95);
-            this.txt_sendData.TabIndex = 8;
             // 
             // groupBox1
             // 
@@ -204,7 +193,6 @@
             this.Text = "送受信";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SocketForm_FormClosed);
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -230,7 +218,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button btn_send;
-        private System.Windows.Forms.TextBox txt_sendData;
         private System.Windows.Forms.TextBox txt_log;
     }
 }
