@@ -9,13 +9,18 @@ using System.Xml.Linq;
 
 namespace NCommonUtility
 {
-    internal class ByteArray
+    public class ByteArray
     {
         private byte[] _dat;
 
         public ByteArray()
         {
             _dat = System.Array.Empty<byte>();
+        }
+        public ByteArray(Byte num)
+        {
+            _dat = new Byte[1];
+            _dat[0] = num;
         }
         public ByteArray(UInt16 num)
         {
@@ -33,9 +38,10 @@ namespace NCommonUtility
             Array.Reverse(_dat);
         }
 
-        public ByteArray(int len)
+        public ByteArray(DateTime dt, string fmt)
         {
-            _dat = new byte[len];
+            string hex = dt.ToString(fmt);
+            _dat = ByteArray.ParseHex(hex);
         }
 
         public ByteArray(byte[] dat)
@@ -357,10 +363,10 @@ namespace NCommonUtility
             Regex r = new Regex("[^0-9a-fA-F]");
             string h = r.Replace(hex, "");
 
-            // 奇数文字ならエラー
+            // 奇数文字なら後ろに"0"を追加
             if ((h.Length % 2) == 1)
             {
-                return System.Array.Empty<byte>();
+                h = h +"0";
             }
 
             int byte_size = h.Length / 2;
