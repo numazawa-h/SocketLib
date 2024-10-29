@@ -40,6 +40,15 @@ namespace NCommonUtility
         private int _data_recv_cnt = -1;
         private int _data_length = -1;
 
+        protected NSocketEx()
+        {
+
+        }
+        protected NSocketEx(Socket soc) : base(soc)
+        {
+
+        }
+
         public NSocketEx(int hsize, int dlen_ofs, int dlen_size=2)
         {
             init(hsize, dlen_ofs, dlen_size);
@@ -50,7 +59,7 @@ namespace NCommonUtility
             init(hsize, dlen_ofs, dlen_size);
         }
 
-        private void init(int hsize, int dlen_ofs, int dlen_size)
+        protected void init(int hsize, int dlen_ofs, int dlen_size)
         {
             if (dlen_ofs < 0)
             {
@@ -67,6 +76,11 @@ namespace NCommonUtility
             HeaderSize = hsize;
             DataLenOffset = dlen_ofs;
             DataLenSize = dlen_size;
+        }
+
+        protected virtual void OnRecvEx()
+        {
+            OnRecvExEvent?.Invoke(this, new SendRecvExEventArgs(this, _comm_header, _comm_data));
         }
 
         protected override void OnRecv()
@@ -91,7 +105,7 @@ namespace NCommonUtility
 
             if (_data_recv_cnt == _data_length)
             {
-                OnRecvExEvent?.Invoke(this, new SendRecvExEventArgs(this, _comm_header, _comm_data));
+                OnRecvEx();
                 lock (this)
                 {
                     _comm_header = null;
