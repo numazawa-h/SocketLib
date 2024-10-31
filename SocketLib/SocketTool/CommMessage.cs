@@ -31,7 +31,8 @@ namespace SocketTool
         }
         public CommMessage(CommMessage other)
         {
-            _data_def = new MessageDefine(other._data_def);
+            _head_def = other._head_def;
+            _data_def = other._data_def;
             _data = new byte[other._data.Length];
             Buffer.BlockCopy(other._data, 0, _data, 0, _data.Length);
             _head = new byte[other._head.Length];
@@ -57,8 +58,8 @@ namespace SocketTool
             string dtype = GetHedValue("dtype").to_hex();
 
             _data_def = CommMessageDefine.GetInstance().GetMessageDefine(dtype);
-            InitData(dat);
-            SetHedValue("dlen", (ulong)_data.Length);
+            _data = new byte[dat.Length];
+            Buffer.BlockCopy(dat, 0, _data, 0, dat.Length);
         }
 
         protected void InitData( byte[] dat = null)
