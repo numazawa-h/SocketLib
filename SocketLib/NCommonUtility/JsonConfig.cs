@@ -173,6 +173,10 @@ namespace NCommonUtility
                 }
                 return found;
             }
+            public bool isArray()
+            {
+                return (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Array);
+            }
 
             public Dictionary<string, JsonValue> GetValues()
             {
