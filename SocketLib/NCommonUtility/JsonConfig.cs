@@ -156,9 +156,9 @@ namespace NCommonUtility
             /// <returns>Node</returns>
             public Node this[string name]
             {
-                get 
+                get
                 {
-                    JsonNode node = _jsonNode.AsObject().ContainsKey(name) ? _jsonNode[name] : null;
+                    JsonNode node = (_jsonNode?.AsObject()).ContainsKey(name) ? _jsonNode[name] : null;
 
                     return new Node(this, node, name);
                 }
@@ -174,17 +174,24 @@ namespace NCommonUtility
                 return found;
             }
 
-            public Dictionary<string, string> GetDict()
+            public Dictionary<string, JsonValue> GetValues()
             {
-                Dictionary<string, string> dic = new Dictionary<string, string>();
+                Dictionary<string, JsonValue> vals = new Dictionary<string, JsonValue>();
                 if(_jsonNode !=null && _jsonNode.GetValueKind() == JsonValueKind.Object)
                 {
                     foreach (var pair in _jsonNode.AsObject())
                     {
-                        dic.Add(pair.Key, pair.Value.ToString());
+                        switch (pair.Value.GetValueKind())
+                        {
+                            case JsonValueKind.String:
+                            case JsonValueKind.Number:
+                            case JsonValueKind.True: case JsonValueKind.False:
+                                vals.Add(pair.Key, (JsonValue)pair.Value);
+                                break;
+                        }
                     }
                 }
-                return dic;
+                return vals;
             }
 
             #region IEnumerator

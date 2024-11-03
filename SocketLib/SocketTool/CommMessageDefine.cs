@@ -198,7 +198,7 @@ namespace SocketTool
 
             public string FldName { get; private set; }
 
-            Dictionary<string, string> _values_def = null;
+            Dictionary<string, JsonValue> _values_def = null;
             Format _format_def = null;
 
             public ValuesDefine(Node def)
@@ -208,7 +208,7 @@ namespace SocketTool
 
                 if (def.ContainsKey("values"))
                 {
-                    _values_def = def["values"].GetDict();
+                    _values_def = def["values"].GetValues();
                 }
                 if (def.ContainsKey("format"))
                 {
@@ -237,7 +237,7 @@ namespace SocketTool
                     if (_values_def.ContainsKey(bcd))
                     {
                         // 値の一覧に存在すれば対応する値を返却する
-                        return _values_def[bcd];
+                        return _values_def[bcd].ToString();
                     }
                     if (_format_def != null)
                     {
