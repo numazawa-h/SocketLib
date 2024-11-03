@@ -26,6 +26,7 @@ namespace SocketTool
     public class CommSocket: NSocketEx
     {
         public event CommMessageEventHandler OnSendCommEvent;
+        public event CommMessageEventHandler OnPreSendCommEvent;
         public event CommMessageEventHandler OnRecvCommEvent;
 
         public CommSocket() : base() 
@@ -70,6 +71,7 @@ namespace SocketTool
 
         public void Send(CommMessage msg)
         {
+            OnPreSendCommEvent?.Invoke(this, new CommMessageEventArgs(this, msg));
             Send(msg.GetHead(), msg.GetData());
             OnSendCommEvent?.Invoke(this, new CommMessageEventArgs(this, msg));
         }
