@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Remoting.Messaging;
 using System.Security.Policy;
 using System.Text;
@@ -173,9 +174,48 @@ namespace NCommonUtility
                 }
                 return found;
             }
+
             public bool isArray()
             {
                 return (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Array);
+            }
+
+            public HashSet<string> GetStringValues(string name)
+            {
+                HashSet<string> values = new HashSet<string>();
+
+                if (this[name].isArray())
+                {
+                    foreach (Node val in this[name])
+                    {
+                        values.Add((string)val);
+                    }
+                }
+                else
+                {
+                    values.Add((string)this[name]);
+                }
+
+                return values;
+            }
+
+            public HashSet<int> GetIntValues(string name)
+            {
+                HashSet<int> values = new HashSet<int>();
+
+                if (this[name].isArray())
+                {
+                    foreach (Node val in this[name])
+                    {
+                        values.Add((int)val);
+                    }
+                }
+                else
+                {
+                    values.Add((int)this[name]);
+                }
+
+                return values;
             }
 
             public Dictionary<string, JsonValue> GetValues()
