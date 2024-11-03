@@ -86,13 +86,15 @@ namespace SampleMain
 
         private void btn_send_Click(object sender, EventArgs e)
         {
-            CommMessage msg = new CommMessage("0103");
+            CommMessage msg = new CommMessage("22");
             msg.SetHedValue("hdatm", new ByteArray(DateTime.Now, "yyyyMMddHHmmss"));
             _Socket.Send(msg);
-            CommMessage msg2 = new CommMessage("0201");
-            msg2.SetFldValue("active-change", ByteArray.ParseHex("0001"));
+            CommMessage msg2 = new CommMessage("30");
+            msg2.SetFldValue("control-type", ByteArray.ParseHex("0001"));
             _Socket.Send(msg2);
-            msg2.SetFldValue("active-change", ByteArray.ParseHex("0002"));
+            msg2.SetFldValue("control-type", ByteArray.ParseHex("0002"));
+            _Socket.Send(msg2);
+            msg2.SetFldValue("control-type", ByteArray.ParseHex("0003"));
             _Socket.Send(msg2);
         }
     }
