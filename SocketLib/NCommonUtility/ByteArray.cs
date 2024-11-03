@@ -241,6 +241,11 @@ namespace NCommonUtility
 
             return val;
         }
+        public DateTime to_dateTime(string fmt)
+        {
+            string bcd = to_hex();
+            return DateTime.ParseExact(bcd, fmt, null); ;
+        }
 
         /// <summary>
         /// 16進文字列への変換
