@@ -22,6 +22,7 @@ namespace SampleMain
             _Socket = socket;
             _Socket.OnDisConnectEvent += OnDisConnect;
             _Socket.OnRecvCommEvent += OnReceive;
+            _Socket.OnPreSendCommEvent += OnPreSend;
             _Socket.OnSendCommEvent += OnSend;
 
             InitializeComponent();
@@ -67,6 +68,16 @@ namespace SampleMain
             DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
         }
 
+        private void OnPreSend(object sender, CommMessageEventArgs args)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new CommMessageEventHandler(OnPreSend), new object[] { sender, args });
+                return;
+            }
+            CommMessage msg = (args.CommMsg);
+            ScriptDefine.GetInstance().ExecOnSend(msg);
+        }
         private void OnSend(object sender, CommMessageEventArgs args)
         {
             if (this.InvokeRequired)
@@ -76,6 +87,7 @@ namespace SampleMain
             }
             CommMessage msg = (args.CommMsg);
             DisplayLog($"SEND {msg.DName}{msg.GetDescription()}");
+            Log.Info($"SEND {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0,0," ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
         }
 
 
@@ -91,10 +103,13 @@ namespace SampleMain
             _Socket.Send(msg);
             CommMessage msg2 = new CommMessage("30");
             msg2.SetFldValue("control-type", ByteArray.ParseHex("0001"));
+            System.Threading.Thread.Sleep(1000);
             _Socket.Send(msg2);
             msg2.SetFldValue("control-type", ByteArray.ParseHex("0002"));
+            System.Threading.Thread.Sleep(1000);
             _Socket.Send(msg2);
             msg2.SetFldValue("control-type", ByteArray.ParseHex("0003"));
+            System.Threading.Thread.Sleep(1000);
             _Socket.Send(msg2);
         }
     }

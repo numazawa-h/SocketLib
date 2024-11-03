@@ -1,0 +1,26 @@
+{
+  "values":{
+    "seqno":0,
+  },
+
+  "Commands":[
+    { "id":"set-head", "cmd":"head", "values":{"hdatm":"now"}},
+    { "id":"send-ack", "cmd":"send", "dtype":"91" },
+    { "id":"send-nak", "cmd":"send", "dtype":"92", "values":{"reson-nak":9}},
+    { "id":"send-health", "cmd":"send", "dtype":"22", },
+    { "id":"send-init", "cmd":"send", "dtype":"01" },
+    { "id":"send-reset", "cmd":"send", "dtype":"02" },
+    { "id":"send-resend-res", "cmd":"send", "dtype":"4f" },
+  ],
+
+  "Scripts":[
+    { "name":"auto-head", "when":"send", "cmd":"set-head" },
+    { "name":"health-check", "when":"timer", "start":5000, "interval":2000, "cmd":"send-health" },
+    { "name":"auto-ack", "when":"recv", "without":["91","92"], "cmd":"send-ack" },
+    { "name":"auto-init", "when":"connect", "cmd":"send-init" },
+    { "name":"auto-response", "when":"recv", "cmds":[
+          { "rdtype":"40", "cmd":"send-resend-res" },
+      ]
+    },
+  ],
+}

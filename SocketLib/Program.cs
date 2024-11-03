@@ -2,6 +2,7 @@
 using SampleMain;
 using SocketTool;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -32,7 +33,8 @@ namespace SocketLib
                 Log.Info("Aplication Started*******************************************");
                 //            JsonTest();
                 //            ByteArrayTest("[ 1234 5678 9abc def0 ]");
-                CommMessageDefine.GetInstance().ReadJson(".\\CommMessageDefine.json");
+                CommMessageDefine.GetInstance().ReadJson(".\\config\\CommMessageDefine.json");
+                ScriptDefine.GetInstance().ReadJson(".\\config\\ScriptDefine.json");
             }
             catch (Exception ex)
             {
