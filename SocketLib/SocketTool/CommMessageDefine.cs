@@ -198,8 +198,9 @@ namespace SocketTool
 
             public string FldName { get; private set; }
 
+            public Format FormatDef { get; private set; }
+
             Dictionary<string, JsonValue> _values_def = null;
-            Format _format_def = null;
 
             public ValuesDefine(Node def)
             {
@@ -215,10 +216,10 @@ namespace SocketTool
                     switch ((string)def["format"]["type"])
                     {
                         case "int":
-                            _format_def = new FormatInt(def["format"]);
+                            FormatDef = new FormatInt(def["format"]);
                             break;
                         case "datetime":
-                            _format_def = new FormatDateTime(def["format"]);
+                            FormatDef = new FormatDateTime(def["format"]);
                             break;
                     }
                 }
@@ -239,9 +240,9 @@ namespace SocketTool
                         // 値の一覧に存在すれば対応する値を返却する
                         return _values_def[bcd].ToString();
                     }
-                    if (_format_def != null)
+                    if (FormatDef != null)
                     {
-                        return _format_def.GetDescription(val);
+                        return FormatDef.GetDescription(val);
                     }
                     return "？？？";
                 }
@@ -255,10 +256,17 @@ namespace SocketTool
         public abstract class Format
         {
             protected string _format_def;
+            protected string _value_format_def;
             public Format(Node def)
             {
                 _format_def = def["fmt"];
+                _value_format_def = def["valfmt"];
             }
+            public virtual string GetFormat()
+            {
+                return _value_format_def;
+            }
+
 
             public abstract string GetDescription(byte[] value);
         }
