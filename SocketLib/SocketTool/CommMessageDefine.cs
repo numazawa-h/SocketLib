@@ -41,14 +41,29 @@ namespace SocketTool
             _values_def.Clear();
             foreach (Node def in root["values-def"])
             {
-                _values_def.Add(def["id"], new ValuesDefine(def));
+                try
+                {
+                    string id = def["id"].Required();
+                    _values_def.Add(id, new ValuesDefine(def));
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"CommMessageDefineで読み込みエラー({def.PropertyNames}) in {path}", ex);
+                }
             }
 
             // メッセージ定義読み込み
             _message_def.Clear();
             foreach (Node def in root["message-def"])
             {
-                _message_def.Add(def["id"], new MessageDefine(def));
+                try
+                {
+                    _message_def.Add(def["id"], new MessageDefine(def));
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"CommMessageDefineで読み込みエラー({def.PropertyNames}) in {path}", ex);
+                }
             }
         }
 
@@ -213,7 +228,8 @@ namespace SocketTool
                 }
                 if (def.ContainsKey("format"))
                 {
-                    switch ((string)def["format"]["type"])
+                    string type = def["format"]["type"].Required();
+                    switch (type)
                     {
                         case "int":
                             FormatDef = new FormatInt(def["format"]);
@@ -221,6 +237,8 @@ namespace SocketTool
                         case "datetime":
                             FormatDef = new FormatDateTime(def["format"]);
                             break;
+                        default:
+                            throw new Exception($"formatの指定に定義されていない type('{type}')が使われています");
                     }
                 }
             }
@@ -297,6 +315,23 @@ namespace SocketTool
         {
             public FormatDateTime(Node def) : base(def)
             {
+                if(_value_format_def != null)
+                {
+                    switch (_value_format_def)
+                    {
+                        case "yyyyMMddHHmmss":
+                        case "yyyyMMddHHmm":
+                        case "yyyyMMddHH":
+                        case "yyyyMMdd":
+                        case "yyMMddHHmmss":
+                        case "yyMMddHHmm":
+                        case "yyMMddHH":
+                        case "yyMMdd":
+                            break;
+                        default:
+                            throw new Exception($"formatの指定に不正な valfmt('{_value_format_def}')が使われています");
+                    }
+                }
             }
 
             public override string GetDescription(byte[] dat)
