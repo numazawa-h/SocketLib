@@ -65,5 +65,14 @@ namespace SocketTool
                 return new CommMessage(dtype);
             }
         }
+
+        public override void Exec(CommSocket socket, CommMessage msg = null)
+        {
+            if (msg == null)
+            {
+                return;
+            }
+            socket.Send(msg);
+        }
     }
 }

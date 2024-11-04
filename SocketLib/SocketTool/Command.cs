@@ -37,10 +37,6 @@ namespace SocketTool
 
         public abstract Command Copy();
 
-        public virtual void Exec(CommMessage msg=null)
-        {
-
-        }
-
+        public abstract void Exec(CommSocket socket, CommMessage msg = null);
     }
 }

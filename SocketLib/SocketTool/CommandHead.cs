@@ -29,8 +29,7 @@ namespace SocketTool
             return cmd;
         }
 
-
-        public override void Exec(CommMessage msg = null)
+        public override void Exec(CommSocket socket, CommMessage msg = null)
         {
             if (msg == null)
             {

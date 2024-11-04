@@ -62,13 +62,13 @@ namespace SocketTool
             }
         }
 
-        public void ExecOnSend(CommMessage msg)
+        public void ExecOnSend(CommSocket socket, CommMessage msg)
         {
             foreach ( var pair in _script_send)
             {
                 string key = pair.Key;
                 ScriptOnSend script = pair.Value;
-                script.Exec(msg);
+                script.Exec(socket, msg);
             }
         }
 
@@ -85,12 +85,12 @@ namespace SocketTool
                 _without = def.GetStringValues("without");
             }
 
-            public void Exec(CommMessage msg)
+            public void Exec(CommSocket socket, CommMessage msg)
             {
                 string dtype = msg.DType;
                 if (_without.Contains(dtype)==false || _dtypes.Contains(dtype)==true)
                 {
-                    _command.Exec(msg);
+                    _command.Exec(socket, msg);
                 }
             }
         }
