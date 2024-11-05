@@ -399,7 +399,7 @@ namespace NCommonUtility
             }
             else
             {
-                return Encoding.Unicode.GetBytes(str);
+                return Encoding.ASCII.GetBytes(str);
             }
         }
         static public byte[] StrToByte(string str, Encoding enc)
