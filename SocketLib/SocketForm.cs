@@ -76,7 +76,7 @@ namespace SampleMain
                 return;
             }
             CommMessage msg = (args.CommMsg);
-            ScriptDefine.GetInstance().ExecOnSend(msg);
+            ScriptDefine.GetInstance().ExecOnSend(_Socket, msg);
         }
         private void OnSend(object sender, CommMessageEventArgs args)
         {

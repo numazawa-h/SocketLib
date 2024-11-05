@@ -78,7 +78,10 @@ namespace SocketTool
 
         public ValuesDefine GetValuesDefine(string id)
         {
-
+            if ( _values_def.ContainsKey(id) == false)
+            {
+                return null;
+            }
             return _values_def[id];
         }
 
@@ -280,7 +283,7 @@ namespace SocketTool
                 _format_def = def["fmt"];
                 _value_format_def = def["valfmt"];
             }
-            public virtual string GetFormat()
+            public virtual string GetValueFormat()
             {
                 return _value_format_def;
             }

@@ -3,30 +3,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using static NCommonUtility.JsonConfig;
 
 namespace SocketTool
 {
     public class CommandHead: Command
     {
-        Dictionary<string, JsonValue> _values_def = null;
-
         private CommandHead()
         {
         }
 
-        public CommandHead(Node node)
+        public CommandHead(Node node): base(node)
         {
-            _values_def = node["values"].GetValues();
         }
 
         public override Command Copy()
         {
             CommandHead cmd = new CommandHead();
-            cmd._values_def = _values_def;
-            return cmd;
+            return base.Copy(cmd);
         }
 
         public override void Exec(CommSocket socket, CommMessage msg = null)
@@ -35,40 +34,30 @@ namespace SocketTool
             {
                 return;
             }
-            foreach (var pair in _values_def)
-            {
-                string key = pair.Key;
-                JsonValue value = pair.Value;
-                ByteArray dat = null;
 
-                switch (value.GetValueKind())
-                {
-                    case System.Text.Json.JsonValueKind.String:
-                        string val = value.ToString();
-                        CommMessageDefine.Format fmtdef =CommMessageDefine.GetInstance().GetValuesDefine(key).FormatDef;
-                        string fmt = fmtdef.GetFormat();
-                        if (fmtdef is CommMessageDefine.FormatDateTime)
-                        {
-                            if(val == "now")
-                            {
-                                dat = new ByteArray(DateTime.Now, fmt);
-                            }
-                            else
-                            {
-                                dat = new ByteArray(val);
-                            }
-                        }
-                        break;
-                    case System.Text.Json.JsonValueKind.Number:
-                        dat = new ByteArray(value.GetValue<ulong>());
-                        break;
-                }
-                if (dat != null)
-                {
-                    msg.SetHedValue(key, dat);
-                }
+            foreach (var pair in _ivalues)
+            {
+                msg.SetHedValue(pair.Key, (ulong)pair.Value);
+            }
+            foreach (var pair in _bvalues)
+            {
+                msg.SetHedValue(pair.Key, pair.Value);
             }
 
+            ScriptDefine scdef = ScriptDefine.GetInstance();
+            foreach (var pair in _ivalues_runtime)
+            {
+                msg.SetHedValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
+            }
+            foreach (var pair in _bvalues_runtime)
+            {
+                msg.SetHedValue(pair.Key, scdef.GetByteValue(pair.Value));
+            }
+            foreach (var pair in _datetime_runtime)
+            {
+                string hex = DateTime.Now.ToString(pair.Value);
+                msg.SetHedValue(pair.Key, ByteArray.ParseHex(hex));
+            }
         }
 
     }

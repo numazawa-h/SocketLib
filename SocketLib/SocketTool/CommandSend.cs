@@ -21,9 +21,11 @@ namespace SocketTool
 
         public CommandSend(Node node)
         {
+            // ひな形読み込み
             string dtype = node["dtype"].Required();
             string tmpl = node["tmpl"];
             _msg = this.InitMessage(dtype, tmpl);
+
             // ひな形に対して特定のフィールドを指定された値で上書きする
             foreach (var pair in node["values"].GetValues())
             {

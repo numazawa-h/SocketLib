@@ -1,10 +1,10 @@
 {
   "values":{
-    "seqno":0,
+    "++seqno":123, // 参照するたびにインクリメントする
   },
 
   "Commands":[
-    { "id":"set-head", "cmd":"head", "values":{"hdatm":"now"}},
+    { "id":"set-head", "cmd":"head", "values":{"hdatm":"now", "seqno":"seqno" }},
     { "id":"send-ack", "cmd":"send", "dtype":"91" },
     { "id":"send-nak", "cmd":"send", "dtype":"92", "values":{"reson-nak":9}},
     { "id":"send-health", "cmd":"send", "dtype":"22", },
