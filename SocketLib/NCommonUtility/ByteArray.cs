@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace NCommonUtility
 {
@@ -386,6 +387,24 @@ namespace NCommonUtility
             }
 
             return buf;
+        }
+        static public byte[] StrToByte(string str)
+        {
+            Regex r = new Regex("[^0-9a-fA-F]");
+            string hex = r.Replace(str, "");
+            if (hex.Length == str.Length)
+            {
+                // １６進表記の文字のみなら16進データとする
+                return ByteArray.ParseHex(str);
+            }
+            else
+            {
+                return Encoding.Unicode.GetBytes(str);
+            }
+        }
+        static public byte[] StrToByte(string str, Encoding enc)
+        {
+            return enc.GetBytes(str);
         }
 
     }
