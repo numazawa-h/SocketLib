@@ -47,7 +47,7 @@ namespace SocketTool
 
             _data_def = CommMessageDefine.GetInstance().GetMessageDefine(dtype);
             InitData(dat);
-            SetHedValue("dlen",(ulong)_data.Length);
+            SetHedDataLength(_data.Length);
         }
 
         public CommMessage(byte[] hed, byte[] dat)
@@ -113,7 +113,7 @@ namespace SocketTool
             Buffer.BlockCopy(_data, 0, _tmp, 0, _data.Length);
             Buffer.BlockCopy(val, 0, _tmp, _data.Length, val.Length);
             _data = _tmp;
-            SetHedValue("dlen", (ulong)_data.Length);
+            SetHedDataLength(_data.Length);
         }
 
         public string GetFldDescription(string fldid)
@@ -220,7 +220,17 @@ namespace SocketTool
             }
             SetHedValue(fldid, fldvalue);
         }
-
+        public void SetHedDataLength(int len)
+        {
+            if (_head_def.ContainsKey("dlen"))
+            {
+                SetHedValue("dlen", (ulong)len);
+            }
+            if (_head_def.ContainsKey("plen"))
+            {
+                SetHedValue("plen", (ulong)(len + _head_def.DLength));
+            }
+        }
 
         public ByteArray GetFldValue(string fldid)
         {

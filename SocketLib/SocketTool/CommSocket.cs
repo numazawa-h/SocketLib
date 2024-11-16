@@ -31,18 +31,41 @@ namespace SocketTool
 
         public CommSocket() : base() 
         {
-            MessageDefine def =CommMessageDefine.GetInstance().GetMessageDefine("head");
-            int ofs = def.GetFldDefine("dlen").Offset;
-            int len = def.GetFldDefine("dlen").Length;
-            base.init(def.DLength,ofs, len);
+            init();
         }
 
         public CommSocket(Socket soc) : base(soc)
         {
+            init();
+        }
+
+        private void init()
+        {
             MessageDefine def = CommMessageDefine.GetInstance().GetMessageDefine("head");
-            int ofs = def.GetFldDefine("dlen").Offset;
-            int len = def.GetFldDefine("dlen").Length;
-            base.init(def.DLength, ofs, len);
+            int ofs = -1;
+            int len = -1;
+            bool bPacket = false;
+            if (def.ContainsKey("plen"))
+            {
+                // 'plen'はパケット長（ヘッダ長を含む）
+                bPacket = true;
+                ofs = def.GetFldDefine("plen").Offset;
+                len = def.GetFldDefine("plen").Length;
+            }
+            else
+            {
+                if (def.ContainsKey("dlen"))
+                {
+                    // 'dlen'はデータ長
+                    ofs = def.GetFldDefine("dlen").Offset;
+                    len = def.GetFldDefine("dlen").Length;
+                }
+                else
+                {
+                    throw new Exception($"headの定義に'dlen'または'plen'が含まれていません");
+                }
+            }
+            base.init(def.DLength, ofs, len, bPacket);
         }
 
         protected override void AcceptCallback(IAsyncResult ar)

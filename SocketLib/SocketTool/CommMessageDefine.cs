@@ -164,6 +164,11 @@ namespace SocketTool
                 }
                 return _fields_def[fldid];
             }
+
+            public bool ContainsKey(string fldid)
+            {
+                return _fields_def.ContainsKey(fldid);
+            }
         }
 
         public class FieldDefine
