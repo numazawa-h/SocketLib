@@ -1,10 +1,13 @@
 {
   "values":{
     "++seqno":123, // 参照するたびにインクリメントする
+    "dst":"abc9",
+    "src":"76543210",
   },
 
   "Commands":[
-    { "id":"set-head", "cmd":"head", "values":{"hdatm":"now", "seqno":"seqno" }},
+    { "id":"set-head", "cmd":"head", "values":{"dst":"dst","src":"src", "hdatm":"now", "seqno":"seqno" }},
+    { "id":"set-init", "cmd":"set", "values":{"seqno":0, "src":"01234567" } },
     { "id":"send-ack", "cmd":"send", "dtype":"91" },
     { "id":"send-nak", "cmd":"send", "dtype":"92", "values":{"reson-nak":9}},
     { "id":"send-health", "cmd":"send", "dtype":"22", },
@@ -14,11 +17,11 @@
   ],
 
   "Scripts":[
-    { "name":"auto-head", "when":"send", "cmd":"set-head" },
-    { "name":"health-check", "when":"timer", "start":5000, "interval":2000, "cmd":"send-health" },
-    { "name":"auto-ack", "when":"recv", "without":["91","92"], "cmd":"send-ack" },
-    { "name":"auto-init", "when":"connect", "cmd":"send-init" },
-    { "name":"auto-response", "when":"recv", "cmds":[
+    { "id":"auto-head","when":"send", "cmd":"set-head" },
+    { "id":"auto-init","when":"connect", "cmds":[ {"cmd":"set-init" },{"cmd":"send-init" } ] },
+    { "id":"auto-ack", "when":"recv", "without":["91","92"], "cmd":"send-ack" },
+    { "id":"health-check", "select":true, "enable":true, "when":"timer", "start":5000, "interval":2000, "cmd":"send-health" },
+    { "id":"auto-response", "when":"recv", "cmds":[
           { "rdtype":"40", "cmd":"send-resend-res" },
       ]
     },

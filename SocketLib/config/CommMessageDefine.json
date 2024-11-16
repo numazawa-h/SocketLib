@@ -1,12 +1,12 @@
 {
   "message-def":[
-		{ "id":"head", "name":"ヘッダ", "len": 48,"flds":[
+		{ "id":"head", "name":"ヘッダ", "len": 32,"flds":[
 				{ "id":"dst",  "name": "送信先",      "ofs": 0, "len": 4 },
 				{ "id":"src",  "name": "送信元",      "ofs": 4, "len": 4 },
 				{ "id":"seqno","name": "送信通番",    "ofs": 8, "len": 4 },
 				{ "id":"hdatm","name": "送信日時",    "ofs":12, "len": 7 },		// BCD形式()
 				{ "id":"dtype","name": "データ種別",  "ofs":19, "len": 1 },
-				{ "id":"dlen", "name": "データ長",    "ofs":20, "len": 2 },
+				{ "id":"plen", "name": "データ長",    "ofs":20, "len": 2 },
 			]
 		},
 		{ "id":"91", "name":"肯定応答", "len":  0,"flds":[] },

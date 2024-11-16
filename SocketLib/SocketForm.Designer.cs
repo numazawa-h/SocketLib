@@ -192,6 +192,7 @@
             this.Name = "SocketForm";
             this.Text = "送受信";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SocketForm_FormClosed);
+            this.Load += new System.EventHandler(this.SocketForm_Load);
             this.panel1.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();

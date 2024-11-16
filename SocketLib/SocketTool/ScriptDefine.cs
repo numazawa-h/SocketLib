@@ -12,6 +12,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using System.Windows.Forms;
 using static NCommonUtility.JsonConfig;
 using static SocketTool.CommMessageDefine;
@@ -38,9 +39,11 @@ namespace SocketTool
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
         protected HashSet<string> _incriment_values = new HashSet<string>();
         protected Dictionary<string, Command> _comands = new Dictionary<string, Command>();
+        protected Dictionary<string, ScriptOnConnect> _script_connect = new Dictionary<string, ScriptOnConnect>();
         protected Dictionary<string, ScriptOnSend> _script_send = new Dictionary<string, ScriptOnSend>();
         protected Dictionary<string, Command> _script_recv = new Dictionary<string, Command>();
 
+        protected Dictionary<string, string> _select = new Dictionary<string, string>();
 
 
         public void ReadJson(string path)
@@ -94,19 +97,50 @@ namespace SocketTool
             {
                 try
                 {
-                    string cmdid;
+                    string cmdid = def["cmd"];
+                    string scrid = def["id"].Required();
+                    bool sel = (bool?)def["select"] is bool v ? v : false; 
+
+                    List<Command> cmds = new List<Command>();
+                    if (cmdid == null)
+                    {
+                        if(def.ContainsKey("cmds") == false)
+                        {
+                            throw new Exception($"Scripts'{scrid}'に'cmd'または'cmds'が定義されていません");
+                        }
+                        foreach (Node node in def["cmds"])
+                        {
+                            cmdid = node["cmd"];
+                            if (_comands.ContainsKey(cmdid) == false)
+                            {
+                                throw new Exception($"Scriptsで使用されている'{cmdid}'は定義されていません");
+                            }
+                            cmds.Add(_comands[cmdid]);
+                        }
+                    }
+                    else
+                    {
+                        if (_comands.ContainsKey(cmdid) == false)
+                        {
+                            throw new Exception($"Scriptsで使用されている'{cmdid}'は定義されていません");
+                        }
+                        cmds.Add(_comands[cmdid]);
+                    }
+
                     switch ((string)def["when"].Required())
                     {
                         case "send":
-                            if (def.ContainsKey("cmd"))
+                            foreach (Command cmd in cmds)
                             {
-                                cmdid = def["cmd"];
-                                if (_comands.ContainsKey(cmdid) == false)
+                                if(cmd is CommandSend)
                                 {
-                                    throw new Exception($"Scriptsで使用されている'{cmdid}'は定義されていません");
+                                    throw new Exception($"送信スクリプト('{scrid}')に送信コマンド('{cmd.CommandId}')を含めることはできません");
                                 }
-                                _script_send.Add(cmdid, new ScriptOnSend(def, _comands[cmdid]));
                             }
+                            _script_send.Add(scrid, new ScriptOnSend(def, cmds.ToArray()));
+                            break;
+                        case "connect":
+                            _script_connect.Add(scrid, new ScriptOnConnect(def, cmds.ToArray()));
                             break;
                     }
                 }
@@ -170,27 +204,13 @@ namespace SocketTool
                 script.Exec(socket, msg);
             }
         }
-
-        protected class ScriptOnSend
+        public void ExecOnConnect(CommSocket socket)
         {
-            HashSet<string> _dtypes = new  HashSet<string>();
-            HashSet<string> _without = new HashSet<string>();
-            Command _command;
-
-            public ScriptOnSend(Node def, Command cmd)
+            foreach (var pair in _script_connect)
             {
-                _command = cmd.Copy();
-                _dtypes = def.GetStringValues("dtype");
-                _without = def.GetStringValues("without");
-            }
-
-            public void Exec(CommSocket socket, CommMessage msg)
-            {
-                string dtype = msg.DType;
-                if (_without.Contains(dtype)==false || _dtypes.Contains(dtype)==true)
-                {
-                    _command.Exec(socket, msg);
-                }
+                string key = pair.Key;
+                ScriptOnConnect script = pair.Value;
+                script.Exec(socket);
             }
         }
     }

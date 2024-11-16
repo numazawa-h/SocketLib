@@ -1,6 +1,7 @@
 ﻿using NCommonUtility;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Drawing.Text;
 using System.Linq;
 using System.Text;
@@ -21,6 +22,7 @@ namespace SocketTool
 
     public abstract class Command
     {
+        public string CommandId { get; protected set; }
         protected Dictionary<string, int> _ivalues = new Dictionary<string, int>();
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
         protected Dictionary<string, string> _ivalues_runtime = new Dictionary<string, string>();
@@ -32,6 +34,7 @@ namespace SocketTool
 
         protected Command Copy(Command other)
         {
+            other.CommandId = CommandId;
             other._ivalues = _ivalues;
             other._bvalues = _bvalues;
             other._ivalues_runtime = _ivalues_runtime;
@@ -47,6 +50,7 @@ namespace SocketTool
 
         protected Command(Node node)
         {
+            CommandId = node["id"].Required();
             _ivalues.Clear();
             _bvalues.Clear();
             _ivalues_runtime.Clear();
@@ -178,17 +182,21 @@ namespace SocketTool
         public static Command ReadJson(Node node)
         {
             Command cmd = null;
+            string cmdid = node["id"].Required();
             string cmdtype = node["cmd"].Required();
             switch (cmdtype)
             {
                 case "head":
                     cmd = new CommandHead(node);
                     break;
+                case "set":
+                    cmd = new CommandSet(node);
+                    break;
                 case "send":
                     cmd = new CommandSend(node);
                     break;
                 default:
-                    throw new Exception($"Commandの指定('{cmdtype}')が不正です");
+                    throw new Exception($"Commandsの'{cmdid}'でcmd指定('{cmdtype}')が不正です");
             }
 
             return cmd;

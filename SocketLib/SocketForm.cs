@@ -112,5 +112,10 @@ namespace SampleMain
             System.Threading.Thread.Sleep(1000);
             _Socket.Send(msg2);
         }
+
+        private void SocketForm_Load(object sender, EventArgs e)
+        {
+            ScriptDefine.GetInstance().ExecOnConnect(_Socket);
+        }
     }
 }

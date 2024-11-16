@@ -19,18 +19,20 @@ namespace SocketTool
         {
         }
 
-        public CommandSend(Node node)
+        public CommandSend(Node node) : base(node)
         {
             // ひな形読み込み
             string dtype = node["dtype"].Required();
             string tmpl = node["tmpl"];
             _msg = this.InitMessage(dtype, tmpl);
 
-            // ひな形に対して特定のフィールドを指定された値で上書きする
-            foreach (var pair in node["values"].GetValues())
+            foreach (var pair in _ivalues)
             {
-                string key = pair.Key;
-                JsonValue val = pair.Value;
+                _msg.SetFldValue(pair.Key, (ulong)pair.Value);
+            }
+            foreach (var pair in _bvalues)
+            {
+                _msg.SetFldValue(pair.Key, pair.Value);
             }
         }
 
@@ -72,8 +74,23 @@ namespace SocketTool
         {
             if (msg == null)
             {
-                return;
+                msg = new CommMessage(_msg);
+                ScriptDefine scdef = ScriptDefine.GetInstance();
+                foreach (var pair in _ivalues_runtime)
+                {
+                    _msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
+                }
+                foreach (var pair in _bvalues_runtime)
+                {
+                    _msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
+                }
+                foreach (var pair in _datetime_runtime)
+                {
+                    string hex = DateTime.Now.ToString(pair.Value);
+                    _msg.SetFldValue(pair.Key, ByteArray.ParseHex(hex));
+                }
             }
+
             socket.Send(msg);
         }
     }
