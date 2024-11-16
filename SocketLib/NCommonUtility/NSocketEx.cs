@@ -29,6 +29,7 @@ namespace NCommonUtility
         public int HeaderSize { get; private set; }
         public int DataLenOffset { get; private set; }
         public int DataLenSize { get; private set; }
+        public bool DataLenIsPacketSize { get; private set; }
 
         public event SendRecvExEventHandler OnSendExEvent;
         public event SendRecvExEventHandler OnRecvExEvent;
@@ -40,6 +41,7 @@ namespace NCommonUtility
         private int _data_recv_cnt = -1;
         private int _data_length = -1;
 
+
         protected NSocketEx()
         {
 
@@ -49,17 +51,17 @@ namespace NCommonUtility
 
         }
 
-        public NSocketEx(int hsize, int dlen_ofs, int dlen_size=2)
+        public NSocketEx(int hsize, int dlen_ofs, int dlen_size=2, bool bPacket=false)
         {
-            init(hsize, dlen_ofs, dlen_size);
+            init(hsize, dlen_ofs, dlen_size, bPacket);
         }
 
-        public NSocketEx(Socket soc, int hsize, int dlen_ofs, int dlen_size = 2) : base(soc)
+        public NSocketEx(Socket soc, int hsize, int dlen_ofs, int dlen_size = 2, bool bPacket = false) : base(soc)
         {
-            init(hsize, dlen_ofs, dlen_size);
+            init(hsize, dlen_ofs, dlen_size, bPacket);
         }
 
-        protected void init(int hsize, int dlen_ofs, int dlen_size)
+        protected void init(int hsize, int dlen_ofs, int dlen_size, bool bPacket)
         {
             if (dlen_ofs < 0)
             {
@@ -73,6 +75,7 @@ namespace NCommonUtility
             {
                 throw new ArgumentException("ヘッダサイズが小さすぎます");
             }
+            DataLenIsPacketSize = bPacket;
             HeaderSize = hsize;
             DataLenOffset = dlen_ofs;
             DataLenSize = dlen_size;
@@ -175,7 +178,13 @@ namespace NCommonUtility
                 Array.Reverse(dlen);
             }
 
-            return BitConverter.ToInt32(dlen, 0);
+            int len = BitConverter.ToInt32(dlen, 0);
+            if (DataLenIsPacketSize)
+            {
+                // ヘッダのレングスがヘッダ長を含むならヘッダ長を引く
+                len -= HeaderSize;
+            }
+            return len;
         }
 
         protected virtual void OnSend(byte[] hed, byte[] dat)
