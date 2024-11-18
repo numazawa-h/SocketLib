@@ -70,26 +70,25 @@ namespace SocketTool
             }
         }
 
-        public override void Exec(CommSocket socket, CommMessage msg = null)
+        public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
-            if (msg == null)
+            CommMessage msg = new CommMessage(_msg);
+            ScriptDefine scdef = ScriptDefine.GetInstance();
+            foreach (var pair in _ivalues_runtime)
             {
-                msg = new CommMessage(_msg);
-                ScriptDefine scdef = ScriptDefine.GetInstance();
-                foreach (var pair in _ivalues_runtime)
-                {
-                    _msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
-                }
-                foreach (var pair in _bvalues_runtime)
-                {
-                    _msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
-                }
-                foreach (var pair in _datetime_runtime)
-                {
-                    string hex = DateTime.Now.ToString(pair.Value);
-                    _msg.SetFldValue(pair.Key, ByteArray.ParseHex(hex));
-                }
+                _msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
             }
+            foreach (var pair in _bvalues_runtime)
+            {
+                _msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
+            }
+            foreach (var pair in _datetime_runtime)
+            {
+                string hex = DateTime.Now.ToString(pair.Value);
+                _msg.SetFldValue(pair.Key, ByteArray.ParseHex(hex));
+            }
+
+            // todo:resmsgからのコピー処理
 
             socket.Send(msg);
         }

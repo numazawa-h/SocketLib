@@ -79,7 +79,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NCommonUtility\Script.cs" />
+    <Compile Include="SocketTool\Script.cs" />
     <Compile Include="SocketTool\Command.cs" />
     <Compile Include="SocketTool\CommandHead.cs" />
     <Compile Include="SocketTool\CommandSend.cs" />

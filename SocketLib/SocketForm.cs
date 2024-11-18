@@ -16,6 +16,7 @@ namespace SampleMain
     public partial class SocketForm : Form
     {
         CommSocket _Socket;
+        List<CheckBox> _checkBoxes = new List<CheckBox>();
 
         public SocketForm(CommSocket socket)
         {
@@ -31,6 +32,35 @@ namespace SampleMain
             txt_portNo1.Text = socket.LocalPortno?.ToString();
             txt_ipAddr2.Text = socket.RemoteIPAddress.ToString();
             txt_portNo2.Text = socket.RemotePortno.ToString();
+
+            _checkBoxes.Add(checkBox1);
+            _checkBoxes.Add(checkBox2);
+            _checkBoxes.Add(checkBox3);
+            _checkBoxes.Add(checkBox4);
+            _checkBoxes.Add(checkBox5);
+            _checkBoxes.Add(checkBox6);
+            _checkBoxes.Add(checkBox7);
+            _checkBoxes.Add(checkBox8);
+            foreach (CheckBox checkBox in _checkBoxes)
+            {
+                checkBox.Visible = false;
+            }
+
+            int idx =0;
+            foreach(ScriptList script in ScriptDefine.GetInstance().GetScriptList())
+            {
+                if(idx < 8)
+                {
+                    if (script.Select)
+                    {
+                        _checkBoxes[idx].Tag = script;
+                        _checkBoxes[idx].Text = script.ID;
+                        _checkBoxes[idx].Checked = script.Enable;
+                        _checkBoxes[idx].Visible = true;
+                        ++idx;
+                    }
+                }
+            }
 
             if (socket.isServer)
             {
@@ -66,6 +96,7 @@ namespace SampleMain
             }
             CommMessage msg = (args.CommMsg);
             DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
+            ScriptDefine.GetInstance().ExecOnRecv(_Socket, msg);
         }
 
         private void OnPreSend(object sender, CommMessageEventArgs args)
@@ -94,6 +125,7 @@ namespace SampleMain
         private void SocketForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _Socket.Close();
+            ScriptDefine.GetInstance().ExecOnDisconnect();
         }
 
         private void btn_send_Click(object sender, EventArgs e)
@@ -116,6 +148,13 @@ namespace SampleMain
         private void SocketForm_Load(object sender, EventArgs e)
         {
             ScriptDefine.GetInstance().ExecOnConnect(_Socket);
+        }
+
+
+        private void checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox cb =(CheckBox)sender;
+            ((ScriptList)cb.Tag).Enable = cb.Checked;
         }
     }
 }

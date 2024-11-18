@@ -13,16 +13,16 @@
     { "id":"send-health", "cmd":"send", "dtype":"22", },
     { "id":"send-init", "cmd":"send", "dtype":"01" },
     { "id":"send-reset", "cmd":"send", "dtype":"02" },
-    { "id":"send-resend-res", "cmd":"send", "dtype":"4f" },
+    { "id":"response-resend", "cmd":"send", "dtype":"4f" },
   ],
 
   "Scripts":[
     { "id":"auto-head","when":"send", "cmd":"set-head" },
-    { "id":"auto-init","when":"connect", "cmds":[ {"cmd":"set-init" },{"cmd":"send-init" } ] },
-    { "id":"auto-ack", "when":"recv", "without":["91","92"], "cmd":"send-ack" },
-    { "id":"health-check", "select":true, "enable":true, "when":"timer", "start":5000, "interval":2000, "cmd":"send-health" },
-    { "id":"auto-response", "when":"recv", "cmds":[
-          { "rdtype":"40", "cmd":"send-resend-res" },
+    { "id":"auto-connect","when":"connect", "cmd":[ "set-init", "send-init"] },
+    { "id":"auto-ack", "select":true, "enable":false, "when":"recv", "without":["91","92"], "cmd":"send-ack" },
+    { "id":"health-check", "select":true, "enable":true, "when":"timer", "start":2000, "interval":5000, "cmd":"send-health" },
+    { "id":"auto-response", "select":true, "enable":true, "when":"recv", "scripts":[
+          { "dtype":"40", "cmd":"response-resend" },
       ]
     },
   ],

@@ -39,9 +39,11 @@ namespace SocketTool
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
         protected HashSet<string> _incriment_values = new HashSet<string>();
         protected Dictionary<string, Command> _comands = new Dictionary<string, Command>();
-        protected Dictionary<string, ScriptOnConnect> _script_connect = new Dictionary<string, ScriptOnConnect>();
-        protected Dictionary<string, ScriptOnSend> _script_send = new Dictionary<string, ScriptOnSend>();
-        protected Dictionary<string, Command> _script_recv = new Dictionary<string, Command>();
+        protected Dictionary<string, ScriptList> _script_connect = new Dictionary<string, ScriptList>();
+        protected Dictionary<string, ScriptList> _script_send = new Dictionary<string, ScriptList>();
+        protected Dictionary<string, ScriptList> _script_recv = new Dictionary<string, ScriptList>();
+        protected Dictionary<string, ScriptTimer> _script_timer = new Dictionary<string, ScriptTimer>();
+        protected List<ScriptList> _script_select = new List<ScriptList>();
 
         protected Dictionary<string, string> _select = new Dictionary<string, string>();
 
@@ -92,56 +94,39 @@ namespace SocketTool
                 }
             }
 
+            _script_connect.Clear();
             _script_send.Clear();
+            _script_recv.Clear();
+            _script_timer.Clear();
+            _script_select.Clear();
             foreach (Node def in root["Scripts"])
             {
                 try
                 {
-                    string cmdid = def["cmd"];
                     string scrid = def["id"].Required();
-                    bool sel = (bool?)def["select"] is bool v ? v : false; 
-
-                    List<Command> cmds = new List<Command>();
-                    if (cmdid == null)
-                    {
-                        if(def.ContainsKey("cmds") == false)
-                        {
-                            throw new Exception($"Scripts'{scrid}'に'cmd'または'cmds'が定義されていません");
-                        }
-                        foreach (Node node in def["cmds"])
-                        {
-                            cmdid = node["cmd"];
-                            if (_comands.ContainsKey(cmdid) == false)
-                            {
-                                throw new Exception($"Scriptsで使用されている'{cmdid}'は定義されていません");
-                            }
-                            cmds.Add(_comands[cmdid]);
-                        }
-                    }
-                    else
-                    {
-                        if (_comands.ContainsKey(cmdid) == false)
-                        {
-                            throw new Exception($"Scriptsで使用されている'{cmdid}'は定義されていません");
-                        }
-                        cmds.Add(_comands[cmdid]);
-                    }
-
+                    ScriptList script = null;
                     switch ((string)def["when"].Required())
                     {
                         case "send":
-                            foreach (Command cmd in cmds)
-                            {
-                                if(cmd is CommandSend)
-                                {
-                                    throw new Exception($"送信スクリプト('{scrid}')に送信コマンド('{cmd.CommandId}')を含めることはできません");
-                                }
-                            }
-                            _script_send.Add(scrid, new ScriptOnSend(def, cmds.ToArray()));
+                            script = new ScriptList(def, _comands);
+                            _script_send.Add(scrid, script);
                             break;
                         case "connect":
-                            _script_connect.Add(scrid, new ScriptOnConnect(def, cmds.ToArray()));
+                            script = new ScriptList(def, _comands);
+                            _script_connect.Add(scrid, script);
                             break;
+                        case "recv":
+                            script = new ScriptList(def, _comands);
+                            _script_recv.Add(scrid, script);
+                            break;
+                        case "timer":
+                            script = new ScriptTimer(def, _comands);
+                            _script_timer.Add(scrid, (ScriptTimer)script);
+                            break;
+                    }
+                    if(script !=null && script.Select == true)
+                    {
+                        _script_select.Add(script);
                     }
                 }
                 catch (Exception ex)
@@ -149,6 +134,11 @@ namespace SocketTool
                     throw new InvalidOperationException($"Scriptsで読み込みエラー({def.PropertyNames}) in {path}", ex);
                 }
             }
+        }
+
+        public ScriptList[] GetScriptList()
+        {
+            return _script_select.ToArray();
         }
 
         public bool ContainsKeyIntValue(string name)
@@ -194,23 +184,47 @@ namespace SocketTool
         }
 
 
+        public void ExecOnConnect(CommSocket socket)
+        {
+            foreach (var pair in _script_timer)
+            {
+                string key = pair.Key;
+                ScriptTimer script = pair.Value;
+                script.Start(socket);
+            }
+            foreach (var pair in _script_connect)
+            {
+                string key = pair.Key;
+                ScriptList script = pair.Value;
+                script.Exec(socket);
+            }
+        }
+        public void ExecOnDisconnect()
+        {
+            foreach (var pair in _script_timer)
+            {
+                string key = pair.Key;
+                ScriptTimer script = pair.Value;
+                script.Stop();
+            }
+        }
 
         public void ExecOnSend(CommSocket socket, CommMessage msg)
         {
             foreach ( var pair in _script_send)
             {
                 string key = pair.Key;
-                ScriptOnSend script = pair.Value;
+                ScriptList script = pair.Value;
                 script.Exec(socket, msg);
             }
         }
-        public void ExecOnConnect(CommSocket socket)
+        public void ExecOnRecv(CommSocket socket, CommMessage msg)
         {
-            foreach (var pair in _script_connect)
+            foreach (var pair in _script_recv)
             {
                 string key = pair.Key;
-                ScriptOnConnect script = pair.Value;
-                script.Exec(socket);
+                ScriptList script = pair.Value;
+                script.Exec(socket, msg);
             }
         }
     }
