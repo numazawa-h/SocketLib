@@ -193,7 +193,10 @@ namespace NCommonUtility
                 }
                 else
                 {
-                    values.Add((string)this[name]);
+                    if (this.ContainsKey(name))
+                    {
+                        values.Add((string)this[name]);
+                    }
                 }
 
                 return values;
