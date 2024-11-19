@@ -79,6 +79,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SocketTool\CommandSendValueMsg.cs" />
+    <Compile Include="SocketTool\CommandSetValueMsg.cs" />
     <Compile Include="SocketTool\Script.cs" />
     <Compile Include="SocketTool\Command.cs" />
     <Compile Include="SocketTool\CommandHead.cs" />

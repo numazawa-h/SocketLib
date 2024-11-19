@@ -28,6 +28,9 @@ namespace SocketTool
         protected Dictionary<string, string> _ivalues_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _bvalues_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _datetime_runtime = new Dictionary<string, string>();
+        protected Dictionary<string, string> _msgcopy_runtime = new Dictionary<string, string>();
+        protected string[] _reqcopy;
+
 
         public abstract Command Copy();
         public abstract void Exec(CommSocket socket, CommMessage msg = null);
@@ -40,6 +43,8 @@ namespace SocketTool
             other._ivalues_runtime = _ivalues_runtime;
             other._bvalues_runtime = _bvalues_runtime;
             other._datetime_runtime = _datetime_runtime;
+            other._msgcopy_runtime = _msgcopy_runtime;
+            other._reqcopy = _reqcopy;
             return other;
         }
 
@@ -56,9 +61,9 @@ namespace SocketTool
             _ivalues_runtime.Clear();
             _bvalues_runtime.Clear();
             _datetime_runtime.Clear();
+            _reqcopy = node.GetStringValues("reqcopy").ToArray();
 
-            Dictionary<string, JsonValue> values = node["values"].GetValues();
-            foreach (var pair in values)
+            foreach (var pair in node["values"].GetValues())
             {
                 string key = pair.Key;
                 JsonValue value = pair.Value;
@@ -92,7 +97,7 @@ namespace SocketTool
                         {
                             // ScriptDefineの values定義項目の時の処理
                             ScriptDefine scdef = ScriptDefine.GetInstance();
-                            if(scdef.ContainsKeyIntValue(sval))
+                            if (scdef.ContainsKeyIntValue(sval))
                             {
                                 _ivalues_runtime.Add(key, sval);
                             }
@@ -108,8 +113,22 @@ namespace SocketTool
                         break;
                 }
             }
+
+            _msgcopy_runtime.Clear();
+            foreach (var pair in node["msgcopy"].GetValues())
+            {
+                string key = pair.Key;
+                JsonValue value = pair.Value;
+                switch (value.GetValueKind())
+                {
+                    case System.Text.Json.JsonValueKind.String:
+                        _msgcopy_runtime.Add(key, value.ToString());
+                        break;
+                }
+            }
         }
-        private void SetDateTimeValue(string key, string sval, string fmt)
+
+        protected void SetDateTimeValue(string key, string sval, string fmt)
         {
             int yyyy, MM, dd;
             int HH = 0;
@@ -190,10 +209,24 @@ namespace SocketTool
                     cmd = new CommandHead(node);
                     break;
                 case "set":
-                    cmd = new CommandSet(node);
+                    if (node.ContainsKey("msg"))
+                    {
+                        cmd = new CommandSetValueMsg(node);
+                    }
+                    else
+                    {
+                        cmd = new CommandSet(node);
+                    }
                     break;
                 case "send":
-                    cmd = new CommandSend(node);
+                    if (node.ContainsKey("msg"))
+                    {
+                        cmd = new CommandSendValueMsg(node);
+                    }
+                    else
+                    {
+                        cmd = new CommandSend(node);
+                    }
                     break;
                 default:
                     throw new Exception($"Commandsの'{cmdid}'でcmd指定('{cmdtype}')が不正です");

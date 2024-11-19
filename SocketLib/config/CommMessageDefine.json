@@ -27,9 +27,15 @@
 		},
 		{ "id":"30", "name":"個別制御", "len":  64,"flds":[
 			{ "id":"control-type", "ofs": 0, "len":2, "disp":true, },
+			{ "id":"control-01", "ofs": 2, "len":1, },
 		  ] 
 		},
 		{ "id":"14", "name":"状態", "len":  640,"flds":[
+			{ "id":"sdatm", "ofs": 0, "len":7, },
+			{ "id":"sts001", "ofs": 7, "len":1, },
+			{ "id":"sts002", "ofs": 8, "len":1, },
+			{ "id":"sts003", "ofs": 9, "len":1, },
+			{ "id":"sts004", "ofs":10, "len":1, },
 		  ] 
 		},
 		
@@ -43,7 +49,7 @@
 		{ "id":"carno", "name":"車両番号", "format":{ "type":"int", "fmt":"#{0:D}" ,"notdisp":0 } },				// 車両番号が0なら表示しない
 		{ "id":"judgm", "name":"判別結果",  "values":{"01":"正常ETC", "02":"異常ETC", "03":"非ETC" } },
 		{ "id":"carpos","name":"車両位置",  "values":{"01":"S2", "02":"S4", "04":"後退退出" } },
-		{ "id":"sdatm", "name":"送信日時", "format":{ "type":"datetime", "fmt":"yyyy/MM/dd HH:mm:ss" } },
+		{ "id":"sdatm", "name":"送信日時", "format":{ "type":"datetime", "valfmt":"yyyyMMddHHmmss", "fmt":"yyyy/MM/dd HH:mm:ss" } },
 		{ "id":"result", "name":"要求結果", "values":{"00":"成功", "01":"失敗" } },
 		{ "id":"reason-1501", "name":"結果理由", "values":{"00":"正常", "01":"異常", "99":"その他異常" } },
 	],

@@ -232,6 +232,11 @@ namespace SocketTool
             }
         }
 
+        public bool ContainsFldKey(string key)
+        {
+            return _data_def.ContainsKey(key);
+        }
+
         public ByteArray GetFldValue(string fldid)
         {
             int ofs = _data_def.GetFldDefine(fldid).Offset;

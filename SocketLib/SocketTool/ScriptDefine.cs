@@ -38,6 +38,7 @@ namespace SocketTool
         protected Dictionary<string, int> _ivalues = new Dictionary<string, int>();
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
         protected HashSet<string> _incriment_values = new HashSet<string>();
+        protected Dictionary<string, CommMessage> _commMessages = new Dictionary<string, CommMessage>();
         protected Dictionary<string, Command> _comands = new Dictionary<string, Command>();
         protected Dictionary<string, ScriptList> _script_connect = new Dictionary<string, ScriptList>();
         protected Dictionary<string, ScriptList> _script_send = new Dictionary<string, ScriptList>();
@@ -51,33 +52,56 @@ namespace SocketTool
         public void ReadJson(string path)
         {
             RootNode root = JsonConfig.ReadJson(path);
-            Dictionary<string, JsonValue> values = root["values"].GetValues();
 
             _ivalues.Clear();
             _bvalues.Clear();
             _incriment_values.Clear();
-            foreach (var pair in values)
+            foreach (var pair in root["values"].GetValues())
             {
                 string key = pair.Key;
                 JsonValue value = pair.Value;
-                switch (value.GetValueKind())
+                try
                 {
-                    case JsonValueKind.String:
-                        string sval = value.ToString();
-                        _bvalues.Add(key, ByteArray.StrToByte(sval));
-                        break;
-                    case JsonValueKind.Number:
-                        int ival = value.GetValue<int>();
-                        if (key.Substring(0, 2) == "++")
-                        {
-                            // インクリメント処理サポート(取得するたびにカウントアップする)
-                            key = key.Substring(2);
-                            _incriment_values.Add(key);
-                        }
-                        _ivalues.Add(key, ival);
-                        break;
-                    default:
-                        throw new Exception($"ScriptDefineのvaluesに数値と文字列以外が指定されました('{key}')");
+                    switch (value.GetValueKind())
+                    {
+                        case JsonValueKind.String:
+                            string sval = value.ToString();
+                            _bvalues.Add(key, ByteArray.StrToByte(sval));
+                            break;
+                        case JsonValueKind.Number:
+                            int ival = value.GetValue<int>();
+                            if (key.Substring(0, 2) == "++")
+                            {
+                                // インクリメント処理サポート(取得するたびにカウントアップする)
+                                key = key.Substring(2);
+                                _incriment_values.Add(key);
+                            }
+                            _ivalues.Add(key, ival);
+                            break;
+                        default:
+                            throw new Exception($"数値と文字列以外が指定されました");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"ScriptDefineのvalues('{key}')で読み込みエラー in {path}", ex);
+                }
+            }
+
+            _commMessages.Clear();
+            foreach (Node node in root["values"].GetObjects())
+            {
+                string name = node._name;
+                try
+                {
+                    node.AddValue("id", name);      // Commandクラスが'id'必須なので追加しておく
+                    CommandSend cmd = new CommandSend(node);
+                    CommMessage msg = cmd.GetMessage();
+                    _commMessages.Add(name, msg);
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"ScriptDefineのvalues('{name}')で読み込みエラー in {path}", ex);
                 }
             }
 
@@ -136,9 +160,19 @@ namespace SocketTool
             }
         }
 
+        /// <summary>
+        /// 画面に表示するスクリプト一覧を取得
+        /// </summary>
+        /// <returns></returns>
         public ScriptList[] GetScriptList()
         {
             return _script_select.ToArray();
+        }
+
+
+        public CommMessage GetValueMsg(string name)
+        {
+            return _commMessages[name];
         }
 
         public bool ContainsKeyIntValue(string name)

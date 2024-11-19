@@ -14,7 +14,6 @@ namespace SocketTool
     {
         private CommMessage _msg;
         public string Dtype => _msg.DType;
-        private string[] _reqcopy;
 
         private CommandSend()
         {
@@ -35,7 +34,6 @@ namespace SocketTool
             {
                 _msg.SetFldValue(pair.Key, pair.Value);
             }
-            _reqcopy =node.GetStringValues("reqcopy").ToArray();
         }
 
         public override Command Copy()
@@ -73,6 +71,11 @@ namespace SocketTool
             }
         }
 
+        public CommMessage GetMessage()
+        {
+            return new CommMessage(_msg);
+        }
+
         public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
             CommMessage msg = new CommMessage(_msg);
@@ -97,6 +100,12 @@ namespace SocketTool
                 foreach (string key in _reqcopy)
                 {
                     msg.SetFldValue(key, resmsg.GetFldValue(key));
+                }
+                foreach (var pair in _msgcopy_runtime)
+                {
+                    string key = pair.Key;
+                    string val = pair.Value;
+                    msg.SetFldValue(key, resmsg.GetFldValue(val));
                 }
             }
 
