@@ -148,7 +148,7 @@ namespace SocketTool
                 yyyy = int.Parse(sval.Substring(ofs, 4));
                 ofs += 4;
             }
-            else if (fmt.Substring(0, 4) == "yy")
+            else if (fmt.Substring(0, 2) == "yy")
             {
                 yyyy = int.Parse(sval.Substring(0, 2)) + 2000;
                 ofs += 2;
