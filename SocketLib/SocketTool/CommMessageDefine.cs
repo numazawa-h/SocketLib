@@ -312,7 +312,7 @@ namespace SocketTool
                 int value = new ByteArray(dat).to_int();
                 if (value >= _minvalue && value <= _maxvalue)
                 {
-                    string.Format(_format_def, value);
+                    desc = string.Format(_format_def, value);
                 }
                 return desc;
             }
