@@ -14,6 +14,7 @@ namespace SocketTool
     {
         private CommMessage _msg;
         public string Dtype => _msg.DType;
+        private string[] _reqcopy;
 
         private CommandSend()
         {
@@ -34,6 +35,7 @@ namespace SocketTool
             {
                 _msg.SetFldValue(pair.Key, pair.Value);
             }
+            _reqcopy =node.GetStringValues("reqcopy").ToArray();
         }
 
         public override Command Copy()
@@ -76,19 +78,26 @@ namespace SocketTool
             ScriptDefine scdef = ScriptDefine.GetInstance();
             foreach (var pair in _ivalues_runtime)
             {
-                _msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
+                msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                _msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
+                msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {
                 string hex = DateTime.Now.ToString(pair.Value);
-                _msg.SetFldValue(pair.Key, ByteArray.ParseHex(hex));
+                msg.SetFldValue(pair.Key, ByteArray.ParseHex(hex));
             }
 
-            // todo:resmsgからのコピー処理
+            // 受信電文からのコピー処理
+            if (resmsg != null)
+            {
+                foreach (string key in _reqcopy)
+                {
+                    msg.SetFldValue(key, resmsg.GetFldValue(key));
+                }
+            }
 
             socket.Send(msg);
         }

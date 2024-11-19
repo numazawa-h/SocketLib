@@ -14,13 +14,15 @@
 		{ "id":"01", "name":"情報要求(イニシャライズ)", "len": 0,"flds":[] },
 		{ "id":"02", "name":"情報要求(リフレッシュ)", "len": 0,"flds":[] },
 		{ "id":"22", "name":"ヘルスチェック", "len":  0,"flds":[] },
-		{ "id":"40", "name":"再通信指示", "len":  4,"flds":[
-			{ "id":"send-id", "ofs": 0, "len":4 },
+		{ "id":"40", "name":"再通信指示", "len":  8,"flds":[
+			{ "id":"send-id", "ofs": 0, "len":4, "disp":true, },
+			{ "id":"carno", "ofs": 4, "len":4 },
 		  ] 
 		},
-		{ "id":"4f", "name":"再通信応答", "len":  0,"flds":[
+		{ "id":"4f", "name":"再通信応答", "len":  12,"flds":[
 			{ "id":"send-id", "ofs": 0, "len":4, "disp":true, },
-			{ "id":"reason-4f", "ofs": 0, "len":4, "disp":true, },
+			{ "id":"carno", "ofs": 4, "len":4 },
+			{ "id":"reason-4f", "ofs": 8, "len":4, "disp":true, },
 		  ] 
 		},
 		{ "id":"30", "name":"個別制御", "len":  64,"flds":[
@@ -34,21 +36,14 @@
 		
 	],
 	"values-def":[
-		{ "id":"hdatm", "name":"ヘッダ日時", "format":{ "type":"datetime","valfmt":"yyyyMMddHHmmss", "fmt":"yyyyMMddHHmmss" } },
-		{ "id":"send-id", "name":"送信ID", "format":{ "type":"int", "fmt":"#{0}-{1}" } },
+		{ "id":"hdatm", "name":"ヘッダ日時", "format":{ "type":"datetime", "valfmt":"yyyyMMddHHmmss", "fmt":"yyyy/MM/dd-HH:mm:ss" } },
+		{ "id":"send-id", "name":"送信ID", "format":{ "type":"int", "fmt":"#{0}" } },
 		{ "id":"control-type", "name":"制御種類", "values":{"0001":"開始", "0002":"一時停止", "0003":"終了" } },
 		{ "id":"reson-nak", "name":"否定理由", "values":{"0001":"シーケンスエラー", "0009":"その他" } },
-		{ "id":"etype", "name":"立ち入り", "values":{"01":"人", "02":"自転車", "03":"その他" } }, 	// 立ち入り種類
-		{ "id":"photo", "name":"撮影種類", "values":{"01":"レーン制御", "02":"インターホン", "03":"操作端末" } }, 	// 立ち入り種類
-		{ "id":"mkind", "name":"切り出し", "values":{"0001":"レーン", "0002":"インタ", "0003":"操作端末" } },
-		{ "id":"mfrdt", "name":"開始日時", "format":{ "type":"datetime", "fmt":"yyyy/MM/dd HH:mm:ss" } },
-		{ "id":"mtodt", "name":"終了日時", "format":{ "type":"datetime", "fmt":"yyyy/MM/dd HH:mm:ss" } },
 		{ "id":"carno", "name":"車両番号", "format":{ "type":"int", "fmt":"#{0:D}" ,"notdisp":0 } },				// 車両番号が0なら表示しない
 		{ "id":"judgm", "name":"判別結果",  "values":{"01":"正常ETC", "02":"異常ETC", "03":"非ETC" } },
 		{ "id":"carpos","name":"車両位置",  "values":{"01":"S2", "02":"S4", "04":"後退退出" } },
 		{ "id":"sdatm", "name":"送信日時", "format":{ "type":"datetime", "fmt":"yyyy/MM/dd HH:mm:ss" } },
-		{ "id":"stadatm", "name":"切出しfrom日時", "format":{ "type":"datetime", "fmt":"yyyy/MM/dd HH:mm:ss" } },
-		{ "id":"enddatm", "name":"切出しend 日時", "format":{ "type":"datetime", "fmt":"yyyy/MM/dd HH:mm:ss" } },
 		{ "id":"result", "name":"要求結果", "values":{"00":"成功", "01":"失敗" } },
 		{ "id":"reason-1501", "name":"結果理由", "values":{"00":"正常", "01":"異常", "99":"その他異常" } },
 	],
