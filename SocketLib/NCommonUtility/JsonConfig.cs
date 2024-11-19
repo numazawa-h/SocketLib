@@ -17,6 +17,7 @@ using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using static log4net.Appender.ColoredConsoleAppender;
 using static NCommonUtility.JsonConfig;
 using static SocketLib.Program;
@@ -254,6 +255,25 @@ namespace NCommonUtility
                     }
                 }
                 return vals;
+            }
+            public Node[] GetObjects()
+            {
+                List<Node> vals = new List<Node>();
+                if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
+                {
+                    foreach (var pair in _jsonNode.AsObject())
+                    {
+                        string name = pair.Key;
+                        JsonNode node = pair.Value;
+                        switch (pair.Value.GetValueKind())
+                        {
+                            case JsonValueKind.Object:
+                                vals.Add(new Node(this, node, name));
+                                break;
+                        }
+                    }
+                }
+                return vals.ToArray();
             }
 
             #region IEnumerator
