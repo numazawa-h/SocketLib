@@ -175,6 +175,21 @@ namespace NCommonUtility
                 return found;
             }
 
+            public void AddValue(string name, string svalue)
+            {
+                if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
+                {
+                    _jsonNode.AsObject().Add(name, svalue);
+                }
+            }
+            public void AddValue(string name, int ivalue)
+            {
+                if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
+                {
+                    _jsonNode.AsObject().Add(name, ivalue);
+                }
+            }
+
             public bool isArray()
             {
                 return (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Array);
