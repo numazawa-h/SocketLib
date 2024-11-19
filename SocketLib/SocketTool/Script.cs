@@ -37,6 +37,7 @@ namespace NCommonUtility
                 _scripts.Add(new Script(def, comands, this));
             }
         }
+
         public void Exec(CommSocket socket, CommMessage msg = null)
         {
             if (Enable == false)
@@ -62,19 +63,14 @@ namespace NCommonUtility
             _dueTime = (int?)def["start"] is int v? v:0;
             _period = def["interval"].Required(); 
         }
+
         public void Start(CommSocket socket)
         {
-            if (Enable == false)
-            {
-                return;
-            }
             lock (this)
             {
-                if (_timer == null)
-                {
-                    _timer = new Timer(new TimerCallback(TimerTask), this, _dueTime, _period);
-                }
+                Stop();
                 _socket = socket;
+                _timer = new Timer(new TimerCallback(TimerTask), this, _dueTime, _period);
             }
         }
 
