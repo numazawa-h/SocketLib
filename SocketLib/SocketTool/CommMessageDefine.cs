@@ -231,10 +231,7 @@ namespace SocketTool
                 FldId = def["id"].Required();
                 FldName = def["name"].Required();
 
-                if (def.ContainsKey("values"))
-                {
-                    _values_def = def["values"].GetValues();
-                }
+                _values_def = def["values"].GetValues();
                 if (def.ContainsKey("format"))
                 {
                     string type = def["format"]["type"].Required();
