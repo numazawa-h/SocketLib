@@ -55,7 +55,9 @@ namespace SocketTool
         public override Command Copy()
         {
             CommandSet cmd = new CommandSet();
-            return base.Copy(cmd);
+            base.Copy(cmd);
+
+            return cmd;
         }
 
         public override void Exec(CommSocket socket, /* 未使用*/ CommMessage msg = null)

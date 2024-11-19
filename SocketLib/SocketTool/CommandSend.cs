@@ -41,6 +41,7 @@ namespace SocketTool
         public override Command Copy()
         {
             CommandSend cmd = new CommandSend();
+            base.Copy(cmd);
             cmd._msg = new CommMessage(_msg);
             return cmd;
         }
