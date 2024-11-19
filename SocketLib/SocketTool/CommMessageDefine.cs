@@ -58,7 +58,7 @@ namespace SocketTool
             {
                 try
                 {
-                    _message_def.Add(def["id"], new MessageDefine(def));
+                    _message_def.Add(((string)def["id"]).ToLower(), new MessageDefine(def));
                 }
                 catch (Exception ex)
                 {
@@ -69,6 +69,7 @@ namespace SocketTool
 
         public MessageDefine GetMessageDefine(string dtype)
         {
+            dtype = dtype.ToLower();
             if (_message_def.ContainsKey(dtype) == false)
             {
                 throw new Exception($"定義されていないデータ種別({dtype})");
