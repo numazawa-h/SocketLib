@@ -35,11 +35,21 @@
 			{ "id":"sts001", "ofs": 7, "len":1, },
 			{ "id":"sts002", "ofs": 8, "len":1, },
 			{ "id":"sts003", "ofs": 9, "len":1, },
-			{ "id":"sts004", "ofs":10, "len":1, },
+			{ "block":"blk", "ofs":10, "len":16, "rep":2, "flds":[
+				{ "id":"sts101", "ofs":0, "len":1, },
+				{ "id":"sts102", "ofs":1, "len":1, },
+				{ "block":"a", "ofs":5, "len":5, "rep":5, "flds":[
+					{ "id":"sts", "ofs":0, "len":1, },
+				  ]
+				},
+				{ "block":"b", "ofs":10, "len":5, "rep":5, "flds":[
+					{ "id":"sts", "ofs":0, "len":1, },
+				  ]
+				},
+			  ]
+			}
 		  ] 
 		},
-		
-		
 	],
 	"values-def":[
 		{ "id":"hdatm", "name":"ヘッダ日時", "format":{ "type":"datetime", "valfmt":"yyyyMMddHHmmss", "fmt":"yyyy/MM/dd-HH:mm:ss" } },

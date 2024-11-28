@@ -135,7 +135,72 @@ namespace SocketTool
 
                 foreach (Node node in def["flds"])
                 {
-                    _fields_def.Add(node["id"], new FieldDefine(node));
+                    if (node.ContainsKey("block"))
+                    {
+                        readBlock(node);
+                    }
+                    else
+                    {
+                        _fields_def.Add(node["id"], new FieldDefine(node));
+                    }
+                }
+            }
+
+            private void readBlock(Node def, int offset=0, string block=null)
+            {
+                string blkid = def["block"].Required();
+                int blkofs = def["ofs"].Required();
+                int len = (int?)def["len"] is int v1 ? v1 : -1;
+                int rep = (int?)def["rep"] is int v2 ? v2 : 1;
+
+                if (rep > 1)
+                {
+                    if (len < 0)
+                    {
+                        throw new Exception($"'rep'指定には'len'指定が必要です");
+                    }
+                    for(int i=0; i<rep; i++, offset += len)
+                    {
+                        string blk = $"{blkid}[{i}]";
+                        if (block != null)
+                        {
+                            blk = block + "." + blk;
+                        }
+                        int ofs = blkofs + offset;
+                        foreach (Node node in def["flds"])
+                        {
+                            if (node.ContainsKey("block"))
+                            {
+                                readBlock(node, ofs, blk);
+                            }
+                            else
+                            {
+                                FieldDefine fld = new FieldDefine(node, ofs, blk);
+                                _fields_def.Add(fld.FldId, fld);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    string blk = blkid;
+                    if (block != null)
+                    {
+                        blk = block + "." + blk;
+                    }
+                    int ofs = blkofs + offset;
+                    foreach (Node node in def["flds"])
+                    {
+                        if (node.ContainsKey("block"))
+                        {
+                            readBlock(node, ofs, blk);
+                        }
+                        else
+                        {
+                            FieldDefine fld = new FieldDefine(node, ofs, blk);
+                            _fields_def.Add(fld.FldId, fld);
+                        }
+                    }
                 }
             }
 
@@ -179,6 +244,12 @@ namespace SocketTool
             public int Length { get; private set; }
             public int Offset { get; private set; }
             public bool isDispDesc { get; private set; }
+
+            public FieldDefine(Node def, int ofs, string blk) :this(def)
+            {
+                Offset += ofs;
+                FldId = blk + "." + FldId;
+            }
 
             public FieldDefine(Node def)
             {
