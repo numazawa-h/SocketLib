@@ -32,6 +32,12 @@ namespace NCommonUtility
             this.ValueMember = "value";
         }
 
+        [Category("カスタマイズ")]
+        [Description("falseの時テキストの編集を許可しない")]
+        [DefaultValue(false)]
+        public bool AllowEdit { get; set; } = false;
+
+
         [Browsable(false)]
         public new string DisplayMember
         {
@@ -76,7 +82,10 @@ namespace NCommonUtility
                 if (item_list.Count > 1)
                 {
                     this.DataSource = item_list;
-                    DropDownStyle = ComboBoxStyle.DropDownList;
+                    if (AllowEdit == false)
+                    {
+                        DropDownStyle = ComboBoxStyle.DropDownList;
+                    }
                 }
             }
             base.OnCreateControl();
