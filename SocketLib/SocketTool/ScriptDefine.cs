@@ -4,8 +4,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Runtime.Remoting.Messaging;
 using System.Security.Cryptography;
+using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -45,6 +47,8 @@ namespace SocketTool
         protected Dictionary<string, ScriptList> _script_recv = new Dictionary<string, ScriptList>();
         protected Dictionary<string, ScriptTimer> _script_timer = new Dictionary<string, ScriptTimer>();
         protected List<ScriptList> _script_select = new List<ScriptList>();
+        protected List<(string desc, IPEndPoint epoint)> _local_addr = new List<(string, IPEndPoint)>();
+        protected List<(string desc, IPEndPoint epoint)> _remote_addr = new List<(string, IPEndPoint)>();
 
         protected Dictionary<string, string> _select = new Dictionary<string, string>();
 
@@ -88,20 +92,59 @@ namespace SocketTool
                 }
             }
 
+            _local_addr.Clear();
+            _remote_addr.Clear();
+            foreach (Node node in root["values"].GetObjects())
+            {
+                string name = node._name;
+                if (node.isArray())
+                {
+                    try
+                    {
+                        foreach (Node node2 in node)
+                        {
+                            string desc = node2["desc"].Required();
+                            IPAddress iaddr = node2["ip"].Required();
+                            int portno = node2["port"].Required();
+                            IPEndPoint endPoint = new IPEndPoint(iaddr, portno);
+                            switch(name)
+                            {
+                                case "local_addr":
+                                    _local_addr.Add((desc, endPoint));
+                                    break;
+                                case "remote_addr":
+                                    _remote_addr.Add((desc, endPoint));
+                                    break;
+                                default :
+                                    throw new Exception($"配列項目で指定できるのは'local_addr'と'remote_addr'だけです");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"ScriptDefineのvalues('{name}')で読み込みエラー in {path}", ex);
+                    }
+                }
+            }
+
+
             _commMessages.Clear();
             foreach (Node node in root["values"].GetObjects())
             {
                 string name = node._name;
-                try
+                if (node.isArray() == false)
                 {
-                    node.AddValue("id", name);      // Commandクラスが'id'必須なので追加しておく
-                    CommandSend cmd = new CommandSend(node);
-                    CommMessage msg = cmd.GetMessage();
-                    _commMessages.Add(name, msg);
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"ScriptDefineのvalues('{name}')で読み込みエラー in {path}", ex);
+                    try
+                    {
+                        node.AddValue("id", name);      // Commandクラスが'id'必須なので追加しておく
+                        CommandSend cmd = new CommandSend(node);
+                        CommMessage msg = cmd.GetMessage();
+                        _commMessages.Add(name, msg);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"ScriptDefineのvalues('{name}')で読み込みエラー in {path}", ex);
+                    }
                 }
             }
 
@@ -172,6 +215,14 @@ namespace SocketTool
             return _script_select.ToArray();
         }
 
+        public (string desc, IPEndPoint epoint)[] GetLocalAddr()
+        {
+            return _local_addr.ToArray();
+        }
+        public (string desc, IPEndPoint epoint)[] GetRemoteAddr()
+        {
+            return _remote_addr.ToArray();
+        }
 
         public CommMessage GetValueMsg(string name)
         {

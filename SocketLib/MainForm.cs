@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
@@ -26,6 +27,17 @@ namespace SampleMain
             listensocket.OnExceptionEvent += OnException;
             listensocket.OnAcceptEvent += OnAccept;
             listensocket.OnDisConnectEvent += OnDisConnect;
+
+            (string desc, IPEndPoint epoint)[] local = ScriptDefine.GetInstance().GetLocalAddr();
+            foreach (var item in local)
+            {
+               this.cbx_addr1.AddItem(item.desc, item.epoint);
+            }
+            (string desc, IPEndPoint epoint)[] remote = ScriptDefine.GetInstance().GetRemoteAddr();
+            foreach (var item in remote)
+            {
+                this.cbx_addr2.AddItem(item.desc, item.epoint);
+            }
         }
 
         private void DisplayLog(string message)
@@ -158,6 +170,19 @@ namespace SampleMain
             frm.StartPosition = FormStartPosition.Manual;
             frm.Location = SocketFormLocation;
             frm.Show();
+        }
+
+        private void cbx_addr1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+           IPEndPoint val = (IPEndPoint)cbx_addr1.SelectedValue;
+            txt_ipAddr1.Text = val.Address.ToString();
+            txt_portNo1.Text = val.Port.ToString();
+        }
+        private void cbx_addr2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            IPEndPoint val = (IPEndPoint)cbx_addr2.SelectedValue;
+            txt_ipAddr2.Text = val.Address.ToString();
+            txt_portNo2.Text = val.Port.ToString();
         }
 
     }

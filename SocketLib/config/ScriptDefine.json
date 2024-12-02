@@ -3,8 +3,19 @@
     "++seqno":123, // 参照するたびにインクリメントする
     "dst":"abc9",
     "src":"76543210",
-    "status":{"dtype":"14", "values":{"blk[0].sts101":1, "blk[0].sts102":1, "blk[0].a[0].sts":10, "blk[0].a[1].sts":11, "blk[1].b[0].sts":12, "blk[1].b[1].sts":13, }}
+    "status":{"dtype":"14", "values":{"blk[0].sts101":1, "blk[0].sts102":1, "blk[0].a[0].sts":10, "blk[0].a[1].sts":11, "blk[1].b[0].sts":12, "blk[1].b[1].sts":13, }},
+    "local_addr":[
+    	{"desc":"料金所1", "ip":"192.168.179.2", "port":901},
+    	{"desc":"料金所2", "ip":"192.168.179.2", "port":902},
+    	{"desc":"処理部", "ip":"192.168.179.2", "port":900},
+    ],
+    "remote_addr":[
+    	{"desc":"処理部", "ip":"192.168.179.2", "port":900},
+    	{"desc":"料金所1", "ip":"192.168.179.2", "port":901},
+    	{"desc":"料金所2", "ip":"192.168.179.2", "port":902},
+    ],
   },
+
 
   "Commands":[
     { "id":"set-head", "cmd":"head", "values":{"dst":"dst","src":"src", "hdatm":"now", "seqno":"seqno" }},

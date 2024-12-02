@@ -412,6 +412,7 @@ namespace NCommonUtility
 
                         switch (_jsonNode.GetValueKind())
                         {
+                            case JsonValueKind.Array:
                             case JsonValueKind.Object:
                                 val = JsonSerializer.Deserialize<T>(_jsonNode, options);
                                 break;
