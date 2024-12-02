@@ -37,7 +37,7 @@
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.btn_send = new System.Windows.Forms.Button();
+            this.btn_clear = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.txt_ipAddr1 = new System.Windows.Forms.TextBox();
             this.txt_portNo1 = new System.Windows.Forms.TextBox();
@@ -50,6 +50,10 @@
             this.label4 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
             this.txt_log = new System.Windows.Forms.TextBox();
+            this.checkBox9 = new System.Windows.Forms.CheckBox();
+            this.checkBox10 = new System.Windows.Forms.CheckBox();
+            this.checkBox11 = new System.Windows.Forms.CheckBox();
+            this.checkBox12 = new System.Windows.Forms.CheckBox();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -59,6 +63,10 @@
             // panel1
             // 
             this.panel1.AllowDrop = true;
+            this.panel1.Controls.Add(this.checkBox9);
+            this.panel1.Controls.Add(this.checkBox10);
+            this.panel1.Controls.Add(this.checkBox11);
+            this.panel1.Controls.Add(this.checkBox12);
             this.panel1.Controls.Add(this.checkBox5);
             this.panel1.Controls.Add(this.checkBox6);
             this.panel1.Controls.Add(this.checkBox7);
@@ -67,13 +75,13 @@
             this.panel1.Controls.Add(this.checkBox3);
             this.panel1.Controls.Add(this.checkBox2);
             this.panel1.Controls.Add(this.checkBox1);
-            this.panel1.Controls.Add(this.btn_send);
+            this.panel1.Controls.Add(this.btn_clear);
             this.panel1.Controls.Add(this.groupBox1);
             this.panel1.Controls.Add(this.groupBox2);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(822, 256);
+            this.panel1.Size = new System.Drawing.Size(884, 280);
             this.panel1.TabIndex = 0;
             this.panel1.DragDrop += new System.Windows.Forms.DragEventHandler(this.FormMain_DragDrop);
             this.panel1.DragEnter += new System.Windows.Forms.DragEventHandler(this.FormMain_DragEnter);
@@ -166,15 +174,16 @@
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox_CheckedChanged);
             // 
-            // btn_send
+            // btn_clear
             // 
-            this.btn_send.Location = new System.Drawing.Point(651, 192);
-            this.btn_send.Name = "btn_send";
-            this.btn_send.Size = new System.Drawing.Size(124, 45);
-            this.btn_send.TabIndex = 9;
-            this.btn_send.Text = "送信";
-            this.btn_send.UseVisualStyleBackColor = true;
-            this.btn_send.Click += new System.EventHandler(this.btn_send_Click);
+            this.btn_clear.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_clear.Location = new System.Drawing.Point(748, 229);
+            this.btn_clear.Name = "btn_clear";
+            this.btn_clear.Size = new System.Drawing.Size(124, 45);
+            this.btn_clear.TabIndex = 9;
+            this.btn_clear.Text = "クリア";
+            this.btn_clear.UseVisualStyleBackColor = true;
+            this.btn_clear.Click += new System.EventHandler(this.btn_clear_Click);
             // 
             // groupBox1
             // 
@@ -274,9 +283,9 @@
             // 
             this.panel2.Controls.Add(this.txt_log);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 256);
+            this.panel2.Location = new System.Drawing.Point(0, 280);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(822, 318);
+            this.panel2.Size = new System.Drawing.Size(884, 322);
             this.panel2.TabIndex = 1;
             // 
             // txt_log
@@ -287,17 +296,57 @@
             this.txt_log.Multiline = true;
             this.txt_log.Name = "txt_log";
             this.txt_log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txt_log.Size = new System.Drawing.Size(822, 318);
+            this.txt_log.Size = new System.Drawing.Size(884, 322);
             this.txt_log.TabIndex = 1;
             this.txt_log.DragDrop += new System.Windows.Forms.DragEventHandler(this.FormMain_DragDrop);
             this.txt_log.DragEnter += new System.Windows.Forms.DragEventHandler(this.FormMain_DragEnter);
+            // 
+            // checkBox9
+            // 
+            this.checkBox9.AutoSize = true;
+            this.checkBox9.Location = new System.Drawing.Point(587, 100);
+            this.checkBox9.Name = "checkBox9";
+            this.checkBox9.Size = new System.Drawing.Size(151, 28);
+            this.checkBox9.TabIndex = 21;
+            this.checkBox9.Text = "checkBox9";
+            this.checkBox9.UseVisualStyleBackColor = true;
+            // 
+            // checkBox10
+            // 
+            this.checkBox10.AutoSize = true;
+            this.checkBox10.Location = new System.Drawing.Point(587, 134);
+            this.checkBox10.Name = "checkBox10";
+            this.checkBox10.Size = new System.Drawing.Size(163, 28);
+            this.checkBox10.TabIndex = 20;
+            this.checkBox10.Text = "checkBox10";
+            this.checkBox10.UseVisualStyleBackColor = true;
+            // 
+            // checkBox11
+            // 
+            this.checkBox11.AutoSize = true;
+            this.checkBox11.Location = new System.Drawing.Point(587, 168);
+            this.checkBox11.Name = "checkBox11";
+            this.checkBox11.Size = new System.Drawing.Size(163, 28);
+            this.checkBox11.TabIndex = 19;
+            this.checkBox11.Text = "checkBox11";
+            this.checkBox11.UseVisualStyleBackColor = true;
+            // 
+            // checkBox12
+            // 
+            this.checkBox12.AutoSize = true;
+            this.checkBox12.Location = new System.Drawing.Point(587, 201);
+            this.checkBox12.Name = "checkBox12";
+            this.checkBox12.Size = new System.Drawing.Size(163, 28);
+            this.checkBox12.TabIndex = 18;
+            this.checkBox12.Text = "checkBox12";
+            this.checkBox12.UseVisualStyleBackColor = true;
             // 
             // SocketForm
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(822, 574);
+            this.ClientSize = new System.Drawing.Size(884, 602);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel1);
             this.Name = "SocketForm";
@@ -332,7 +381,7 @@
         private System.Windows.Forms.TextBox txt_portNo2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Button btn_send;
+        private System.Windows.Forms.Button btn_clear;
         private System.Windows.Forms.TextBox txt_log;
         private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.CheckBox checkBox3;
@@ -342,5 +391,9 @@
         private System.Windows.Forms.CheckBox checkBox6;
         private System.Windows.Forms.CheckBox checkBox7;
         private System.Windows.Forms.CheckBox checkBox8;
+        private System.Windows.Forms.CheckBox checkBox9;
+        private System.Windows.Forms.CheckBox checkBox10;
+        private System.Windows.Forms.CheckBox checkBox11;
+        private System.Windows.Forms.CheckBox checkBox12;
     }
 }

@@ -45,23 +45,44 @@ namespace SampleMain
             _checkBoxes.Add(checkBox6);
             _checkBoxes.Add(checkBox7);
             _checkBoxes.Add(checkBox8);
+            _checkBoxes.Add(checkBox9);
+            _checkBoxes.Add(checkBox10);
+            _checkBoxes.Add(checkBox11);
+            _checkBoxes.Add(checkBox12);
             foreach (CheckBox checkBox in _checkBoxes)
             {
                 checkBox.Visible = false;
+                checkBox.Checked = false;
             }
 
-            int idx =0;
-            foreach(ScriptList script in ScriptDefine.GetInstance().GetScriptList())
+            int cmdidx =0;
+            int dispidx = 8;
+            foreach (ScriptList script in ScriptDefine.GetInstance().GetScriptList())
             {
-                if(idx < 8)
+                if (script.Select)
                 {
-                    if (script.Select)
+                    if (script.When == "disp")
                     {
-                        _checkBoxes[idx].Tag = script;
-                        _checkBoxes[idx].Text = script.ID;
-                        _checkBoxes[idx].Checked = script.Enable;
-                        _checkBoxes[idx].Visible = true;
-                        ++idx;
+                        if (dispidx < 12)
+                        {
+                            _checkBoxes[dispidx].Tag = script;
+                            _checkBoxes[dispidx].Text = script.ID;
+                            _checkBoxes[dispidx].Checked = script.Enable;
+                            _checkBoxes[dispidx].Visible = true;
+                            script.Enable = true;       // checkboxの初期値をセットした後は常にenable
+                            ++dispidx;
+                        }
+                    }
+                    else
+                    {
+                        if (cmdidx < 8)
+                        {
+                            _checkBoxes[cmdidx].Tag = script;
+                            _checkBoxes[cmdidx].Text = script.ID;
+                            _checkBoxes[cmdidx].Checked = script.Enable;
+                            _checkBoxes[cmdidx].Visible = true;
+                            ++cmdidx;
+                        }
                     }
                 }
             }
@@ -99,7 +120,10 @@ namespace SampleMain
                 return;
             }
             CommMessage msg = (args.CommMsg);
-            DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
+            if (isDisplay(msg))
+            {
+                DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
+            }
             Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
             ScriptDefine.GetInstance().ExecOnRecv(_Socket, msg);
         }
@@ -122,32 +146,35 @@ namespace SampleMain
                 return;
             }
             CommMessage msg = (args.CommMsg);
-            DisplayLog($"SEND {msg.DName}{msg.GetDescription()}");
+            if (isDisplay(msg))
+            {
+                DisplayLog($"SEND {msg.DName}{msg.GetDescription()}");
+            }
             Log.Info($"SEND {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0,0," ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
         }
 
-
+        private bool isDisplay(CommMessage msg)
+        {
+            for (int i = 8; i < 12; i++)
+            {
+                CheckBox cb = this._checkBoxes[i];
+                ScriptList scr = (ScriptList)cb.Tag;
+                if(scr!=null && scr.Exec(_Socket, msg) == true)
+                {
+                    return cb.Checked;
+                }
+            }
+            return true;
+        }
         private void SocketForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _Socket.Close();
             ScriptDefine.GetInstance().ExecOnDisconnect();
         }
 
-        private void btn_send_Click(object sender, EventArgs e)
+        private void btn_clear_Click(object sender, EventArgs e)
         {
-            CommMessage msg = new CommMessage("22");
-            msg.SetHedValue("hdatm", new ByteArray(DateTime.Now, "yyyyMMddHHmmss"));
-            _Socket.Send(msg);
-            CommMessage msg2 = new CommMessage("30");
-            msg2.SetFldValue("control-type", ByteArray.ParseHex("0001"));
-            System.Threading.Thread.Sleep(1000);
-            _Socket.Send(msg2);
-            msg2.SetFldValue("control-type", ByteArray.ParseHex("0002"));
-            System.Threading.Thread.Sleep(1000);
-            _Socket.Send(msg2);
-            msg2.SetFldValue("control-type", ByteArray.ParseHex("0003"));
-            System.Threading.Thread.Sleep(1000);
-            _Socket.Send(msg2);
+            this.txt_log.Clear();
         }
 
         private void SocketForm_Load(object sender, EventArgs e)
@@ -265,6 +292,5 @@ namespace SampleMain
                 }
             }
         }
-
     }
 }

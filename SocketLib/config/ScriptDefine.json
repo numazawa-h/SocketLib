@@ -34,5 +34,7 @@
           { "dtype":"30", "cmd":["set-status", "send-status"] },
       ]
     },
+    { "id":"disp-ack", "select":true, "enable":false, "when":"disp", "dtype":"91" },
+    { "id":"disp-health", "select":true, "enable":false, "when":"disp", "dtype":"22" },
   ],
 }

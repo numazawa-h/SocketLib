@@ -38,16 +38,21 @@ namespace NCommonUtility
             }
         }
 
-        public void Exec(CommSocket socket, CommMessage msg = null)
+        public bool Exec(CommSocket socket, CommMessage msg = null)
         {
             if (Enable == false)
             {
-                return;
+                return false;
+            }
+            if(When == "disp")
+            {
+                return _scripts[0].Exec(socket, msg);
             }
             foreach (var script in _scripts)
             {
                 script.Exec(socket, msg);
             }
+            return true;
         }
     }
 
@@ -130,29 +135,30 @@ namespace NCommonUtility
                 }
                 _commands.Add(cmd);
             }
-            if(_commands.Count == 0)
+            if(_owner.When != "disp" && _commands.Count == 0)
             {
                 throw new Exception($"Scriptsに'cmd'が定義されていません");
             }
         }
-        public void Exec(CommSocket socket, CommMessage msg=null)
+        public bool Exec(CommSocket socket, CommMessage msg=null)
         {
             string dtype = msg?.DType;
             switch (_owner.When)
             {
                 case "send":
                 case "recv":
+                case "disp":
                     if (dtype == null)
                     {
-                        return;
+                        return false;
                     }
                     if (_without.Contains(dtype) == true)
                     {
-                        return;
+                        return false;
                     }
                     if (_dtypes.Count >0 &&_dtypes.Contains(dtype) == false)
                     {
-                        return;
+                        return false;
                     }
                     break;
             }
@@ -161,6 +167,7 @@ namespace NCommonUtility
             {
                 command.Exec(socket, msg);
             }
+            return true;
         }
     }
 }

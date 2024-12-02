@@ -147,6 +147,9 @@ namespace SocketTool
                             script = new ScriptTimer(def, _comands);
                             _script_timer.Add(scrid, (ScriptTimer)script);
                             break;
+                        case "disp":
+                            script = new ScriptList(def, _comands);
+                            break;
                     }
                     if(script !=null && script.Select == true)
                     {
