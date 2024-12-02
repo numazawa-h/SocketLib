@@ -10,7 +10,7 @@
 			]
 		},
 		{ "id":"91", "name":"肯定応答", "len":  0,"flds":[] },
-		{ "id":"92", "name":"否定応答", "len": 32,"flds":[{ "id":"reson-nak", "ofs": 0, "len":4 },] },
+		{ "id":"92", "name":"否定応答", "len": 32,"flds":[{ "id":"reson-nak", "ofs": 0, "len":2, "disp":true, },] },
 		{ "id":"01", "name":"情報要求(イニシャライズ)", "len": 0,"flds":[] },
 		{ "id":"02", "name":"情報要求(リフレッシュ)", "len": 0,"flds":[] },
 		{ "id":"22", "name":"ヘルスチェック", "len":  0,"flds":[] },
@@ -55,7 +55,7 @@
 		{ "id":"hdatm", "name":"ヘッダ日時", "format":{ "type":"datetime", "valfmt":"yyyyMMddHHmmss", "fmt":"yyyy/MM/dd-HH:mm:ss" } },
 		{ "id":"send-id", "name":"送信ID", "format":{ "type":"int", "fmt":"#{0}" } },
 		{ "id":"control-type", "name":"制御種類", "values":{"0001":"開始", "0002":"一時停止", "0003":"終了" } },
-		{ "id":"reson-nak", "name":"否定理由", "values":{"0001":"シーケンスエラー", "0009":"その他" } },
+		{ "id":"reson-nak", "name":"否定理由", "values":{"0001":"シーケンスエラー", "3132":"その他" } },
 		{ "id":"carno", "name":"車両番号", "format":{ "type":"int", "fmt":"#{0:D}" ,"notdisp":0 } },				// 車両番号が0なら表示しない
 		{ "id":"judgm", "name":"判別結果",  "values":{"01":"正常ETC", "02":"異常ETC", "03":"非ETC" } },
 		{ "id":"carpos","name":"車両位置",  "values":{"01":"S2", "02":"S4", "04":"後退退出" } },

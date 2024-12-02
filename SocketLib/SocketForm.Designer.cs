@@ -58,6 +58,7 @@
             // 
             // panel1
             // 
+            this.panel1.AllowDrop = true;
             this.panel1.Controls.Add(this.checkBox5);
             this.panel1.Controls.Add(this.checkBox6);
             this.panel1.Controls.Add(this.checkBox7);
@@ -74,6 +75,8 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(822, 256);
             this.panel1.TabIndex = 0;
+            this.panel1.DragDrop += new System.Windows.Forms.DragEventHandler(this.FormMain_DragDrop);
+            this.panel1.DragEnter += new System.Windows.Forms.DragEventHandler(this.FormMain_DragEnter);
             // 
             // checkBox5
             // 
@@ -278,6 +281,7 @@
             // 
             // txt_log
             // 
+            this.txt_log.AllowDrop = true;
             this.txt_log.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txt_log.Location = new System.Drawing.Point(0, 0);
             this.txt_log.Multiline = true;
@@ -285,9 +289,12 @@
             this.txt_log.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txt_log.Size = new System.Drawing.Size(822, 318);
             this.txt_log.TabIndex = 1;
+            this.txt_log.DragDrop += new System.Windows.Forms.DragEventHandler(this.FormMain_DragDrop);
+            this.txt_log.DragEnter += new System.Windows.Forms.DragEventHandler(this.FormMain_DragEnter);
             // 
             // SocketForm
             // 
+            this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(822, 574);
@@ -297,6 +304,8 @@
             this.Text = "送受信";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SocketForm_FormClosed);
             this.Load += new System.EventHandler(this.SocketForm_Load);
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.FormMain_DragDrop);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.FormMain_DragEnter);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.groupBox1.ResumeLayout(false);

@@ -5,11 +5,15 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static NCommonUtility.JsonConfig;
+using static System.Windows.Forms.LinkLabel;
 
 namespace SampleMain
 {
@@ -157,5 +161,110 @@ namespace SampleMain
             CheckBox cb =(CheckBox)sender;
             ((ScriptList)cb.Tag).Enable = cb.Checked;
         }
+
+
+        public void FormMain_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                // ドラッグ中のファイルやディレクトリの取得
+                string[] drags = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                foreach (string d in drags)
+                {
+                    if (!System.IO.File.Exists(d))
+                    {
+                        // ファイル以外であればイベント・ハンドラを抜ける
+                        return;
+                    }
+                }
+                e.Effect = DragDropEffects.Copy;
+            }
+        }
+
+        public void FormMain_DragDrop(object sender, DragEventArgs e)
+        {
+            int dtypelen = CommMessageDefine.GetInstance().GetMessageDefine("head").GetFldDefine("dtype").Length;
+
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string path in files)
+            {
+                try
+                {
+                    string dtype = null;
+                    byte[] hed = System.Array.Empty<byte>();
+                    byte[] dat = System.Array.Empty<byte>();
+                    string fname = System.IO.Path.GetFileName(path);
+
+                    string file_ext = Path.GetExtension(path);
+                    if (file_ext == ".txt")
+                    {
+                        dtype = null;
+                        hed = System.Array.Empty<byte>();
+                        dat = System.Array.Empty<byte>();
+                        using (System.IO.StreamReader sr = new System.IO.StreamReader(path))
+                        {
+                            string filetext = sr.ReadToEnd();
+                            Regex reg_comment = new Regex("//.*\\n");
+                            Regex reg_whitesp = new Regex("[\\r\\n\\s\\t]");
+                            string txt = reg_whitesp.Replace(reg_comment.Replace(filetext, ""), "");
+                            var matchs = Regex.Matches(txt, @"\[[0-9,a-f,A-F ]*\]");
+                            if (matchs.Count != 2)
+                            {
+                                throw new Exception($"フォーマットが[head][data]の形式ではありません");
+                            }
+                            Regex r = new Regex("[\\[\\] \\t]");
+                            string hed_bcd = r.Replace(matchs[0].Value, "");
+                            string dat_bcd = r.Replace(matchs[1].Value, "");
+                            if (hed_bcd.Length == (dtypelen*2))
+                            {
+                                dtype = hed_bcd;
+                                dat = ByteArray.ParseHex(dat_bcd);
+                            }
+                            else
+                            {
+                                hed = ByteArray.ParseHex(hed_bcd);
+                                dat = ByteArray.ParseHex(dat_bcd);
+                            }
+                        }
+                        if (dtype != null && dat.Length > 0)
+                        {
+                            _Socket.Send(new CommMessage(dtype, dat));
+                        }
+                        if (hed.Length > 0 && dat.Length > 0)
+                        {
+                            _Socket.Send(new CommMessage(hed, dat));
+                        }
+                    }
+                    else if (file_ext == ".bin")
+                    {
+                        dtype = fname.Substring(0, dtypelen * 2);
+                        if (CommMessageDefine.GetInstance().Contains(dtype) == false)
+                        {
+                            throw new Exception($"dtype'{dtype}'が定義されていません");
+                        }
+                        using (System.IO.FileStream fs = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+                        {
+                            dat = new byte[fs.Length];
+                            fs.Read(dat, 0, dat.Length);
+                        }
+                        _Socket.Send(new CommMessage(dtype, dat));
+                    }
+                    else if (file_ext == ".json")
+                    {
+                        JsonConfig.RootNode root = JsonConfig.ReadJson(path);
+                        foreach (Node def in root["Commands"])
+                        {
+                            Command.ReadJson(def).Exec(_Socket);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn($"ドラッグドロップ'{path}'読み込みで例外", ex);
+                }
+            }
+        }
+
     }
 }

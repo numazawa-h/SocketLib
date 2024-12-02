@@ -67,6 +67,12 @@ namespace SocketTool
             }
         }
 
+        public bool Contains(string dtype)
+        {
+            dtype = dtype.ToLower();
+            return _message_def.ContainsKey(dtype);
+        }
+
         public MessageDefine GetMessageDefine(string dtype)
         {
             dtype = dtype.ToLower();

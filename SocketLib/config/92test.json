@@ -1,0 +1,5 @@
+{
+  "Commands":[
+    { "id":"send-nak", "cmd":"send", "dtype":"92", "values":{"reson-nak":1}},
+  ]
+}
