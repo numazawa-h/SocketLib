@@ -268,6 +268,7 @@ namespace NCommonUtility
                         switch (pair.Value.GetValueKind())
                         {
                             case JsonValueKind.Object:
+                            case JsonValueKind.Array:
                                 vals.Add(new Node(this, node, name));
                                 break;
                         }
