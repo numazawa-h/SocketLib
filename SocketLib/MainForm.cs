@@ -132,7 +132,7 @@ namespace SampleMain
             socket.OnDisConnectEvent += OnDisConnect;
 
             DisplayLog($"OnAccept {socket.RemoteIPAddress}:{socket.RemotePortno}");
-            var frm = new SocketForm(socket);
+            var frm = new SocketForm(socket, this.cbx_addr1.Text);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);
@@ -161,7 +161,7 @@ namespace SampleMain
                 return;
             }
             DisplayLog($"OnConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
-            var frm = new SocketForm((CommSocket)args.Socket);
+            var frm = new SocketForm((CommSocket)args.Socket, this.cbx_addr1.Text);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);

@@ -22,7 +22,7 @@ namespace SampleMain
         CommSocket _Socket;
         List<CheckBox> _checkBoxes = new List<CheckBox>();
 
-        public SocketForm(CommSocket socket)
+        public SocketForm(CommSocket socket, string title=null)
         {
             _Socket = socket;
             _Socket.OnDisConnectEvent += OnDisConnect;
@@ -87,13 +87,20 @@ namespace SampleMain
                 }
             }
 
-            if (socket.isServer)
+            if (title != null)
             {
-                this.Text = "サーバーソケット";
+                this.Text = title;
             }
-            if (socket.isClient)
+            else
             {
-                this.Text = "クライアントソケット";
+                if (socket.isServer)
+                {
+                    this.Text = "サーバーソケット";
+                }
+                if (socket.isClient)
+                {
+                    this.Text = "クライアントソケット";
+                }
             }
         }
 
