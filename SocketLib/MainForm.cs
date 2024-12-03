@@ -177,12 +177,14 @@ namespace SampleMain
            IPEndPoint val = (IPEndPoint)cbx_addr1.SelectedValue;
             txt_ipAddr1.Text = val.Address.ToString();
             txt_portNo1.Text = val.Port.ToString();
+            ScriptDefine.GetInstance().OnSelectLocal(cbx_addr1.Text);
         }
         private void cbx_addr2_SelectedIndexChanged(object sender, EventArgs e)
         {
             IPEndPoint val = (IPEndPoint)cbx_addr2.SelectedValue;
             txt_ipAddr2.Text = val.Address.ToString();
             txt_portNo2.Text = val.Port.ToString();
+            ScriptDefine.GetInstance().OnSelectRemote(cbx_addr2.Text);
         }
 
     }

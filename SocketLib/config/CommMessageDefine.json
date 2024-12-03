@@ -1,12 +1,13 @@
 {
   "message-def":[
-		{ "id":"head", "name":"ヘッダ", "len": 32,"flds":[
-				{ "id":"dst",  "name": "送信先",      "ofs": 0, "len": 4 },
-				{ "id":"src",  "name": "送信元",      "ofs": 4, "len": 4 },
-				{ "id":"seqno","name": "送信通番",    "ofs": 8, "len": 4 },
-				{ "id":"hdatm","name": "送信日時",    "ofs":12, "len": 7 },		// BCD形式()
-				{ "id":"dtype","name": "データ種別",  "ofs":19, "len": 1 },
-				{ "id":"plen", "name": "データ長",    "ofs":20, "len": 2 },
+		{ "id":"head", "name":"ヘッダ", "len": 16,"flds":[
+				{ "id":"dst",  "name": "相手装置",  "ofs": 0, "len": 1 },
+				{ "id":"src",  "name": "自装置",    "ofs": 1, "len": 1 },
+				{ "id":"seqno","name": "送信通番",  "ofs": 2, "len": 4 },
+				{ "id":"hdatm","name": "送信日時",  "ofs": 6, "len": 7 },		// BCD形式("values-def"の"valfmt"定義が必須)
+				{ "id":"dtype","name": "データ種別","ofs":13, "len": 1 },		// dtype必須
+	//			{ "id":"dlen", "name": "データ長",  "ofs":14, "len": 2 },		// dlen,plenどちらか必須
+				{ "id":"plen", "name": "パケット長","ofs":14, "len": 2 },
 			]
 		},
 		{ "id":"91", "name":"肯定応答", "len":  0,"flds":[] },

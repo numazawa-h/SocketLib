@@ -37,14 +37,14 @@ namespace SocketTool
                     case System.Text.Json.JsonValueKind.Number:
                         if (scdef.ContainsKeyIntValue(key)==false)
                         {
-                            throw new Exception($"Commandsの'{CommandId}'でvalues指定('{key}')が定義されていません");
+                            throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
                         }
                         _ivalues.Add(key, value.GetValue<int>());
                         break;
                     case System.Text.Json.JsonValueKind.String:
                         if (scdef.ContainsKeyByteValue(key) == false)
                         {
-                            throw new Exception($"Commandsの'{CommandId}'でvalues指定('{key}')が定義されていません");
+                            throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
                         }
                         _bvalues.Add(key, ByteArray.StrToByte(value.ToString()));
                         break;

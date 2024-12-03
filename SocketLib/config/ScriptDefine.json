@@ -1,25 +1,27 @@
 {
   "values":{
-    "++seqno":123, // 参照するたびにインクリメントする
-    "dst":"abc9",
-    "src":"76543210",
+    "++seqno":123, 		// "++"を付けると参照するたびにインクリメントする数値項目になる
+    
+    // 任意の送信コマンドを変数にできる
     "status":{"dtype":"14", "values":{"blk[0].sts101":1, "blk[0].sts102":1, "blk[0].a[0].sts":10, "blk[0].a[1].sts":11, "blk[1].b[0].sts":12, "blk[1].b[1].sts":13, }},
+
+    "mtype_src":"00",	// 自装置タイプlocal_addrを選択した時に設定される
     "local_addr":[
-    	{"desc":"料金所1", "ip":"192.168.179.2", "port":901},
-    	{"desc":"料金所2", "ip":"192.168.179.2", "port":902},
-    	{"desc":"処理部", "ip":"192.168.179.2", "port":900},
+    	{"desc":"サーバー", "ip":"192.168.179.2", "port":900, "values":{"mtype_src":"90" } },
+    	{"desc":"クライアント1", "ip":"192.168.179.2", "port":901, "values":{"mtype_src":"91" } },
+    	{"desc":"クライアント2", "ip":"192.168.179.2", "port":902, "values":{"mtype_src":"92" } },
     ],
+    "mtype_dst":"00",	// 相手装置タイプremote_addrを選択した時に設定される
     "remote_addr":[
-    	{"desc":"処理部", "ip":"192.168.179.2", "port":900},
-    	{"desc":"料金所1", "ip":"192.168.179.2", "port":901},
-    	{"desc":"料金所2", "ip":"192.168.179.2", "port":902},
+    	{"desc":"サーバー", "ip":"192.168.179.2", "port":900, "values":{"mtype_dst":"90" } },
+    	{"desc":"クライアント1", "ip":"192.168.179.2", "port":901, "values":{"mtype_dst":"91" } },
+    	{"desc":"クライアント2", "ip":"192.168.179.2", "port":902, "values":{"mtype_dst":"92" } },
     ],
   },
 
-
   "Commands":[
-    { "id":"set-head", "cmd":"head", "values":{"dst":"dst","src":"src", "hdatm":"now", "seqno":"seqno" }},
-    { "id":"set-init", "cmd":"set", "values":{"seqno":0, "src":"01234567" } },
+    { "id":"set-head", "cmd":"head", "values":{"dst":"mtype_dst","src":"mtype_src", "hdatm":"now", "seqno":"seqno" }},
+    { "id":"set-init", "cmd":"set", "values":{"seqno":0, } },
     { "id":"send-ack", "cmd":"send", "dtype":"91" },
     { "id":"send-nak", "cmd":"send", "dtype":"92", "values":{"reson-nak":9}},
     { "id":"send-health", "cmd":"send", "dtype":"22", },
@@ -27,9 +29,10 @@
     { "id":"send-reset", "cmd":"send", "dtype":"02" },
     { "id":"send-control", "cmd":"send", "dtype":"30" , "values":{"control-type":"0002", "control-01":255 }},
     { "id":"send-resend", "cmd":"send", "dtype":"40" , "values":{"send-id":18, "carno":255 }},
-    { "id":"response-resend", "cmd":"send", "dtype":"4f", "reqcopy":["send-id", "carno"], "values":{"reason-4f":9}},
+    { "id":"response-resend", "cmd":"send", "dtype":"4f", "reqcopy":["send-id", "carno"], "values":{"reason-4f":9}},	// reqcopyは要求電文の同一項目をコピーする
     { "id":"send-status", "cmd":"send", "msg":"status" },
-    { "id":"set-status", "cmd":"set", "msg":"status", "values":{"sdatm":"now","sts001":2, "sts002":3 }, "msgcopy":{ "sts003":"control-01"}}
+    { "id":"set-status", "cmd":"set", "msg":"status",     "msgcopy":{ "sts003":"control-01"},	// msgcopyは受信電文の任意の項目をコピーする
+				"values":{"sdatm":"now","sts001":2, "sts002":3 }},
   ],
 
   "Scripts":[
