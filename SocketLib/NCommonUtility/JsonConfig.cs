@@ -268,8 +268,34 @@ namespace NCommonUtility
                         switch (pair.Value.GetValueKind())
                         {
                             case JsonValueKind.Object:
-                            case JsonValueKind.Array:
                                 vals.Add(new Node(this, node, name));
+                                break;
+                        }
+                    }
+                }
+                return vals.ToArray();
+            }
+            public Node[] GetArrayObject()
+            {
+                List<Node> vals = new List<Node>();
+                if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
+                {
+                    foreach (var pair in _jsonNode.AsObject())
+                    {
+                        string name = pair.Key;
+                        JsonNode node = pair.Value;
+                        switch (node.GetValueKind())
+                        {
+                            case JsonValueKind.Array:
+                                int idx = 0;
+                                foreach(JsonNode node1 in node.AsArray())
+                                {
+                                    if (node1.GetValueKind() == JsonValueKind.Object)
+                                    {
+                                        vals.Add(new Node(this, node1, $"{name}[{idx}]"));
+                                    }
+                                    idx++;
+                                }
                                 break;
                         }
                     }
