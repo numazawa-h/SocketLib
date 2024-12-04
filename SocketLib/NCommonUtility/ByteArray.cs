@@ -399,6 +399,12 @@ namespace NCommonUtility
             }
             else
             {
+                if(str.Length>1 && str.Substring(str.Length-1)==" ")
+                {
+                    // 文字列の最後がスペースなら削除する
+                    // これにより例えば"abc"という文字列を指定したい時、"abc "と指定すればよい（16進データにならない）
+                    str = str.Substring(0,str.Length-1);
+                }
                 return Encoding.ASCII.GetBytes(str);
             }
         }

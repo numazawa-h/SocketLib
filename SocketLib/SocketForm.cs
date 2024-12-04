@@ -67,9 +67,8 @@ namespace SampleMain
                         {
                             _checkBoxes[dispidx].Tag = script;
                             _checkBoxes[dispidx].Text = script.ID;
-                            _checkBoxes[dispidx].Checked = script.Enable;
+                            _checkBoxes[dispidx].Checked = script.Enabled;
                             _checkBoxes[dispidx].Visible = true;
-                            script.Enable = true;       // checkboxの初期値をセットした後は常にenable
                             ++dispidx;
                         }
                     }
@@ -79,7 +78,7 @@ namespace SampleMain
                         {
                             _checkBoxes[cmdidx].Tag = script;
                             _checkBoxes[cmdidx].Text = script.ID;
-                            _checkBoxes[cmdidx].Checked = script.Enable;
+                            _checkBoxes[cmdidx].Checked = script.Enabled;
                             _checkBoxes[cmdidx].Visible = true;
                             ++cmdidx;
                         }
@@ -193,7 +192,7 @@ namespace SampleMain
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox cb =(CheckBox)sender;
-            ((ScriptList)cb.Tag).Enable = cb.Checked;
+            ((ScriptList)cb.Tag).Enabled = cb.Checked;
         }
 
 

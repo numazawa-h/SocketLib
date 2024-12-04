@@ -17,14 +17,22 @@ namespace NCommonUtility
         public string ID { get; protected set; }
         public string When { get; protected set; }
         public bool Display { get; protected set; }
-        public bool Enable = false;
+        public bool Enabled = false;
         protected List<Script> _scripts = new List<Script>();
         public ScriptList(Node def, Dictionary<string, Command> comands)
         {
             ID = def["id"].Required();
             When = def["when"].Required();
-            Display = (bool?)def["display"] is bool v1 ? v1 : false;
-            Enable = (bool?)def["enable"] is bool v2 ? v2 : true;  // 省略値は、true
+            if(def.ContainsKey("checked"))
+            {
+                Display = true;
+                Enabled = def["checked"].Required();
+            }
+            else
+            {
+                Display = false;
+                Enabled = true;
+            }
             if (def.ContainsKey("scripts"))
             {
                 foreach(Node _def in def["scripts"])
@@ -40,13 +48,13 @@ namespace NCommonUtility
 
         public bool Exec(CommSocket socket, CommMessage msg = null)
         {
-            if (Enable == false)
-            {
-                return false;
-            }
-            if(When == "disp")
+            if (When == "disp")
             {
                 return _scripts[0].Exec(socket, msg);
+            }
+            if (Enabled == false)
+            {
+                return false;
             }
             foreach (var script in _scripts)
             {
@@ -94,7 +102,7 @@ namespace NCommonUtility
             {
                 Stop();
             }
-            if (Enable == false || _socket == null)
+            if (Enabled == false || _socket == null)
             {
                 return;
             }
