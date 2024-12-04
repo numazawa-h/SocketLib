@@ -28,22 +28,31 @@
 		},
 		{ "id":"30", "name":"個別制御", "len":  64,"flds":[
 			{ "id":"control-type", "ofs": 0, "len":2, "disp":true, },
-			{ "id":"control-01", "ofs": 2, "len":1, },
-		  ] 
+			// control-typeが"0001"の時
+			{ "block":"type01", "ofs":2, "flds":[
+				{ "id":"idx", "ofs": 0, "len":1, },
+				{ "id":"cmd", "ofs": 1, "len":1, },
+			  ],
+			},
+			// control-typeが"0002"の時
+			{ "block":"type02", "ofs":2, "flds":[
+				{ "id":"cmd", "ofs": 1, "len":1, },
+			  ],
+			},
+		  ],
 		},
 		{ "id":"14", "name":"状態", "len":  640,"flds":[
-			{ "id":"sdatm", "ofs": 0, "len":7, },
-			{ "id":"sts001", "ofs": 7, "len":1, },
-			{ "id":"sts002", "ofs": 8, "len":1, },
-			{ "id":"sts003", "ofs": 9, "len":1, },
-			{ "block":"blk", "ofs":10, "len":16, "rep":2, "flds":[
-				{ "id":"sts101", "ofs":0, "len":1, },
-				{ "id":"sts102", "ofs":1, "len":1, },
-				{ "block":"a", "ofs":5, "len":5, "rep":5, "flds":[
+			{ "id":"sts001", "ofs": 0, "len":1, },
+			{ "id":"sts002", "ofs": 1, "len":1, },
+			{ "id":"sts003", "ofs": 2, "len":1, },
+			{ "block":"blk", "ofs": 8, "len":16, "rep":2, "flds":[
+				{ "id":"b01", "ofs":0, "len":1, },
+				{ "id":"b02", "ofs":1, "len":1, },
+				{ "block":"a", "ofs":5, "len":1, "rep":5, "flds":[
 					{ "id":"sts", "ofs":0, "len":1, },
 				  ]
 				},
-				{ "block":"b", "ofs":10, "len":5, "rep":5, "flds":[
+				{ "block":"b", "ofs":10, "len":1, "rep":5, "flds":[
 					{ "id":"sts", "ofs":0, "len":1, },
 				  ]
 				},

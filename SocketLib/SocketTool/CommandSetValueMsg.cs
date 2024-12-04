@@ -21,7 +21,11 @@ namespace SocketTool
         public CommandSetValueMsg(Node node):base(node) 
         {
             _name = node["msg"];
+        }
 
+        public CommandSetValueMsg(Node node, string name) : base(node)
+        {
+            _name = name;
         }
 
         public override Command Copy()

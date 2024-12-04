@@ -14,7 +14,11 @@
   //   local_addrとremote_addrには選択された時に実行する変数setをvalues定義できる
   "Working-area":{	
     "++seqno":123,
-    "status":{"dtype":"14", "values":{"blk[0].sts101":1, "blk[0].sts102":1, "blk[0].a[0].sts":10, "blk[0].a[1].sts":11, "blk[1].b[0].sts":12, "blk[1].b[1].sts":13, }},
+    "status":{"dtype":"14", "values":{
+    	"blk[0].b01":1, "blk[0].b02":2,
+    	"blk[0].a[0].sts":10, "blk[0].a[1].sts":11, "blk[0].a[2].sts":12, "blk[0].a[3].sts":13, "blk[0].a[4].sts":14,
+    	"blk[1].b[0].sts":12, "blk[1].b[1].sts":13, 
+    }},
 
     "mtype_src":"00",	// 自装置タイプlocal_addrを選択した時に設定される
     "local_addr":[
@@ -33,6 +37,7 @@
   // 実行するコマンドを定義する
   //   cmd:headはヘッダ項目を更新する（送信電文に変更後のヘッダがつけられる）
   //   cmd:setは'Working-area'の変数を更新する
+  //   cmd:set
   //   cmd:sendは指定された電文を送信する
   //   valuesは更新する内容を定義する（項目名:値）※値には'Working-area'の変数名も指定できる
   //   reqcopyは要求電文の項目を応答電文の同一項目にコピーする
@@ -45,12 +50,31 @@
     { "id":"send-health", "cmd":"send", "dtype":"22", },
     { "id":"send-init", "cmd":"send", "dtype":"01" },
     { "id":"send-reset", "cmd":"send", "dtype":"02" },
-    { "id":"send-control", "cmd":"send", "dtype":"30" , "values":{"control-type":"0002", "control-01":255 }},
+    { "id":"send-control", "cmd":"send", "dtype":"30" , "values":{"control-type":"0001", "type01.idx":9, "type01.cmd":"99" }},
     { "id":"send-resend", "cmd":"send", "dtype":"40" , "values":{"send-id":18, "carno":255 }},
     { "id":"response-resend", "cmd":"send", "dtype":"4f", "reqcopy":["send-id", "carno"], "values":{"reason-4f":9}},
     { "id":"send-status", "cmd":"send", "msg":"status" },
-    { "id":"set-status", "cmd":"set", "msg":"status",     "msgcopy":{ "sts003":"control-01"},
-				"values":{"sdatm":"now","sts001":2, "sts002":3 }},
+    { "id":"set-status", "cmd":"set", "msg":"status", "select":[
+	    	{ "case":{ "control-type":1, "type01.cmd":"99", "type01.idx":0 }, 
+	    			"msgcopy":{ "sts001":"type01.cmd" },
+	    			"values":{ "blk[0].a[0].sts":"a0" },
+	    	},	
+	    	{ "case":{ "control-type":1, "type01.cmd":"99", "type01.idx":1 }, 
+	    			"msgcopy":{ "sts001":"type01.cmd" },
+	    			"values":{ "blk[0].a[1].sts":"a1" },
+	    	},	
+	    	{ "case":{ "control-type":1, "type01.cmd":"99", "type01.idx":2 }, 
+	    			"msgcopy":{ "sts001":"type01.cmd" },
+	    			"values":{ "blk[0].a[2].sts":"a2" },
+	    	},	
+	    	{ "case":{ "control-type":2 }, 
+	    			"msgcopy":{ "sts002":"type02.cmd" },
+	    	},	
+	    	{ "case":{ }, // 無条件実行
+	    			"msgcopy":{ "sts003":"control-type" },
+	    	},	
+		]
+	},
   ],
 
   // 各イベント発生時に実行するコマンドを定義する
@@ -66,7 +90,7 @@
   "Scripts":[	
     { "id":"auto-head","when":"send", "cmd":"set-head" },
     { "id":"auto-connect","when":"connect", "cmd":[ "set-init", "send-init"] },
-    { "id":"auto-ack", "checked":false, "when":"recv", "without":["91","92"], "cmd":"send-ack" },
+    { "id":"auto-ack", "checked":false, "when":"recv", "without":["91","92","22"], "cmd":"send-ack" },
     { "id":"health-check", "checked":false, "when":"timer", "start":2000, "interval":5000, "cmd":"send-health" },
     { "id":"send-resend", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":"send-resend" },
     { "id":"send-control", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":"send-control" },

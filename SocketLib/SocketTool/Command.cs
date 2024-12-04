@@ -211,7 +211,14 @@ namespace SocketTool
                 case "set":
                     if (node.ContainsKey("msg"))
                     {
-                        cmd = new CommandSetValueMsg(node);
+                        if (node.ContainsKey("select"))
+                        {
+                            cmd = new CommandSetValueMsgList(node);
+                        }
+                        else
+                        {
+                            cmd = new CommandSetValueMsg(node);
+                        }
                     }
                     else
                     {
