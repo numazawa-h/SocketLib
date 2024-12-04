@@ -16,14 +16,14 @@ namespace NCommonUtility
     {
         public string ID { get; protected set; }
         public string When { get; protected set; }
-        public bool Select { get; protected set; }
+        public bool Display { get; protected set; }
         public bool Enable = false;
         protected List<Script> _scripts = new List<Script>();
         public ScriptList(Node def, Dictionary<string, Command> comands)
         {
             ID = def["id"].Required();
             When = def["when"].Required();
-            Select = (bool?)def["select"] is bool v1 ? v1 : false;
+            Display = (bool?)def["display"] is bool v1 ? v1 : false;
             Enable = (bool?)def["enable"] is bool v2 ? v2 : true;  // 省略値は、true
             if (def.ContainsKey("scripts"))
             {

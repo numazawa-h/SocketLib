@@ -59,7 +59,7 @@ namespace SampleMain
             int dispidx = 8;
             foreach (ScriptList script in ScriptDefine.GetInstance().GetScriptList())
             {
-                if (script.Select)
+                if (script.Display)
                 {
                     if (script.When == "disp")
                     {

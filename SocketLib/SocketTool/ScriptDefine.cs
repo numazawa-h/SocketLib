@@ -189,7 +189,7 @@ namespace SocketTool
                             script = new ScriptList(def, _comands);
                             break;
                     }
-                    if(script !=null && script.Select == true)
+                    if(script !=null && script.Display == true)
                     {
                         _script_select.Add(script);
                     }
