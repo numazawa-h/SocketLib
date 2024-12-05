@@ -79,7 +79,7 @@ namespace NCommonUtility
             if (isInit == false)
             {
                 isInit = true;
-                if (item_list.Count > 1)
+                if (item_list.Count > 0)
                 {
                     this.DataSource = item_list;
                     if (AllowEdit == false)
