@@ -126,12 +126,21 @@ namespace SampleMain
                 return;
             }
             CommMessage msg = (args.CommMsg);
-            if (isDisplay(msg))
+            try
             {
-                DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
+                if (isDisplay(msg))
+                {
+                    DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
+                }
+                Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
+                ScriptDefine.GetInstance().ExecOnRecv(_Socket, msg);
             }
-            Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
-            ScriptDefine.GetInstance().ExecOnRecv(_Socket, msg);
+            catch (Exception ex)
+            {
+                string errmsg = $"OnReceiveイベントハンドラで例外発生({msg.DName})";
+                Log.Warn(errmsg, ex);
+                DisplayLog(errmsg);
+            }
         }
 
         private void OnPreSend(object sender, CommMessageEventArgs args)
@@ -142,7 +151,16 @@ namespace SampleMain
                 return;
             }
             CommMessage msg = (args.CommMsg);
-            ScriptDefine.GetInstance().ExecOnSend(_Socket, msg);
+            try
+            {
+                ScriptDefine.GetInstance().ExecOnSend(_Socket, msg);
+            }
+            catch (Exception ex)
+            {
+                string errmsg = $"OnPreSendイベントハンドラで例外発生({msg.DName})";
+                Log.Warn(errmsg, ex);
+                DisplayLog(errmsg);
+            }
         }
         private void OnSend(object sender, CommMessageEventArgs args)
         {
@@ -152,11 +170,20 @@ namespace SampleMain
                 return;
             }
             CommMessage msg = (args.CommMsg);
-            if (isDisplay(msg))
+            try
             {
-                DisplayLog($"SEND {msg.DName}{msg.GetDescription()}");
+                if (isDisplay(msg))
+                {
+                    DisplayLog($"SEND {msg.DName}{msg.GetDescription()}");
+                }
+                Log.Info($"SEND {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
             }
-            Log.Info($"SEND {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0,0," ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
+            catch (Exception ex)
+            {
+                string errmsg = $"OnSendイベントハンドラで例外発生({msg.DName})";
+                Log.Warn(errmsg, ex);
+                DisplayLog(errmsg);
+            }
         }
 
         private bool isDisplay(CommMessage msg)
@@ -185,7 +212,16 @@ namespace SampleMain
 
         private void SocketForm_Load(object sender, EventArgs e)
         {
-            ScriptDefine.GetInstance().ExecOnConnect(_Socket);
+            try
+            {
+                ScriptDefine.GetInstance().ExecOnConnect(_Socket);
+            }
+            catch (Exception ex)
+            {
+                string errmsg = $"SocketForm_Loadイベントハンドラで例外発生)";
+                Log.Warn(errmsg, ex);
+                DisplayLog(errmsg);
+            }
         }
 
 
