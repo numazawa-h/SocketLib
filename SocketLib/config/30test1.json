@@ -2,7 +2,7 @@
   "Commands":[
     { "id":"個別制御", "cmd":"send", "dtype":"30", 
 		"values":{
-    	  "control-type":"ff00", "type02.cmd":"88", "type01.idx":1, 
+    	  "control-type":1, "type01.cmd":"99", "type01.idx":3, 
     	}
     },
   ]

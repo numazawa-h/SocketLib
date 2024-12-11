@@ -17,6 +17,7 @@ using System.Text.Json.Serialization;
 using System.Text.Unicode;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.UI;
 using System.Xml.Linq;
 using static log4net.Appender.ColoredConsoleAppender;
 using static NCommonUtility.JsonConfig;
@@ -254,6 +255,36 @@ namespace NCommonUtility
                         }
                     }
                 }
+                return vals;
+            }
+            public Dictionary<string, JsonValue[]> GetArrayValue()
+            {
+                var vals = new Dictionary<string, JsonValue[]>();
+                if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
+                {
+                    foreach (var pair in _jsonNode.AsObject())
+                    {
+                        string name = pair.Key;
+                        JsonNode node = pair.Value;
+                        switch (node.GetValueKind())
+                        {
+                            case JsonValueKind.Array:
+                                var values = new List<JsonValue>();
+                                foreach (var node1 in node.AsArray())
+                                {
+                                    switch (node1.GetValueKind())
+                                    {
+                                        case JsonValueKind.String:
+                                        case JsonValueKind.Number:
+                                            values.Add((JsonValue)node1);
+                                            break;
+                                    }
+                                }
+                                vals.Add(name, values.ToArray());
+                                break;
+                        }
+                    }
+                } 
                 return vals;
             }
             public Node[] GetObjects()

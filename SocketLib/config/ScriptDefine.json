@@ -16,15 +16,13 @@
     "++seqno":123,
     "status":{"dtype":"14", "values":{
     	"blk[0].b01":1, "blk[0].b02":2,
-    	"blk[0].a[0].sts":10, "blk[0].a[1].sts":11, "blk[0].a[2].sts":12, "blk[0].a[3].sts":13, "blk[0].a[4].sts":14,
-    	"blk[1].b[0].sts":12, "blk[1].b[1].sts":13, 
     }},
 
     "mtype_src":"00",	// 自装置タイプlocal_addrを選択した時に設定される
     "local_addr":[
     	{"desc":"サーバー", "ip":"192.168.179.2", "port":900, "values":{"mtype_src":"90" } },
-//    	{"desc":"クライアント1", "ip":"192.168.179.2", "port":901, "values":{"mtype_src":"91" } },
-//    	{"desc":"クライアント2", "ip":"192.168.179.2", "port":902, "values":{"mtype_src":"92" } },
+    	{"desc":"クライアント1", "ip":"192.168.179.2", "port":901, "values":{"mtype_src":"91" } },
+    	{"desc":"クライアント2", "ip":"192.168.179.2", "port":902, "values":{"mtype_src":"92" } },
     ],
     "mtype_dst":"00",	// 相手装置タイプremote_addrを選択した時に設定される
     "remote_addr":[
@@ -37,7 +35,11 @@
   // 実行するコマンドを定義する
   //   cmd:headはヘッダ項目を更新する（送信電文に変更後のヘッダがつけられる）
   //   cmd:setは'Working-area'の変数を更新する
-  //   cmd:set
+  //   cmd:setはselect-caseで条件を指定できる
+  //       caseには受信電文の項目名と値とで条件を指定する
+  //       caseの値が配列の時はor条件となる
+  //       caseが複数ある場合はand条件となる
+  //       selectは3階層までネストできる
   //   cmd:sendは指定された電文を送信する
   //   valuesは更新する内容を定義する（項目名:値）※値には'Working-area'の変数名も指定できる
   //   reqcopyは要求電文の項目を応答電文の同一項目にコピーする
@@ -55,24 +57,19 @@
     { "id":"response-resend", "cmd":"send", "dtype":"4f", "reqcopy":["send-id", "carno"], "values":{"reason-4f":9}},
     { "id":"send-status", "cmd":"send", "msg":"status" },
     { "id":"set-status", "cmd":"set", "msg":"status", "select":[
-	    	{ "case":{ "control-type":1, "type01.cmd":"99", "type01.idx":0 }, 
-	    			"msgcopy":{ "sts001":"type01.cmd" },
-	    			"values":{ "blk[0].a[0].sts":"a0" },
-	    	},	
-	    	{ "case":{ "control-type":1, "type01.cmd":"99", "type01.idx":1 }, 
-	    			"msgcopy":{ "sts001":"type01.cmd" },
-	    			"values":{ "blk[0].a[1].sts":"a1" },
-	    	},	
-	    	{ "case":{ "control-type":1, "type01.cmd":"99", "type01.idx":2 }, 
-	    			"msgcopy":{ "sts001":"type01.cmd" },
-	    			"values":{ "blk[0].a[2].sts":"a2" },
-	    	},	
-	    	{ "case":{ "control-type":2 }, 
-	    			"msgcopy":{ "sts002":"type02.cmd" },
-	    	},	
+	    	{ "case":{ "control-type":1,  }, "select":[
+	    		{ "case":{ "type01.cmd":"99" }, "select":[
+			    	{ "case":{ "type01.idx":0 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[0].sts":"a0" }},
+			    	{ "case":{ "type01.idx":1 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[1].sts":"a1" }},
+			    	{ "case":{ "type01.idx":2 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[2].sts":"a2" }},
+				  ]
+				}
+			  ]
+	    	},
+	    	{ "case":{ "control-type":2 }, "msgcopy":{ "sts002":"type02.cmd" }},
 	    	{ "case":{ }, // 無条件実行
 	    			"msgcopy":{ "sts003":"control-type" },
-	    	},	
+	    	}
 		]
 	},
   ],

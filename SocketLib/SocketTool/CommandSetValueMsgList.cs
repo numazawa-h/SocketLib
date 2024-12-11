@@ -8,13 +8,14 @@ using System.Xml.Linq;
 using System.Text.Json.Nodes;
 using NCommonUtility;
 using System.Security.Cryptography;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace SocketTool
 {
     internal class CommandSetValueMsgList : Command
     {
         private string _name;
-        private List<Dictionary<string, JsonValue>> _caselist = new List<Dictionary<string, JsonValue>>();
+        private List<CaseList> _caselist = new List<CaseList>();
         private List<CommandSetValueMsg> _commands = new List<CommandSetValueMsg>();
 
         private CommandSetValueMsgList()
@@ -27,9 +28,43 @@ namespace SocketTool
             string id = node["id"];
             foreach (Node node1 in node["select"].Required())
             {
-                _caselist.Add(node1["case"].Required().GetValues());
-                node1.AddValue("id", node1._name);      // Commandクラスが'id'必須なので追加しておく
-                _commands.Add(new CommandSetValueMsg(node1, _name));
+                var case1 = new CaseList(node1);
+                if (node1.ContainsKey("select") == false)
+                {
+                    _caselist.Add(case1);
+                    node1.AddValue("id", node1._name);      // Commandクラスが'id'必須なので追加しておく
+                    _commands.Add(new CommandSetValueMsg(node1, _name));
+                }
+                else
+                {
+                    foreach (Node node2 in node1["select"])
+                    {
+                        var case2 = new CaseList(node2).Add(case1);
+                        if (node2.ContainsKey("select") == false)
+                        {
+                            _caselist.Add(case2);
+                            node2.AddValue("id", node2._name);      // Commandクラスが'id'必須なので追加しておく
+                            _commands.Add(new CommandSetValueMsg(node2, _name));
+                        }
+                        else
+                        {
+                            foreach (Node node3 in node2["select"])
+                            {
+                                var case3 = new CaseList(node3).Add(case2);
+                                if (node3.ContainsKey("select")==false)
+                                {
+                                    _caselist.Add(case3);
+                                    node3.AddValue("id", node3._name);      // Commandクラスが'id'必須なので追加しておく
+                                    _commands.Add(new CommandSetValueMsg(node3, _name));
+                                }
+                                else
+                                {
+                                    throw new Exception($"selectのネストは３階層までです({id})");
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -44,14 +79,14 @@ namespace SocketTool
 
         public override void Exec(CommSocket socket, CommMessage resmsg)
         {
-            if(resmsg == null)
+            if (resmsg == null)
             {
                 return;
             }
             int idx = 0;
-            foreach(Dictionary<string, JsonValue> conditons in _caselist)
+            foreach (CaseList caselist in _caselist)
             {
-                if (checkCondition(conditons, resmsg))
+                if (caselist.isTarget(resmsg))
                 {
                     _commands[idx].Exec(socket, resmsg);
                     break;
@@ -60,37 +95,97 @@ namespace SocketTool
             }
         }
 
-        private bool checkCondition(Dictionary<string, JsonValue> conditons, CommMessage resmsg)
+
+        private class CaseList
         {
-            ScriptDefine scrd = ScriptDefine.GetInstance();
-            foreach (var pair in conditons)
+            Dictionary<string, JsonValue> _values = new Dictionary<string, JsonValue>();
+            Dictionary<string, JsonValue[]> _array_values = new Dictionary<string, JsonValue[]>();
+
+            public CaseList(Node node)
             {
-                string key = pair.Key;
-                JsonValue val = pair.Value;
-                if (resmsg.ContainsFldKey(key) == false)
-                {
-                    return false;
-                }
-                ByteArray fldval = resmsg.GetFldValue(key);
-                switch (val.GetValueKind())
-                {
-                    case System.Text.Json.JsonValueKind.Number:
-                        int intval = val.GetValue<int>();
-                        if (fldval.to_int() != intval)
-                        {
-                            return false;
-                        }
-                        break;
-                    case System.Text.Json.JsonValueKind.String:
-                        string hexval = val.GetValue<string>();
-                        if (fldval.to_hex() != hexval)
-                        {
-                            return false;
-                        }
-                        break;
-                }
+                _values = node["case"].Required().GetValues();
+                _array_values = node["case"].Required().GetArrayValue();
             }
-            return true;
+
+            public CaseList Add(CaseList other)
+            {
+                foreach (var pair in other._values)
+                {
+                    this._values.Add(pair.Key, pair.Value);
+                }
+                foreach (var pair in other._array_values)
+                {
+                    this._array_values.Add(pair.Key, pair.Value);
+                }
+                return this;
+            }
+
+            public bool isTarget(CommMessage resmsg)
+            {
+                foreach (var pair in _values)
+                {
+                    string key = pair.Key;
+                    JsonValue val = pair.Value;
+                    if (resmsg.ContainsFldKey(key) == false)
+                    {
+                        return false;
+                    }
+                    ByteArray fldval = resmsg.GetFldValue(key);
+                    switch (val.GetValueKind())
+                    {
+                        case System.Text.Json.JsonValueKind.Number:
+                            int intval = val.GetValue<int>();
+                            if (fldval.to_int() != intval)
+                            {
+                                return false;
+                            }
+                            break;
+                        case System.Text.Json.JsonValueKind.String:
+                            string hexval = val.GetValue<string>().ToUpper();
+                            if (fldval.to_hex() != hexval)
+                            {
+                                return false;
+                            }
+                            break;
+                    }
+                }
+                foreach (var pair in _array_values)
+                {
+                    string key = pair.Key;
+                    JsonValue[] vals = pair.Value;
+                    if (resmsg.ContainsFldKey(key) == false)
+                    {
+                        return false;
+                    }
+                    ByteArray fldval = resmsg.GetFldValue(key);
+                    bool or = false;
+                    foreach(JsonValue val in vals)
+                    {
+                        switch (val.GetValueKind())
+                        {
+                            case System.Text.Json.JsonValueKind.Number:
+                                int intval = val.GetValue<int>();
+                                if (fldval.to_int() == intval)
+                                {
+                                    or = true;
+                                }
+                                break;
+                            case System.Text.Json.JsonValueKind.String:
+                                string hexval = val.GetValue<string>().ToUpper();
+                                if (fldval.to_hex() == hexval)
+                                {
+                                    or = true;
+                                }
+                                break;
+                        }
+                        if(or == false)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
         }
     }
 }

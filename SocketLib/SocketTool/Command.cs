@@ -95,7 +95,7 @@ namespace SocketTool
                         }
                         else
                         {
-                            // ScriptDefineの values定義項目の時の処理
+                            // ScriptDefineの Working-area定義項目の時の処理
                             ScriptDefine scdef = ScriptDefine.GetInstance();
                             if (scdef.ContainsKeyIntValue(sval))
                             {
