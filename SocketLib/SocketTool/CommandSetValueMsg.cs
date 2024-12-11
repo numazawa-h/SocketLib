@@ -12,7 +12,7 @@ namespace SocketTool
 {
     public class CommandSetValueMsg : Command
     {
-        private string _name;
+        private string _msgname;
 
         private CommandSetValueMsg()
         {
@@ -20,26 +20,26 @@ namespace SocketTool
 
         public CommandSetValueMsg(Node node):base(node) 
         {
-            _name = node["msg"];
+            _msgname = node["msg"];
         }
 
         public CommandSetValueMsg(Node node, string name) : base(node)
         {
-            _name = name;
+            _msgname = name;
         }
 
         public override Command Copy()
         {
             CommandSetValueMsg cmd = new CommandSetValueMsg();
             base.Copy(cmd);
-            cmd._name = _name;
+            cmd._msgname = _msgname;
             return cmd;
         }
 
         public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
             ScriptDefine scdef = ScriptDefine.GetInstance();
-            CommMessage msg = scdef.GetValueMsg(_name);
+            CommMessage msg = scdef.GetValueMsg(_msgname);
 
             foreach (var pair in _ivalues)
             {

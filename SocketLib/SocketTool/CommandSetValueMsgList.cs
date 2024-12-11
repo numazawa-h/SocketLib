@@ -14,7 +14,7 @@ namespace SocketTool
 {
     internal class CommandSetValueMsgList : Command
     {
-        private string _name;
+        private string _msgname;
         private List<CaseList> _caselist = new List<CaseList>();
         private List<CommandSetValueMsg> _commands = new List<CommandSetValueMsg>();
 
@@ -24,7 +24,7 @@ namespace SocketTool
 
         public CommandSetValueMsgList(Node node)
         {
-            _name = node["msg"];
+            _msgname = node["msg"];
             string id = node["id"];
             foreach (Node node1 in node["select"].Required())
             {
@@ -33,7 +33,7 @@ namespace SocketTool
                 {
                     _caselist.Add(case1);
                     node1.AddValue("id", node1._name);      // Commandクラスが'id'必須なので追加しておく
-                    _commands.Add(new CommandSetValueMsg(node1, _name));
+                    _commands.Add(new CommandSetValueMsg(node1, _msgname));
                 }
                 else
                 {
@@ -44,7 +44,7 @@ namespace SocketTool
                         {
                             _caselist.Add(case2);
                             node2.AddValue("id", node2._name);      // Commandクラスが'id'必須なので追加しておく
-                            _commands.Add(new CommandSetValueMsg(node2, _name));
+                            _commands.Add(new CommandSetValueMsg(node2, _msgname));
                         }
                         else
                         {
@@ -55,7 +55,7 @@ namespace SocketTool
                                 {
                                     _caselist.Add(case3);
                                     node3.AddValue("id", node3._name);      // Commandクラスが'id'必須なので追加しておく
-                                    _commands.Add(new CommandSetValueMsg(node3, _name));
+                                    _commands.Add(new CommandSetValueMsg(node3, _msgname));
                                 }
                                 else
                                 {
@@ -72,7 +72,7 @@ namespace SocketTool
         {
             CommandSetValueMsgList cmd = new CommandSetValueMsgList();
             base.Copy(cmd);
-            cmd._name = _name;
+            cmd._msgname = _msgname;
             cmd._commands = new List<CommandSetValueMsg>(_commands);
             return cmd;
         }
