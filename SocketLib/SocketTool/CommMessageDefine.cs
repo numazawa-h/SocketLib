@@ -263,6 +263,12 @@ namespace SocketTool
                     {
                         indexes.Add(match.Groups[1].Value);
             }
+                    for (int i = 0; i < indexes.Count; ++i)
+                    {
+                        Name = new Regex($"#{i}").Replace(Name, indexes[i].ToString());
+                    }
+                }
+            }
 
             public FieldDefine(Node def)
             {
