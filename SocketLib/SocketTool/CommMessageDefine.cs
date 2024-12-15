@@ -103,6 +103,10 @@ namespace SocketTool
             {
                 valid = valid.Substring(0, valid.IndexOf("_"));
             }
+            if (valid.Contains("."))
+            {
+                valid = valid.Substring(valid.LastIndexOf(".")+1);
+            }
             if (_values_def.ContainsKey(valid))
             {
                 return _values_def[valid][val];
