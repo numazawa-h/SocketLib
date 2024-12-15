@@ -255,6 +255,13 @@ namespace SocketTool
             {
                 Offset += ofs;
                 FldId = blk + "." + FldId;
+                if (Name != null)
+                {
+                    // nameの#nをblockのインデックスで置き換える
+                    List<string> indexes = new List<string>();
+                    foreach (Match match in new Regex("\\[([0-9]+)\\]").Matches(blk))
+                    {
+                        indexes.Add(match.Groups[1].Value);
             }
 
             public FieldDefine(Node def)
