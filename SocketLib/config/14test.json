@@ -1,0 +1,9 @@
+{
+  "Commands":[
+    { "id":"状態", "cmd":"send", "dtype":"14", 
+		"values":{
+    		"blk[0].a[0].sts":1, "blk[1].b[1].sts":2,
+    	}
+    },
+  ]
+}

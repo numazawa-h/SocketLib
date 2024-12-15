@@ -124,7 +124,12 @@ namespace SocketTool
                 return string.Empty;
             }
             ByteArray val = GetFldValue(fldid);
-            return CommMessageDefine.GetInstance().GetValueDescription(fldid, val);
+            string desc  = CommMessageDefine.GetInstance().GetValueDescription(fldid, val);
+            if (desc != string.Empty && fld.Name != null)
+            {
+                desc = $"{fld.Name}:{desc}";
+            }
+            return desc;
         }
 
 

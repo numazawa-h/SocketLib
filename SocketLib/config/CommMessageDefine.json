@@ -46,14 +46,14 @@
 			{ "id":"sts002", "ofs": 1, "len":1, },
 			{ "id":"sts003", "ofs": 2, "len":2, },
 			{ "block":"blk", "ofs": 8, "len":16, "rep":2, "flds":[
-				{ "id":"b01", "ofs":0, "len":1, },
-				{ "id":"b02", "ofs":1, "len":1, },
+				{ "id":"b01", "ofs":0, "len":1, "disp":true},
+				{ "id":"b02", "ofs":1, "len":1, "disp":true},
 				{ "block":"a", "ofs":5, "len":1, "rep":5, "flds":[
-					{ "id":"sts", "ofs":0, "len":1, },
+					{ "id":"sts", "name":"L#0S#1", "ofs":0, "len":1, "disp":true},
 				  ]
 				},
 				{ "block":"b", "ofs":10, "len":1, "rep":5, "flds":[
-					{ "id":"sts", "ofs":0, "len":1, },
+					{ "id":"sts", "ofs":0, "len":1, "disp":true},
 				  ]
 				},
 			  ]
@@ -64,6 +64,9 @@
 	"values-def":[
 		{ "id":"hdatm", "name":"ヘッダ日時", "format":{ "type":"datetime", "valfmt":"yyyyMMddHHmmss", "fmt":"yyyy/MM/dd-HH:mm:ss" } },
 		{ "id":"send-id", "name":"送信ID", "format":{ "type":"int", "fmt":"#{0}" } },
+		{ "id":"b01", "name":"状態b1", "values":{"01":"開始", "02":"一時停止", "03":"終了", "00":"" } },
+		{ "id":"b02", "name":"状態b2", "values":{"00":"aa", "01":"bb", "02":"cc" } },
+		{ "id":"sts", "name":"状態", "values":{"00":"", "01":"異常",  } },
 		{ "id":"control-type", "name":"制御種類", "values":{"0001":"開始", "0002":"一時停止", "0003":"終了" } },
 		{ "id":"reson-nak", "name":"否定理由", "values":{"0001":"シーケンスエラー", "3132":"その他" } },
 		{ "id":"carno", "name":"車両番号", "format":{ "type":"int", "fmt":"#{0:D}" ,"notdisp":0 } },				// 車両番号が0なら表示しない

@@ -1,10 +1,12 @@
 ﻿using NCommonUtility;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.UI;
 using static NCommonUtility.JsonConfig;
@@ -266,7 +268,7 @@ namespace SocketTool
                     foreach (Match match in new Regex("\\[([0-9]+)\\]").Matches(blk))
                     {
                         indexes.Add(match.Groups[1].Value);
-            }
+                    }
                     for (int i = 0; i < indexes.Count; ++i)
                     {
                         Name = new Regex($"#{i}").Replace(Name, indexes[i].ToString());
@@ -279,23 +281,8 @@ namespace SocketTool
                 FldId = def["id"].Required();
                 Offset = def["ofs"].Required();
                 Length = def["len"].Required();
+                Name = def["name"];
                 isDispDesc = (bool?)def["disp"] is bool v ? v : false;
-
-                if (def.ContainsKey("name"))
-                {
-                    Name = def["name"];
-                }
-                else
-                {
-                    if (CommMessageDefine.GetInstance()._values_def.ContainsKey(FldId))
-                    {
-                        Name = CommMessageDefine.GetInstance()._values_def[FldId].FldName;
-                    }
-                    else
-                    {
-                        Name = FldId;
-                    }
-                }
             }
 
             /// <summary>
@@ -323,7 +310,7 @@ namespace SocketTool
             public ValuesDefine(Node def)
             {
                 FldId = def["id"].Required();
-                FldName = def["name"].Required();
+                FldName = def["name"];
 
                 _values_def = def["values"].GetValues();
                 if (def.ContainsKey("format"))
