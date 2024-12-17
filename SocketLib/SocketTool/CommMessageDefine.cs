@@ -264,17 +264,17 @@ namespace SocketTool
             {
                 _owner = owner;
                 string blockid = def["block"].Required();
-                if(_owner.BlkId != string.Empty)
-                {
-                    blockid = $"{_owner.BlkId}.{blockid}";
-                }
-                if (idx < 0)
+                if(_owner.BlkId == string.Empty)
                 {
                     BlkId = blockid;
                 }
                 else
                 {
-                    BlkId = $"{blockid}[{idx}]";
+                    BlkId = $"{_owner.BlkId}.{blockid}";
+                }
+                if (idx >= 0)
+                {
+                    BlkId = $"{BlkId}[{idx}]";
                 }
                 if (def.ContainsKey("name"))
                 {
@@ -292,7 +292,11 @@ namespace SocketTool
                 }
                 else
                 {
-                    Name = BlkId;
+                    Name = $"{_owner.Name}.{blockid}";
+                    if (idx >= 0)
+                    {
+                        Name = $"{Name}[{idx}]";
+                    }
                 }
             }
 
