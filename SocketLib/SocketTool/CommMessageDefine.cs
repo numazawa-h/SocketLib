@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.UI;
 using static NCommonUtility.JsonConfig;
+using static SocketTool.CommMessageDefine;
 
 namespace SocketTool
 {
@@ -131,6 +132,8 @@ namespace SocketTool
             // データ長（可変長の時の固定部の長さ）
             public int MinLength { get; private set; }
 
+            // ブロック定義
+            private BlockDefine _blockDefine;
             // フィールド定義
             private Dictionary<string, FieldDefine> _fields_def = new Dictionary<string, FieldDefine>();
 
@@ -144,12 +147,13 @@ namespace SocketTool
                 DName = def["name"].Required();
                 DLength = def["len"].Required();
                 MinLength = (int?)def["minlen"] is int v ? v : 0;
+                _blockDefine = new BlockDefine();
 
                 foreach (Node node in def["flds"])
                 {
                     if (node.ContainsKey("block"))
                     {
-                        readBlock(node);
+                        readBlock(_blockDefine, node);
                     }
                     else
                     {
@@ -158,9 +162,8 @@ namespace SocketTool
                 }
             }
 
-            private void readBlock(Node def, int offset=0, string block=null)
+            private void readBlock(BlockDefine block, Node def, int offset=0)
             {
-                string blkid = def["block"].Required();
                 int blkofs = def["ofs"].Required();
                 int len = (int?)def["len"] is int v1 ? v1 : -1;
                 int rep = (int?)def["rep"] is int v2 ? v2 : 1;
@@ -173,44 +176,38 @@ namespace SocketTool
                     }
                     for(int i=0; i<rep; i++, offset += len)
                     {
-                        string blk = $"{blkid}[{i}]";
-                        if (block != null)
-                        {
-                            blk = block + "." + blk;
-                        }
+                        BlockDefine blk = block.AddBlock(def, i);
                         int ofs = blkofs + offset;
                         foreach (Node node in def["flds"])
                         {
                             if (node.ContainsKey("block"))
                             {
-                                readBlock(node, ofs, blk);
+                                readBlock(blk, node, ofs);
                             }
                             else
                             {
                                 FieldDefine fld = new FieldDefine(node, ofs, blk);
                                 _fields_def.Add(fld.FldId, fld);
+                                blk.AddField(fld);
                             }
                         }
                     }
                 }
                 else
                 {
-                    string blk = blkid;
-                    if (block != null)
-                    {
-                        blk = block + "." + blk;
-                    }
+                    BlockDefine blk = block.AddBlock(def);
                     int ofs = blkofs + offset;
                     foreach (Node node in def["flds"])
                     {
                         if (node.ContainsKey("block"))
                         {
-                            readBlock(node, ofs, blk);
+                            readBlock(blk, node, ofs);
                         }
                         else
                         {
                             FieldDefine fld = new FieldDefine(node, ofs, blk);
                             _fields_def.Add(fld.FldId, fld);
+                            blk.AddField(fld);
                         }
                     }
                 }
@@ -249,6 +246,69 @@ namespace SocketTool
             }
         }
 
+        public class BlockDefine
+        {
+            public string BlkId { get; private set; }
+            public string Name { get; private set; }
+
+            private BlockDefine _owner = null;
+            private List<FieldDefine> _fields = new List<FieldDefine>();
+            private List<BlockDefine> _blocks = new List<BlockDefine>();
+            public BlockDefine()
+            {
+                BlkId = string.Empty;
+                Name = "top";
+            }
+
+            public BlockDefine(BlockDefine owner, Node def, int idx)
+            {
+                _owner = owner;
+                string blockid = def["block"].Required();
+                if(_owner.BlkId != string.Empty)
+                {
+                    blockid = $"{_owner.BlkId}.{blockid}";
+                }
+                if (idx < 0)
+                {
+                    BlkId = blockid;
+                }
+                else
+                {
+                    BlkId = $"{blockid}[{idx}]";
+                }
+                if (def.ContainsKey("name"))
+                {
+                    Name = def["name"];
+                    // nameの#nをblockのインデックスで置き換える
+                    List<string> indexes = new List<string>();
+                    foreach (Match match in new Regex("\\[([0-9]+)\\]").Matches(BlkId))
+                    {
+                        indexes.Add(match.Groups[1].Value);
+                    }
+                    for (int i = 0; i < indexes.Count; ++i)
+                    {
+                        Name = new Regex($"#{i}").Replace(Name, indexes[i].ToString());
+                    }
+                }
+                else
+                {
+                    Name = BlkId;
+                }
+            }
+
+            public BlockDefine AddBlock(Node def, int idx = -1)
+            {
+                BlockDefine block = new BlockDefine(this, def, idx);
+                _blocks.Add(block);
+                return block;
+            }
+
+            public void AddField(FieldDefine fld)
+            {
+                _fields.Add(fld);
+            }
+        }
+
         public class FieldDefine
         {
             public string FldId { get; private set; }
@@ -257,15 +317,15 @@ namespace SocketTool
             public int Offset { get; private set; }
             public bool isDispDesc { get; private set; }
 
-            public FieldDefine(Node def, int ofs, string blk) :this(def)
+            public FieldDefine(Node def, int ofs, BlockDefine blk) :this(def)
             {
                 Offset += ofs;
-                FldId = blk + "." + FldId;
+                FldId = blk.BlkId + "." + FldId;
                 if (Name != null)
                 {
                     // nameの#nをblockのインデックスで置き換える
                     List<string> indexes = new List<string>();
-                    foreach (Match match in new Regex("\\[([0-9]+)\\]").Matches(blk))
+                    foreach (Match match in new Regex("\\[([0-9]+)\\]").Matches(blk.BlkId))
                     {
                         indexes.Add(match.Groups[1].Value);
                     }
