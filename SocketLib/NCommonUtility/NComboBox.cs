@@ -39,7 +39,21 @@ namespace NCommonUtility
         [Category("カスタマイズ")]
         [Description("falseの時テキストの編集を許可しない")]
         [DefaultValue(false)]
-        public bool AllowEdit { get; set; } = false;
+        public bool AllowEdit 
+        {
+            get => (DropDownStyle == ComboBoxStyle.DropDown);
+            set
+            {
+                if (value == true)
+                {
+                    DropDownStyle = ComboBoxStyle.DropDown;
+                }
+                else
+                {
+                    DropDownStyle = ComboBoxStyle.DropDownList;
+                }
+            }
+        }
 
 
         [Browsable(false)]
@@ -98,15 +112,7 @@ namespace NCommonUtility
             if (isInit == false)
             {
                 isInit = true;
-                foreach(var item in item_list)
-                {
-                    this.Items.Add(item);
-                }
                 this.DataSource = item_list;
-                if (AllowEdit == false)
-                {
-                    DropDownStyle = ComboBoxStyle.DropDownList;
-                }
             }
             base.OnCreateControl();
         }
