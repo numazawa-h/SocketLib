@@ -12,7 +12,7 @@ namespace NCommonUtility
     public class NComboBox : System.Windows.Forms.ComboBox
     {
         [Serializable]
-        public class Item
+        private class Item
         {
             public string display { get; private set; }
             public Object value { get; private set; }
@@ -21,6 +21,10 @@ namespace NCommonUtility
                 this.display = display;
                 this.value = value;
             }
+            public override string ToString()
+            {
+                return display;
+            }
         }
 
         bool isInit = false;
@@ -28,8 +32,8 @@ namespace NCommonUtility
 
         public NComboBox()
         {
-            this.DisplayMember = "display";
-            this.ValueMember = "value";
+           this.DisplayMember = "display";
+           this.ValueMember = "value";
         }
 
         [Category("カスタマイズ")]
@@ -71,7 +75,22 @@ namespace NCommonUtility
 
         public void AddItem(string disp, Object val)
         {
-            item_list.Add(new Item(disp, val));
+            Item item = new Item(disp, val);
+            item_list.Add(item);
+            if (isInit == true)
+            {
+                this.DataSource = null;
+                this.DataSource = item_list;
+            }
+        }
+        public void ClearItems()
+        {
+            item_list.Clear();
+            if (isInit == true)
+            {
+                this.DataSource = null;
+                this.DataSource = item_list;
+            }
         }
 
         protected override void OnCreateControl()
@@ -79,13 +98,14 @@ namespace NCommonUtility
             if (isInit == false)
             {
                 isInit = true;
-                if (item_list.Count > 0)
+                foreach(var item in item_list)
                 {
-                    this.DataSource = item_list;
-                    if (AllowEdit == false)
-                    {
-                        DropDownStyle = ComboBoxStyle.DropDownList;
-                    }
+                    this.Items.Add(item);
+                }
+                this.DataSource = item_list;
+                if (AllowEdit == false)
+                {
+                    DropDownStyle = ComboBoxStyle.DropDownList;
                 }
             }
             base.OnCreateControl();
