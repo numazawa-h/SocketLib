@@ -448,6 +448,7 @@ namespace SocketTool
             public Format FormatDef { get; private set; }
 
             Dictionary<string, JsonValue> _values_def = null;
+            List<string> _notdisp = new List<string>();
 
             public ValuesDefine(Node def)
             {
@@ -455,6 +456,21 @@ namespace SocketTool
                 FldName = def["name"];
 
                 _values_def = def["values"].GetValues();
+                if (_values_def.ContainsKey("notdisp"))
+                {
+                    if (_values_def["notdisp"].GetValueKind() == System.Text.Json.JsonValueKind.Array)
+                    {
+                        foreach(var val in _values_def["notdisp"].AsArray())
+                        {
+                            _notdisp.Add((string)val);
+                        }
+                    }
+                    else
+                    {
+                        _notdisp.Add((string)_values_def["notdisp"]);
+                    }
+                    _values_def.Remove("notdisp");
+                }
                 if (def.ContainsKey("format"))
                 {
                     string type = def["format"]["type"].Required();
@@ -482,6 +498,11 @@ namespace SocketTool
                 get
                 {
                     string bcd = new ByteArray(val).to_hex();
+                    if (_notdisp.Contains(bcd))
+                    {
+                        // 非表示指定の値なら表示しない
+                        return string.Empty;
+                    }
                     if (_values_def.ContainsKey(bcd))
                     {
                         // 値の一覧に存在すれば対応する値を返却する
