@@ -125,9 +125,16 @@ namespace SocketTool
             }
             ByteArray val = GetFldValue(fldid);
             string desc  = CommMessageDefine.GetInstance().GetValueDescription(fldid, val);
-            if (desc != string.Empty && fld.Name != null)
+            if (desc != string.Empty && fld.isDispName == true)
             {
-                desc = $"{fld.Name}:{desc}";
+                if(fld.Name != null)
+                {
+                    desc = $"{fld.Name}:{desc}";
+                }
+                else
+                {
+                    desc = $"{fld.FldId}:{desc}";
+                }
             }
             return desc;
         }

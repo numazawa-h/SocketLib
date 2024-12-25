@@ -396,6 +396,7 @@ namespace SocketTool
             public int Length { get; private set; }
             public int Offset { get; private set; }
             public bool isDispDesc { get; private set; }
+            public bool isDispName { get; private set; }
 
             public FieldDefine(Node def, int ofs, BlockDefine blk) :this(def)
             {
@@ -424,7 +425,8 @@ namespace SocketTool
                 Offset = def["ofs"].Required();
                 Length = def["len"].Required();
                 Name = def["name"];
-                isDispDesc = (bool?)def["disp"] is bool v ? v : false;
+                isDispDesc = (bool?)def["disp"] is bool v1 ? v1 : false;
+                isDispName = (bool?)def["dispname"] is bool v2 ? v2 : false;
             }
 
             /// <summary>

@@ -46,8 +46,8 @@
 			{ "id":"sts002", "ofs": 1, "len":1, },
 			{ "id":"sts003", "ofs": 2, "len":2, },
 			{ "block":"blk", "name":"車線[#0]","ofs": 8, "len":16, "rep":2, "flds":[
-				{ "id":"b01", "ofs":0, "len":1, "disp":true},
-				{ "id":"b02", "ofs":1, "len":1, "disp":true},
+				{ "id":"b01", "ofs":0, "len":1, "disp":true, "dispname":true},
+				{ "id":"b02", "ofs":1, "len":1, "disp":true, "dispname":false},
 				{ "block":"a", "ofs":5, "len":1, "rep":5, "flds":[
 					{ "id":"sts", "name":"L#0S#1", "ofs":0, "len":1, "disp":true},
 				  ]
