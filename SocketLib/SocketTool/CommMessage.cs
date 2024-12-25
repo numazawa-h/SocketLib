@@ -241,6 +241,14 @@ namespace SocketTool
         {
             return _data_def.ContainsKey(key);
         }
+        public BlockDefine GetBlockDefine()
+        {
+            return _data_def.BlockDefine;
+        }
+        public string[] GetFldidList()
+        {
+            return _data_def.GetFldidList();
+        }
 
         public ByteArray GetFldValue(string fldid)
         {

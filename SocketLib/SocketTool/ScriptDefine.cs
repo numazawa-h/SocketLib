@@ -228,6 +228,10 @@ namespace SocketTool
             _remote_set[desc].Exec(null);
         }
 
+        public CommMessage[] GetValueMsgList()
+        {
+            return _commMessages.Values.ToArray();
+        }
         public CommMessage GetValueMsg(string name)
         {
             return _commMessages[name];

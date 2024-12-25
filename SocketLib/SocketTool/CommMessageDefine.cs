@@ -117,6 +117,25 @@ namespace SocketTool
 
             return "？？？";
         }
+        public Dictionary<string, JsonValue> GetFldDescription(string fldid)
+        {
+            Dictionary<string, JsonValue> desc_list = new Dictionary<string, JsonValue>();
+            string valid = fldid;
+            if (valid.Contains("_"))
+            {
+                valid = valid.Substring(0, valid.IndexOf("_"));
+            }
+            if (valid.Contains("."))
+            {
+                valid = valid.Substring(valid.LastIndexOf(".") + 1);
+            }
+            if (_values_def.ContainsKey(valid))
+            {
+                desc_list = _values_def[valid].ValuesDef;
+            }
+
+            return desc_list;
+        }
 
         /// <summary>
         /// 通信電文定義
@@ -131,9 +150,8 @@ namespace SocketTool
             public int DLength { get; private set; }
             // データ長（可変長の時の固定部の長さ）
             public int MinLength { get; private set; }
-
             // ブロック定義
-            private BlockDefine _blockDefine;
+            public BlockDefine BlockDefine { get; private set; }
             // フィールド定義
             private Dictionary<string, FieldDefine> _fields_def = new Dictionary<string, FieldDefine>();
 
@@ -147,17 +165,19 @@ namespace SocketTool
                 DName = def["name"].Required();
                 DLength = def["len"].Required();
                 MinLength = (int?)def["minlen"] is int v ? v : 0;
-                _blockDefine = new BlockDefine();
+                BlockDefine = new BlockDefine();
 
                 foreach (Node node in def["flds"])
                 {
                     if (node.ContainsKey("block"))
                     {
-                        readBlock(_blockDefine, node);
+                        readBlock(BlockDefine, node);
                     }
                     else
                     {
-                        _fields_def.Add(node["id"], new FieldDefine(node));
+                        FieldDefine fld = new FieldDefine(node);
+                        _fields_def.Add(node["id"], fld);
+                        BlockDefine.AddField(fld);
                     }
                 }
             }
@@ -220,12 +240,17 @@ namespace SocketTool
                 DName = other.DName;
                 DLength = other.DLength;
                 MinLength = other.MinLength;
+                BlockDefine = other.BlockDefine;
                 foreach (KeyValuePair<string, FieldDefine> pair in other._fields_def)
                 {
                     _fields_def.Add(pair.Key, pair.Value);
                 }
             }
 
+            public FieldDefine[] GetFldList()
+            {
+                return _fields_def.Values.ToArray();
+            }
             public string[] GetFldidList()
             {
                 return _fields_def.Keys.ToArray();
@@ -248,29 +273,37 @@ namespace SocketTool
 
         public class BlockDefine
         {
+            public string GrpId { get; private set; }
+            public string OwnerGrpId => _owner.GrpId;
             public string BlkId { get; private set; }
             public string Name { get; private set; }
+            public int NestingLevel { get; private set; }
 
             private BlockDefine _owner = null;
             private List<FieldDefine> _fields = new List<FieldDefine>();
             private List<BlockDefine> _blocks = new List<BlockDefine>();
             public BlockDefine()
             {
+                GrpId = "top";
                 BlkId = string.Empty;
-                Name = "top";
+                Name = string.Empty;
+                NestingLevel = 0;
             }
 
             public BlockDefine(BlockDefine owner, Node def, int idx)
             {
                 _owner = owner;
-                string blockid = def["block"].Required();
+                NestingLevel = owner.NestingLevel + 1;
+
+                GrpId = def["block"].Required();
                 if(_owner.BlkId == string.Empty)
                 {
-                    BlkId = blockid;
+                    BlkId = GrpId;
                 }
                 else
                 {
-                    BlkId = $"{_owner.BlkId}.{blockid}";
+                    BlkId = $"{_owner.BlkId}.{GrpId}";
+                    GrpId = $"{_owner.GrpId}.{GrpId}";
                 }
                 if (idx >= 0)
                 {
@@ -292,7 +325,14 @@ namespace SocketTool
                 }
                 else
                 {
-                    Name = $"{_owner.Name}.{blockid}";
+                    if (_owner.Name == string.Empty)
+                    {
+                        Name = GrpId;
+                    }
+                    else
+                    {
+                        Name = $"{_owner.Name}.{GrpId}";
+                    }
                     if (idx >= 0)
                     {
                         Name = $"{Name}[{idx}]";
@@ -311,10 +351,46 @@ namespace SocketTool
             {
                 _fields.Add(fld);
             }
+
+            public string[] GetBlockIdList()
+            {
+                List<string> list = new List<string>();
+                foreach (BlockDefine blk in _blocks)
+                {
+                    if (list.Contains(blk.GrpId) == false)
+                    {
+                        list.Add(blk.GrpId);
+                    }
+                }
+                return list.ToArray();
+            }
+            public BlockDefine[] GetBlocks(string id)
+            {
+                List<BlockDefine> list = new List<BlockDefine>();
+                foreach (BlockDefine blk in _blocks)
+                {
+                    if (blk.GrpId == id)
+                    {
+                        list.Add(blk);
+                    }
+                }
+                return list.ToArray();
+            }
+
+            public BlockDefine[] GetBlocks()
+            {
+                return _blocks.ToArray();
+            }
+            public FieldDefine[] GetFields()
+            {
+                return _fields.ToArray();
+            }
         }
 
         public class FieldDefine
         {
+            public BlockDefine OwnerBlock { get; private set; }
+
             public string FldId { get; private set; }
             public string Name { get; private set; }
             public int Length { get; private set; }
@@ -323,6 +399,7 @@ namespace SocketTool
 
             public FieldDefine(Node def, int ofs, BlockDefine blk) :this(def)
             {
+                OwnerBlock = blk;
                 Offset += ofs;
                 FldId = blk.BlkId + "." + FldId;
                 if (Name != null)
@@ -342,6 +419,7 @@ namespace SocketTool
 
             public FieldDefine(Node def)
             {
+                OwnerBlock = null;
                 FldId = def["id"].Required();
                 Offset = def["ofs"].Required();
                 Length = def["len"].Required();
@@ -419,6 +497,10 @@ namespace SocketTool
             public string[] Values
             {
                 get { return _values_def.Keys.ToArray<string>(); }
+            }
+            public Dictionary<string, JsonValue> ValuesDef
+            {
+                get { return _values_def; }
             }
         }
 
