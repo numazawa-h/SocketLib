@@ -32,8 +32,8 @@ namespace NCommonUtility
 
         public NComboBox()
         {
-           this.DisplayMember = "display";
-           this.ValueMember = "value";
+            this.DisplayMember = "display";
+            this.ValueMember = "value";
         }
 
         [Category("カスタマイズ")]
@@ -103,7 +103,6 @@ namespace NCommonUtility
             if (isInit == true)
             {
                 this.DataSource = null;
-                this.DataSource = item_list;
             }
         }
 
@@ -112,7 +111,10 @@ namespace NCommonUtility
             if (isInit == false)
             {
                 isInit = true;
-                this.DataSource = item_list;
+                if (DesignMode == false)
+                {
+                    this.DataSource = item_list;
+                }
             }
             base.OnCreateControl();
         }
