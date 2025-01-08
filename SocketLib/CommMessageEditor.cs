@@ -132,7 +132,7 @@ namespace SocketLib
             refresh();
         }
 
-        private void refresh()
+        public void refresh()
         {
             for (int idx = 0; idx < _comboBoxes.Count; idx++)
             {

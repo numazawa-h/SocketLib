@@ -149,6 +149,7 @@ namespace SampleMain
                 }
                 Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
                 ScriptDefine.GetInstance().ExecOnRecv(_Socket, msg);
+                _CommMessageEditor.refresh();
             }
             catch (Exception ex)
             {
