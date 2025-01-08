@@ -3,7 +3,10 @@ using SocketLib.Properties;
 using SocketTool;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -18,74 +21,86 @@ namespace SocketLib
     internal class CommMessageEditor
     {
         Panel _panel;
+        List<Button> _buttons = new List<Button>();
         List<NComboBox> _comboBoxes = new List<NComboBox>();
         List<Label> _labels = new List<Label>();
-        int _comboBoxes_left;
-        int _comboBoxes_hight;
-        int _comboBoxes_width_narrow;
-        int _comboBoxes_width_wide;
-        int _label_left;
-        int _label_hight;
+        int _width;
         int _hight;
         int _next_y;
-        int _label_y;
         int _next_tabidx;
 
-        CommMessage _commMsg;
+        protected CommMessage _commMsg;
 
-        /// <summary>
+        protected bool bInnerUpdate = false;
+
+        protected int cbx_left => _comboBoxes[0].Left;
+        protected int cbx_width => _comboBoxes[0].Width;
+        protected int cbx_wide_width => _width - _comboBoxes[0].Left;
+
+                /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="pnl">パネル</param>
+        /// <param name="btn">ひな型となる（最初の1個の）展開ボタン</param>
         /// <param name="cbx">ひな型となる（最初の1個の）NComboBox</param>
-        /// <param name="lbl">ひな型となる（最初の1個の）Label</param>
+        /// <param name="lbl">ひな型となる（最初の1個の）項目名ラベル</param>
         /// <param name="width">領域の幅</param>
         /// <param name="hight">１行の高さ</param>
-        public CommMessageEditor(Panel pnl, NComboBox cbx, Label lbl, int width, int hight)
+        public CommMessageEditor(Panel pnl, Button btn, NComboBox cbx, Label lbl, int width, int hight)
         {
             _panel = pnl;
+            _buttons.Add(btn);
             _comboBoxes.Add(cbx);
             _labels.Add(lbl);
+            btn.Click += Btn_Clicked;
+            cbx.SelectedIndexChanged += Cbx_SelectedIndexChanged;
+            cbx.TextUpdate += Cbx_TextUpdate;
+            cbx.TextChanged += Cbx_TextChanged;
 
-            _comboBoxes_left = cbx.Left;
-            _comboBoxes_hight = cbx.Height;
-            _comboBoxes_width_narrow = cbx.Width;
-            _comboBoxes_width_wide = width - _comboBoxes_left;
-            _label_left = lbl.Left;
-            _label_hight = lbl.Height;
+            _width = width;
             _hight = hight;
             _next_y = cbx.Top + _hight;
-            _label_y = lbl.Top - cbx.Top;
-            _next_tabidx = cbx.TabIndex + 2;
+            _next_tabidx = cbx.TabIndex + 3;
         }
 
         private void AddLine()
         {
             int no = _comboBoxes.Count +1;
 
-            NComboBox cbx= new NCommonUtility.NComboBox();
+            Button btn = new Button();
+            int btn_y = _next_y + (_buttons[0].Top - _comboBoxes[0].Top);
+            btn.Visible = false;
+            btn.Location = new System.Drawing.Point(_buttons[0].Left, btn_y);
+            btn.Name = string.Format($"btn_{no:D4}");
+            btn.Size = new System.Drawing.Size(_buttons[0].Width, _buttons[0].Height);
+            btn.TabIndex = _next_tabidx++;
+            btn.Text = "+";
+            btn.Click += Btn_Clicked;
+            _buttons.Add(btn);
+            _panel.Controls.Add(btn);
+
+            NComboBox cbx = new NCommonUtility.NComboBox();
             cbx.Visible = false;
             cbx.Tag = null;
             cbx.AllowEdit = true;
             cbx.FormattingEnabled = true;
-            cbx.Location = new System.Drawing.Point(_comboBoxes_left, _next_y);
+            cbx.Location = new System.Drawing.Point(_comboBoxes[0].Left, _next_y);
             cbx.Name = string.Format($"cbx_{no:D4}");
-            cbx.Size = new System.Drawing.Size(_comboBoxes_width_narrow, _comboBoxes_hight);
+            cbx.Size = new System.Drawing.Size(_comboBoxes[0].Width, _comboBoxes[0].Height);
             cbx.TabIndex = _next_tabidx++;
-            //cbx.SelectedIndexChanged += Cbx_SelectedIndexChanged;
-            cbx.DropDownClosed += Cbx_SelectedIndexChanged;
+            cbx.SelectedIndexChanged += Cbx_SelectedIndexChanged;
             cbx.TextUpdate += Cbx_TextUpdate;
             cbx.TextChanged += Cbx_TextChanged;
-
             _comboBoxes.Add(cbx);
             _panel.Controls.Add(cbx);
 
             Label lbl = new System.Windows.Forms.Label();
+            int label_y = _next_y + (_labels[0].Top - _comboBoxes[0].Top);
             lbl.Visible = false;
             lbl.AutoSize = true;
-            lbl.Location = new System.Drawing.Point(_label_left, _next_y + _label_y);
-            lbl.Name = string.Format($"lbl_{no:D4}");;
-            lbl.Size = new System.Drawing.Size(100, _label_hight);
+            lbl.Location = new System.Drawing.Point(_labels[0].Left, label_y);
+            lbl.Name = string.Format($"lbl_{no:D4}");
+            lbl.Size = new System.Drawing.Size(100, _labels[0].Height);
             lbl.TabIndex = _next_tabidx++;
             lbl.Text = lbl.Name;
             _labels.Add(lbl);
@@ -96,308 +111,94 @@ namespace SocketLib
 
         public void SetCommMessage(CommMessage msg)
         {
-            _commMsg = msg;
+            foreach (Button btn in _buttons)
+            {
+                btn.Visible = false;
+                btn.Text = "+";
+            }
             foreach (ComboBox cbx in _comboBoxes)
             {
                 cbx.Visible = false;
                 cbx.Tag = null;
             }
-
             foreach (Label lbl in _labels)
             {
                 lbl.Visible = false;
             }
-            expandBlock(msg.GetBlockDefine());
+
+            _commMsg = msg;
+            expandBlock(msg.GetBlockDefine(), -1, -1);
         }
 
-        private void Cbx_SelectedIndexChanged(object sender, EventArgs e)
+        private void expandBlock(BlockDefine blk, int idx, int level)
         {
-            NComboBox cbx = (NComboBox)sender;
-            int idx = _comboBoxes.IndexOf(cbx);
-
-            Object tag = cbx.Tag;
-            if (tag is FieldDefine)
+            bool bInsert = false;
+            if (idx < 0)
             {
-                // 選択されたフィールド値をWorkingAreaのメッセージに設定
-                string val = (string)cbx.SelectedValue;
-                if (val != null)
-                {
-                    FieldDefine fld = (FieldDefine)tag;
-                    _commMsg.SetFldValue(fld.FldId, ByteArray.ParseHex(val));
-                }
+                bInsert = true;
             }
-            else
+            else if (_buttons[idx].Text == "+")
             {
-                if (isExpanding == false)
-                {
-                    // ブロックのインデックスを選択
-                    BlockDefine block = (BlockDefine)cbx.SelectedValue;
-                    expandBlock(block);
-                }
+                bInsert = true;
+                _buttons[idx].Text = "-";
             }
-        }
-
-        private void Cbx_TextUpdate(object sender, EventArgs e)
-        {
-            NComboBox cbx = (NComboBox)sender;
-            Object tag = cbx.Tag;
-            if (tag is FieldDefine)
+            foreach (FieldDefine fld in blk.GetFields())
             {
-                if (cbx.SelectedIndex >= 0)
+                ++idx;
+                FieldObject fldobj = new FieldObject(this, level + 1, fld);
+                if (bInsert)
                 {
-                    // 選択状態からユーザ入力があったら一旦選択値を表示する
-                    cbx.Text = (string)cbx.SelectedValue;
-                    cbx.SelectionStart = cbx.Text.Length;
+                    InsertLine(idx);
                 }
+                _comboBoxes[idx].Tag = fld;
+                fldobj.SetValues(_buttons[idx], _comboBoxes[idx], _labels[idx]);
+                _comboBoxes[idx].Text = _commMsg.GetFldValue(fld.FldId).to_hex();
             }
-        }
 
-        private void Cbx_TextChanged(object sender, EventArgs e)
-        {
-            NComboBox cbx = (NComboBox)sender;
-            int idx = _comboBoxes.IndexOf(cbx);
-
-            Object tag = cbx.Tag;
-            if (tag is FieldDefine)
+            foreach (string grpid in blk.GetGroupIdList())
             {
-                if (cbx.SelectedIndex < 0)
+                ++idx;
+                BlockObject blkobj = new BlockObject(this, level + 1, blk, grpid);
+                if (bInsert)
                 {
-                    // 未選択の状態からユーザ入力があったら補正する
-                    FieldDefine fld = (FieldDefine)tag;
-                    int pos = cbx.SelectionStart;
-                    int len = cbx.Text.Length;
-                    // 16進文字列以外は削除
-                    cbx.Text = new Regex("[^0-9a-fA-F]+").Replace(cbx.Text, "");
-                    if (len > cbx.Text.Length)
-                    {
-                        // 削除した文字列分を補正
-                        --pos;
-                        len = cbx.Text.Length;
-                    }
-                    // フィールドの長さに合わせて補正
-                    if (len > (fld.Length * 2))
-                    {
-                        if (pos >= (fld.Length * 2))
-                        {
-                            cbx.Text = cbx.Text.Substring(0, (fld.Length * 2));
-                        }
-                        else
-                        {
-                            cbx.Text = cbx.Text.Substring(0, pos) + cbx.Text.Substring(pos + 1, (fld.Length * 2) - pos);
-                        }
-                    }
-                    cbx.SelectionStart = pos;
-
-                    // 入力された値をWorkingAreaのメッセージに設定
-                    string txt = cbx.Text;
-                    if (txt.Length < (fld.Length * 2))
-                    {
-                        // 長さが足りなければ0埋め
-                        txt = (new String('0', (fld.Length * 2)) + txt).Substring(txt.Length);
-                    }
-                    _commMsg.SetFldValue(fld.FldId, ByteArray.ParseHex(txt));
-                }
-            }
-        }
-        private bool isExpanding = false;
-        private void expandBlock(BlockDefine block)
-        {
-            isExpanding = true;
-            // cbxidxを0から順番に処理していく
-            int cbxidx = 0;
-            BlockDefine blk = null;
-            string group = string.Empty;
-            int nest = 0;
-            NComboBox cbx;
-            while (_comboBoxes[cbxidx].Visible == true)
-            {
-                cbx = _comboBoxes[cbxidx];
-                Object tag = cbx.Tag;
-
-                if (tag is FieldDefine)
-                {
-                    if (block.GrpId.Contains(group))
-                    {
-                        // 展開するグループに属するならそのまま
-                        cbxidx++;
-                    }
-                    else
-                    {
-                        if (nest == 0)
-                        {
-                            // トップレベルならそのまま
-                            cbxidx++;
-                        }
-                        else
-                        {
-                            // そうでなければ閉じる
-                            deleteLine(cbxidx);
-                        }
-                    }
+                    InsertLine(idx);
                 }
                 else
                 {
-                    (blk, group) = ((BlockDefine, string))tag;
-                    nest = blk.NestingLevel;
-                    if (group == block.GrpId)
-                    {
-                        // 展開するグループなら展開処理へ進む
-                        cbxidx++;
-                        break;
-                    }
-                    if (group.Contains(block.OwnerGrpId))
-                    {
-                        // 展開するグループに属するならそのまま
-                        cbxidx++;
-                    }
-                    else
-                    {
-                        if (nest == 0)
-                        {
-                            // トップレベルならそのまま
-                            cbxidx++;
-                        }
-                        else
-                        {
-                            // そうでなければ閉じる
-                            deleteLine(cbxidx);
-                        }
-                    }
+                    ShrinkBlock(idx);
                 }
+                _comboBoxes[idx].Tag = blk;
+                blkobj.SetValues(_buttons[idx], _comboBoxes[idx], _labels[idx]);
             }
-            // 展開するグループが展開済なら一旦閉じる
-            while (true)
+        }
+
+        private void ShrinkBlock(int idx)
+        {
+            if (_buttons[idx].Text == "+")
             {
-                cbx = _comboBoxes[cbxidx];
-                Object tag = cbx.Tag;
-                if (tag == null)
+                return;
+            }
+            _buttons[idx].Text = "+";
+            int lev = ((FieldAndBlock)_comboBoxes[idx++].Tag).level;
+            while(idx< _comboBoxes.Count)
+            {
+                FieldAndBlock fabobj = (FieldAndBlock)_comboBoxes[idx].Tag;
+                if (fabobj == null)
                 {
-                    // 展開してなければ展開処理へ進む
                     break;
                 }
-                else
+                else if (lev < fabobj.level)
                 {
-                    if (tag is FieldDefine)
-                    {
-                        FieldDefine fld = (FieldDefine)tag;
-                        if (fld.OwnerBlock.GrpId != block.GrpId)
-                        {
-                            // 展開するグループに属さなければ展開処理へ進む
-                            break;
-                        }
-                        // そうでなければ閉じる
-                        deleteLine(cbxidx);
-                    }
-                    else
-                    {
-                        (blk, group) = ((BlockDefine, string))tag;
-                        if (blk.GrpId != block.GrpId)
-                        {
-                            // 展開するグループに属さなければ展開処理へ進む
-                            break;
-                        }
-                        // そうでなければ閉じる
-                        deleteLine(cbxidx);
-                    }
-                }
-            }
-
-            int level = block.NestingLevel;
-            int shift = level * 20;
-            // フィールドの展開
-            foreach (FieldDefine fld in block.GetFields())
-            {
-                insertLine(cbxidx);
-                string val = _commMsg.GetFldValue(fld.FldId).to_hex();
-                putField(_comboBoxes[cbxidx], _labels[cbxidx], fld, val, _comboBoxes_left + shift);
-                cbxidx++;
-            }
-
-            // ブロックの展開
-            foreach (string blkid in block.GetBlockIdList())
-            {
-                insertLine(cbxidx);
-                putBlock(_comboBoxes[cbxidx], _labels[cbxidx], block, blkid, _comboBoxes_left + shift);
-                cbxidx++;
-            }
-
-            // 未使用を非表示
-            for (; cbxidx < _comboBoxes.Count; ++cbxidx)
-            {
-                cbx = _comboBoxes[cbxidx];
-                Object tag = cbx.Tag;
-                if (tag == null)
-                {
-                    cbx.Visible = false;
-                    _labels[cbxidx].Visible = false;
+                    DeleteLine(idx);
                 }
                 else
                 {
-                    if (tag is FieldDefine)
-                    {
-                        FieldDefine fld = (FieldDefine)tag;
-                        BlockDefine ownerblk = fld.OwnerBlock;
-                        if (ownerblk != null)
-                        {
-                            cbx.Visible = false;
-                            _labels[cbxidx].Visible = false;
-                        }
-                    }
-                    else
-                    {
-                        (blk, group) = ((BlockDefine, string))tag;
-                        if (blk.NestingLevel >= level)
-                        {
-                            cbx.Visible = false;
-                            _labels[cbxidx].Visible = false;
-                        }
-                    }
+                    break;
                 }
             }
-            isExpanding = false;
-        }
-        private void putField(NComboBox cbx, Label lbl, FieldDefine fld, string val, int left)
-        {
-            int ofs = left - _comboBoxes_left;
-            cbx.Visible = true;
-            cbx.AllowEdit = true;
-            cbx.Left = left;
-            cbx.Width = _comboBoxes_width_narrow - ofs;
-            cbx.Tag = fld;
-
-            // フィールドの値を設定
-            cbx.ClearItems();
-            CommMessageDefine comdef = CommMessageDefine.GetInstance();
-            foreach (var pair in comdef.GetFldDescription(fld.FldId))
-            {
-                string vals = (string)pair.Key;
-                string desc = (string)pair.Value;
-                cbx.AddItem(desc, vals);
-            }
-            cbx.Text = val;
-
-            lbl.Visible = true;
-            lbl.Left = left + _comboBoxes_width_narrow - ofs;
-            lbl.Text = (fld.Name != null) ? fld.Name : fld.FldId;
-        }
-        private void putBlock(NComboBox cbx, Label lbl, BlockDefine block, string blkid, int left)
-        {
-            int ofs = left - _comboBoxes_left;
-            cbx.Visible = true;
-            cbx.AllowEdit = false;
-            cbx.Left = left;
-            cbx.Width = _comboBoxes_width_wide - ofs;
-            cbx.Tag = (block, blkid);
-            cbx.ClearItems();
-            foreach (BlockDefine blk in block.GetBlocks(blkid))
-            {
-                cbx.AddItem(blk.Name, blk);
-            }
-            cbx.SelectedIndex = 0;
-            lbl.Visible = false;
         }
 
-        private void insertLine(int idx)
+        private void InsertLine(int idx)
         {
             while ((_comboBoxes.Count - 1) <= idx)
             {
@@ -405,54 +206,243 @@ namespace SocketLib
             }
             for (int i = _comboBoxes.Count - 1; i > idx; --i)
             {
-                NComboBox dst = (NComboBox)_comboBoxes[i];
-                NComboBox src = (NComboBox)_comboBoxes[i - 1];
-                Label lbl = _labels[i];
-                if (src.Visible == true)
+                int dst = i;
+                int src =i - 1;
+                if (_comboBoxes[src].Visible == true)
                 {
-                    if (src.Tag is FieldDefine)
-                    {
-                        putField(dst, lbl, (FieldDefine)src.Tag, src.Text, src.Left);
-                    }
-                    else
-                    {
-                        var (block, blkid) = ((BlockDefine, string))src.Tag;
-                        putBlock(dst, lbl, block, blkid, src.Left);
-                    }
+                    FieldAndBlock obj = (FieldAndBlock)_comboBoxes[src].Tag;
+                    _comboBoxes[dst].Tag = obj;
+                    obj.SetValues(_buttons[dst], _comboBoxes[dst], _labels[dst]);
+                    _buttons[dst].Text = _buttons[src].Text;
                 }
             }
         }
-        private void deleteLine(int idx)
+        private void DeleteLine(int idx)
         {
             for (int i = idx; i < (_comboBoxes.Count - 1); ++i)
             {
-                NComboBox dst = (NComboBox)_comboBoxes[i];
-                NComboBox src = (NComboBox)_comboBoxes[i + 1];
-                Label lbl = _labels[i];
-                if (src.Visible == true)
+                int dst = i;
+                int src = i + 1;
+                if (_comboBoxes[src].Visible == true)
                 {
-                    if (src.Tag is FieldDefine)
-                    {
-                        putField(dst, lbl, (FieldDefine)src.Tag, src.Text, src.Left);
-                    }
-                    else
-                    {
-                        var (block, blkid) = ((BlockDefine, string))src.Tag;
-                        putBlock(dst, lbl, block, blkid, src.Left);
-                    }
+                    FieldAndBlock obj = (FieldAndBlock)_comboBoxes[src].Tag;
+                    _comboBoxes[dst].Tag = obj;
+                    obj.SetValues(_buttons[dst], _comboBoxes[dst], _labels[dst]);
+                    _buttons[dst].Text = _buttons[src].Text;
                 }
                 else
                 {
-                    dst.Visible = false;
-                    dst.Tag = null;
-                    lbl.Visible = false;
+                    InitLine(dst);
                 }
             }
-            _comboBoxes[_comboBoxes.Count - 1].Visible = false;
-            _comboBoxes[_comboBoxes.Count - 1].Tag = null;
-            _labels[_comboBoxes.Count - 1].Visible = false;
+            InitLine(_comboBoxes.Count - 1);
         }
 
+        private void InitLine(int idx)
+        {
+            _buttons[idx].Visible = false;
+            _buttons[idx].Text = "+";
+            _comboBoxes[idx].Visible = false;
+            _comboBoxes[idx].Tag = null;
+            _labels[idx].Visible = false;
+        }
 
+        private void Btn_Clicked(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            int idx = _buttons.IndexOf(btn);
+
+            switch (_comboBoxes[idx].Tag)
+            {
+                case BlockObject blkobj:
+                    if(btn.Text == "+")
+                    {
+                        BlockDefine blk = (BlockDefine)_comboBoxes[idx].SelectedValue;
+                        expandBlock(blk, idx, blkobj.level);
+                    }
+                    else
+                    {
+                        ShrinkBlock(idx);
+                    }
+                    break;
+            }
+        }
+
+        private void Cbx_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            NComboBox cbx = (NComboBox)sender;
+            int idx = _comboBoxes.IndexOf(cbx);
+            switch ((FieldAndBlock)cbx.Tag)
+            {
+                case FieldObject fldobj:
+                    // 選択されたフィールド値をWorkingAreaのメッセージに設定
+                    string val = (string)cbx.SelectedValue;
+                    if (val != null)
+                    {
+                        fldobj.SetFldValue(val);
+                    }
+                    break;
+                case BlockObject blkobj:
+                    // 展開中でなければ選択されたブロックを展開する
+                    if (bInnerUpdate == false)
+                    {
+                        BlockDefine blk = (BlockDefine)cbx.SelectedValue;
+                        expandBlock(blk, idx, blkobj.level);
+                    }
+                    break;
+            }
+        }
+
+        private void Cbx_TextUpdate(object sender, EventArgs e)
+        {
+            NComboBox cbx = (NComboBox)sender;
+            switch ((FieldAndBlock)cbx.Tag)
+            {
+                case FieldObject fldobj:
+                    if (cbx.SelectedIndex >= 0)
+                    {
+                        // 選択状態からユーザ入力があったら一旦選択値を表示する
+                        cbx.Text = (string)cbx.SelectedValue;
+                        cbx.SelectionStart = cbx.Text.Length;
+                    }
+                    break;
+            }
+        }
+
+        private void Cbx_TextChanged(object sender, EventArgs e)
+        {
+            if(bInnerUpdate)
+            {
+                return;
+            }
+            NComboBox cbx = (NComboBox)sender;
+            int idx = _comboBoxes.IndexOf(cbx);
+            switch ((FieldAndBlock)cbx.Tag)
+            {
+                case FieldObject fldobj:
+                    if (cbx.SelectedIndex < 0)
+                    {
+                        // 未選択の状態からユーザ入力があったら補正する
+                        int pos = cbx.SelectionStart;
+                        int len = cbx.Text.Length;
+                        // 16進文字列以外は削除
+                        cbx.Text = new Regex("[^0-9a-fA-F]+").Replace(cbx.Text, "");
+                        if (len > cbx.Text.Length)
+                        {
+                            // 削除した文字列分を補正
+                            --pos;
+                            len = cbx.Text.Length;
+                        }
+                        // フィールドの長さに合わせて補正
+                        FieldDefine fld = fldobj.fld;
+                        if (len > (fld.Length * 2))
+                        {
+                            if (pos >= (fld.Length * 2))
+                            {
+                                cbx.Text = cbx.Text.Substring(0, (fld.Length * 2));
+                            }
+                            else
+                            {
+                                cbx.Text = cbx.Text.Substring(0, pos) + cbx.Text.Substring(pos + 1, (fld.Length * 2) - pos);
+                            }
+                        }
+                        cbx.SelectionStart = pos;
+
+                        // 入力された値をWorkingAreaのメッセージに設定
+                        string txt = cbx.Text;
+                        if (txt.Length < (fld.Length * 2))
+                        {
+                            // 長さが足りなければ0埋め
+                            txt = (new String('0', (fld.Length * 2)) + txt).Substring(txt.Length);
+                        }
+                        _commMsg.SetFldValue(fld.FldId, ByteArray.ParseHex(txt));
+                    }
+                    break;
+            }
+        }
+
+        protected abstract class FieldAndBlock
+        {
+            public CommMessageEditor owner { get; private set; }
+            public int level {  get; private set; }
+
+            public FieldAndBlock(CommMessageEditor owner, int level)
+            {
+                this.owner = owner;
+                this.level = level;
+            }
+            public abstract void SetValues(Button btn, NComboBox cbx, Label lbl);
+        }
+
+        protected class FieldObject : FieldAndBlock
+        {
+            public FieldDefine fld { get; private set; }
+            public FieldObject(CommMessageEditor owner, int level, FieldDefine fld): base(owner, level)
+            {
+                this.fld = fld;
+            }
+
+            public override void SetValues(Button btn, NComboBox cbx, Label lbl)
+            {
+                btn.Visible = false;
+
+                cbx.Visible = true;
+                cbx.AllowEdit = true;
+                cbx.Left = owner.cbx_left + (level * 20);
+                cbx.Width = owner.cbx_width - (level * 20);
+                cbx.Tag = this;
+
+                // フィールドの値を設定
+                owner.bInnerUpdate = true;
+                cbx.ClearItems();
+                CommMessageDefine comdef = CommMessageDefine.GetInstance();
+                foreach (var pair in comdef.GetFldDescription(fld.FldId))
+                {
+                    string vals = (string)pair.Key;
+                    string desc = (string)pair.Value;
+                    cbx.AddItem(desc, vals);
+                }
+                owner.bInnerUpdate = false;
+                cbx.Text = owner._commMsg.GetFldValue(fld.FldId).to_hex();
+
+                lbl.Visible = true;
+                lbl.Text = (fld.Name != null) ? fld.Name : fld.FldId;
+            }
+            public void SetFldValue(string val)
+            {
+                owner._commMsg.SetFldValue(fld.FldId, ByteArray.ParseHex(val));
+            }
+        }
+        protected class BlockObject : FieldAndBlock
+        {
+            public BlockDefine block { get; private set; }
+            public string grpid { get; private set; }
+
+            public BlockObject(CommMessageEditor owner, int level, BlockDefine blk, string grpid) : base(owner, level)
+            {
+                this.block = blk;
+                this.grpid = grpid;
+            }
+
+            public override void SetValues(Button btn, NComboBox cbx, Label lbl)
+            {
+                btn.Visible = true;
+
+                cbx.Visible = true;
+                cbx.AllowEdit = false;
+                cbx.Left = owner.cbx_left + (level * 20);
+                cbx.Width = owner.cbx_wide_width - (level * 20);
+                cbx.Tag = this;
+                owner.bInnerUpdate = true;
+                cbx.ClearItems();
+                foreach (BlockDefine blk in block.GetBlocks(grpid))
+                {
+                    cbx.AddItem(blk.Name, blk);
+                }
+                cbx.SelectedIndex = 0;
+                owner.bInnerUpdate = false;
+                lbl.Visible = false;
+            }
+        }
     }
 }

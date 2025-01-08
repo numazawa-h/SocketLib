@@ -352,7 +352,7 @@ namespace SocketTool
                 _fields.Add(fld);
             }
 
-            public string[] GetBlockIdList()
+            public string[] GetGroupIdList()
             {
                 List<string> list = new List<string>();
                 foreach (BlockDefine blk in _blocks)

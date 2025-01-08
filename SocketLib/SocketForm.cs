@@ -96,7 +96,7 @@ namespace SampleMain
             {
                 cbx_MessageType.AddItem(msg.DName, msg);
             }
-            _CommMessageEditor= new CommMessageEditor(panel4, cbx_001, lbl_001, cbx_MessageType.Width, cbx_001.Height + 4);
+            _CommMessageEditor= new CommMessageEditor(panel4, btn_001, cbx_001, lbl_001, cbx_MessageType.Width, cbx_001.Height + 4);
 
             // タイトル設定
             if (title != null)

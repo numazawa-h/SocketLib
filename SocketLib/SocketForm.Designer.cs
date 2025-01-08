@@ -59,9 +59,10 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.lbl_001 = new System.Windows.Forms.Label();
             this.cbx_001 = new NCommonUtility.NComboBox();
             this.cbx_MessageType = new NCommonUtility.NComboBox();
+            this.lbl_001 = new System.Windows.Forms.Label();
+            this.btn_001 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -400,6 +401,7 @@
             // panel4
             // 
             this.panel4.AutoScroll = true;
+            this.panel4.Controls.Add(this.btn_001);
             this.panel4.Controls.Add(this.cbx_001);
             this.panel4.Controls.Add(this.cbx_MessageType);
             this.panel4.Controls.Add(this.lbl_001);
@@ -408,15 +410,6 @@
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(907, 529);
             this.panel4.TabIndex = 0;
-            // 
-            // lbl_001
-            // 
-            this.lbl_001.AutoSize = true;
-            this.lbl_001.Location = new System.Drawing.Point(606, 76);
-            this.lbl_001.Name = "lbl_001";
-            this.lbl_001.Size = new System.Drawing.Size(91, 24);
-            this.lbl_001.TabIndex = 45;
-            this.lbl_001.Text = "label001";
             // 
             // cbx_001
             // 
@@ -440,6 +433,27 @@
             this.cbx_MessageType.TabIndex = 43;
             this.cbx_MessageType.ValueMember = "value";
             this.cbx_MessageType.SelectedIndexChanged += new System.EventHandler(this.Cbx_MessageType_SelectedIndexChanged);
+            // 
+            // lbl_001
+            // 
+            this.lbl_001.AutoSize = true;
+            this.lbl_001.Location = new System.Drawing.Point(606, 76);
+            this.lbl_001.Name = "lbl_001";
+            this.lbl_001.Size = new System.Drawing.Size(91, 24);
+            this.lbl_001.TabIndex = 45;
+            this.lbl_001.Text = "label001";
+            // 
+            // btn_001
+            // 
+            this.btn_001.FlatAppearance.BorderSize = 0;
+            this.btn_001.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btn_001.Location = new System.Drawing.Point(14, 71);
+            this.btn_001.Margin = new System.Windows.Forms.Padding(0);
+            this.btn_001.Name = "btn_001";
+            this.btn_001.Size = new System.Drawing.Size(32, 32);
+            this.btn_001.TabIndex = 44;
+            this.btn_001.Text = "+";
+            this.btn_001.UseVisualStyleBackColor = true;
             // 
             // SocketForm
             // 
@@ -508,5 +522,6 @@
         private NCommonUtility.NComboBox cbx_001;
         private NCommonUtility.NComboBox cbx_MessageType;
         private System.Windows.Forms.Label lbl_001;
+        private System.Windows.Forms.Button btn_001;
     }
 }
