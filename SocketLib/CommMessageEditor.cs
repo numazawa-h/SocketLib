@@ -30,14 +30,12 @@ namespace SocketLib
         int _next_tabidx;
 
         protected CommMessage _commMsg;
-
         protected bool bInnerUpdate = false;
+        protected int cbx_left { get; private set; }
+        protected int cbx_width { get; private set; }
+        protected int cbx_wide_width { get; private set; }
 
-        protected int cbx_left => _comboBoxes[0].Left;
-        protected int cbx_width => _comboBoxes[0].Width;
-        protected int cbx_wide_width => _width - _comboBoxes[0].Left;
-
-                /// <summary>
+        /// <summary>
         /// コンストラクタ
         /// </summary>
         /// <param name="pnl">パネル</param>
@@ -61,6 +59,10 @@ namespace SocketLib
             _hight = hight;
             _next_y = cbx.Top + _hight;
             _next_tabidx = cbx.TabIndex + 3;
+
+            cbx_left = _comboBoxes[0].Left;
+            cbx_width = _comboBoxes[0].Width;
+            cbx_wide_width = _width - _comboBoxes[0].Left;
         }
 
         private void AddLine()

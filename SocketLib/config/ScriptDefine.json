@@ -15,7 +15,6 @@
   "Working-area":{	
     "++seqno":123,
     "status":{"dtype":"14", "values":{
-    	"sts001":1, "sts002":2,
     	"blk[0].b01":1, "blk[0].b02":2,
     }},
     "control":{"dtype":"30",},
