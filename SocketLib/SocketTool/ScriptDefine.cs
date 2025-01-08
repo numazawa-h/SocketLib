@@ -42,6 +42,7 @@ namespace SocketTool
         protected HashSet<string> _incriment_values = new HashSet<string>();
         protected Dictionary<string, CommMessage> _commMessages = new Dictionary<string, CommMessage>();
         protected Dictionary<string, CommMessage> _commMessagesInit = new Dictionary<string, CommMessage>();
+        protected Dictionary<string, string> _commMessagesDisp = new Dictionary<string, string>();
         protected Dictionary<string, Command> _comands = new Dictionary<string, Command>();
         protected Dictionary<string, ScriptList> _script_connect = new Dictionary<string, ScriptList>();
         protected Dictionary<string, ScriptList> _script_send = new Dictionary<string, ScriptList>();
@@ -103,13 +104,14 @@ namespace SocketTool
                     node.AddValue("id", id);      // Commandクラスが'id'必須なので追加しておく
                     CommandSend cmd = new CommandSend(node);
                     CommMessage msg = cmd.GetMessage();
-                    string name = node["name"];
-                    if (name == null)
+                    _commMessages.Add(id, msg);
+                    _commMessagesInit.Add(id, new CommMessage(msg));
+                    string display = node["name"];
+                    if (display == null)
                     {
-                        name = msg.DName;
+                        display = msg.DName;
                     }
-                    _commMessages.Add(name, msg);
-                    _commMessagesInit.Add(name, new CommMessage(msg));
+                    _commMessagesDisp.Add(display, id);
                 }
                 catch (Exception ex)
                 {
@@ -235,15 +237,27 @@ namespace SocketTool
             _remote_set[desc].Exec(null);
         }
 
-        public string[] GetValueMsgList()
+        public string[] GetValueMsgKeyList()
         {
             return _commMessages.Keys.ToArray();
         }
-        public CommMessage GetValueMsg(string name)
+        public CommMessage GetValueMsg(string id)
         {
-            return _commMessages[name];
+            return _commMessages[id];
         }
-
+        public string GetValueMsgDisp(string id)
+        {
+            string disp= string.Empty;
+            foreach(var pair in _commMessagesDisp)
+            {
+                if(pair.Value == id)
+                {
+                    disp = pair.Key;
+                    break;
+                }
+            }
+            return disp;
+        }
         public bool ContainsKeyIntValue(string name)
         {
             return _ivalues.ContainsKey(name);
@@ -286,10 +300,11 @@ namespace SocketTool
             _bvalues[name] = val;
         }
 
-        public CommMessage InitMessage(string name)
+        public CommMessage InitMessage(string disp)
         {
-            _commMessages[name] = new CommMessage(_commMessagesInit[name]);
-            return _commMessages[name];
+            string id = _commMessagesDisp[disp];
+            _commMessages[id] = new CommMessage(_commMessagesInit[id]);
+            return _commMessages[id];
         }
 
         public void ExecOnConnect(CommSocket socket)
