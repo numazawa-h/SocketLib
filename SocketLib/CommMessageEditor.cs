@@ -75,6 +75,15 @@ namespace SocketLib
             btn.Location = new System.Drawing.Point(_buttons[0].Left, btn_y);
             btn.Name = string.Format($"btn_{no:D4}");
             btn.Size = new System.Drawing.Size(_buttons[0].Width, _buttons[0].Height);
+            btn.Font = _buttons[0].Font;
+            btn.ForeColor = _buttons[0].ForeColor;
+            btn.BackColor = _buttons[0].BackColor;
+            btn.FlatStyle = _buttons[0].FlatStyle;
+            btn.FlatAppearance.BorderSize = _buttons[0].FlatAppearance.BorderSize;
+            btn.FlatAppearance.BorderColor = _buttons[0].FlatAppearance.BorderColor;
+            btn.FlatAppearance.CheckedBackColor = _buttons[0].FlatAppearance.CheckedBackColor;
+            btn.FlatAppearance.MouseOverBackColor = _buttons[0].FlatAppearance.MouseOverBackColor;
+            btn.FlatAppearance.MouseDownBackColor = _buttons[0].FlatAppearance.MouseDownBackColor;
             btn.TabIndex = _next_tabidx++;
             btn.Text = "+";
             btn.Click += Btn_Clicked;
