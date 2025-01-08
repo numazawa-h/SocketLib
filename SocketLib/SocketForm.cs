@@ -92,9 +92,10 @@ namespace SampleMain
             }
 
             // 電文編集タブのセットアップ
-            foreach (CommMessage msg in ScriptDefine.GetInstance().GetValueMsgList())
+            foreach ( string name in ScriptDefine.GetInstance().GetValueMsgList())
             {
-                cbx_MessageType.AddItem(msg.DName, msg);
+                CommMessage msg= ScriptDefine.GetInstance().GetValueMsg(name);
+                cbx_MessageType.AddItem(name, msg);
             }
             _CommMessageEditor= new CommMessageEditor(panel4, btn_001, cbx_001, lbl_001, cbx_MessageType.Width, cbx_001.Height + 4);
 
@@ -351,7 +352,18 @@ namespace SampleMain
         private void Cbx_MessageType_SelectedIndexChanged(object sender, EventArgs e)
         {
             CommMessage msg = (CommMessage)cbx_MessageType.SelectedValue;
-            _CommMessageEditor.SetCommMessage(msg);
+            string name = cbx_MessageType.GetSelectedDisplay();
+            _CommMessageEditor.SetCommMessage(msg,name);
+        }
+
+        private void Btn_init_Click(object sender, EventArgs e)
+        {
+            _CommMessageEditor.InitCommMessage();
+        }
+
+        private void Btn_send_Click(object sender, EventArgs e)
+        {
+            _CommMessageEditor.SendCommMessage(_Socket);
         }
     }
 }

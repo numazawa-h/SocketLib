@@ -41,6 +41,7 @@ namespace SocketTool
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
         protected HashSet<string> _incriment_values = new HashSet<string>();
         protected Dictionary<string, CommMessage> _commMessages = new Dictionary<string, CommMessage>();
+        protected Dictionary<string, CommMessage> _commMessagesInit = new Dictionary<string, CommMessage>();
         protected Dictionary<string, Command> _comands = new Dictionary<string, Command>();
         protected Dictionary<string, ScriptList> _script_connect = new Dictionary<string, ScriptList>();
         protected Dictionary<string, ScriptList> _script_send = new Dictionary<string, ScriptList>();
@@ -96,17 +97,23 @@ namespace SocketTool
             _commMessages.Clear();
             foreach (Node node in root["Working-area"].GetObjects())
             {
-                string name = node._name;
+                string id = node._name;
                 try
                 {
-                    node.AddValue("id", name);      // Commandクラスが'id'必須なので追加しておく
+                    node.AddValue("id", id);      // Commandクラスが'id'必須なので追加しておく
                     CommandSend cmd = new CommandSend(node);
                     CommMessage msg = cmd.GetMessage();
+                    string name = node["name"];
+                    if (name == null)
+                    {
+                        name = msg.DName;
+                    }
                     _commMessages.Add(name, msg);
+                    _commMessagesInit.Add(name, new CommMessage(msg));
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException($"ScriptDefineのvalues('{name}')で読み込みエラー in {path}", ex);
+                    throw new InvalidOperationException($"ScriptDefineのvalues('{id}')で読み込みエラー in {path}", ex);
                 }
             }
 
@@ -228,9 +235,9 @@ namespace SocketTool
             _remote_set[desc].Exec(null);
         }
 
-        public CommMessage[] GetValueMsgList()
+        public string[] GetValueMsgList()
         {
-            return _commMessages.Values.ToArray();
+            return _commMessages.Keys.ToArray();
         }
         public CommMessage GetValueMsg(string name)
         {
@@ -279,6 +286,11 @@ namespace SocketTool
             _bvalues[name] = val;
         }
 
+        public CommMessage InitMessage(string name)
+        {
+            _commMessages[name] = new CommMessage(_commMessagesInit[name]);
+            return _commMessages[name];
+        }
 
         public void ExecOnConnect(CommSocket socket)
         {

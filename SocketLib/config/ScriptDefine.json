@@ -14,7 +14,7 @@
   //   local_addrとremote_addrには選択された時に実行する変数setをvalues定義できる
   "Working-area":{	
     "++seqno":123,
-    "status":{"dtype":"14", "values":{
+    "status":{"name":"状態送信電文", "dtype":"14", "values":{
     	"blk[0].b01":1, "blk[0].b02":2,
     }},
     "control":{"dtype":"30",},

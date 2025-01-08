@@ -63,6 +63,8 @@
             this.btn_001 = new System.Windows.Forms.Button();
             this.cbx_001 = new NCommonUtility.NComboBox();
             this.cbx_MessageType = new NCommonUtility.NComboBox();
+            this.btn_init = new System.Windows.Forms.Button();
+            this.btn_send = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -401,6 +403,8 @@
             // panel4
             // 
             this.panel4.AutoScroll = true;
+            this.panel4.Controls.Add(this.btn_send);
+            this.panel4.Controls.Add(this.btn_init);
             this.panel4.Controls.Add(this.btn_001);
             this.panel4.Controls.Add(this.cbx_001);
             this.panel4.Controls.Add(this.cbx_MessageType);
@@ -414,21 +418,21 @@
             // lbl_001
             // 
             this.lbl_001.AutoSize = true;
-            this.lbl_001.Location = new System.Drawing.Point(606, 76);
+            this.lbl_001.Location = new System.Drawing.Point(603, 107);
             this.lbl_001.Name = "lbl_001";
             this.lbl_001.Size = new System.Drawing.Size(91, 24);
-            this.lbl_001.TabIndex = 45;
+            this.lbl_001.TabIndex = 52;
             this.lbl_001.Text = "label001";
             // 
             // btn_001
             // 
             this.btn_001.FlatAppearance.BorderSize = 0;
             this.btn_001.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btn_001.Location = new System.Drawing.Point(14, 71);
+            this.btn_001.Location = new System.Drawing.Point(11, 102);
             this.btn_001.Margin = new System.Windows.Forms.Padding(0);
             this.btn_001.Name = "btn_001";
             this.btn_001.Size = new System.Drawing.Size(32, 32);
-            this.btn_001.TabIndex = 44;
+            this.btn_001.TabIndex = 50;
             this.btn_001.Text = "+";
             this.btn_001.UseVisualStyleBackColor = true;
             // 
@@ -437,10 +441,10 @@
             this.cbx_001.AllowEdit = true;
             this.cbx_001.DisplayMember = "display";
             this.cbx_001.FormattingEnabled = true;
-            this.cbx_001.Location = new System.Drawing.Point(49, 70);
+            this.cbx_001.Location = new System.Drawing.Point(46, 101);
             this.cbx_001.Name = "cbx_001";
             this.cbx_001.Size = new System.Drawing.Size(549, 32);
-            this.cbx_001.TabIndex = 44;
+            this.cbx_001.TabIndex = 51;
             this.cbx_001.ValueMember = "value";
             // 
             // cbx_MessageType
@@ -455,6 +459,26 @@
             this.cbx_MessageType.TabIndex = 43;
             this.cbx_MessageType.ValueMember = "value";
             this.cbx_MessageType.SelectedIndexChanged += new System.EventHandler(this.Cbx_MessageType_SelectedIndexChanged);
+            // 
+            // btn_init
+            // 
+            this.btn_init.Location = new System.Drawing.Point(46, 55);
+            this.btn_init.Name = "btn_init";
+            this.btn_init.Size = new System.Drawing.Size(112, 40);
+            this.btn_init.TabIndex = 44;
+            this.btn_init.Text = "初期化";
+            this.btn_init.UseVisualStyleBackColor = true;
+            this.btn_init.Click += new System.EventHandler(this.Btn_init_Click);
+            // 
+            // btn_send
+            // 
+            this.btn_send.Location = new System.Drawing.Point(776, 55);
+            this.btn_send.Name = "btn_send";
+            this.btn_send.Size = new System.Drawing.Size(112, 40);
+            this.btn_send.TabIndex = 53;
+            this.btn_send.Text = "送信";
+            this.btn_send.UseVisualStyleBackColor = true;
+            this.btn_send.Click += new System.EventHandler(this.Btn_send_Click);
             // 
             // SocketForm
             // 
@@ -524,5 +548,7 @@
         private NCommonUtility.NComboBox cbx_MessageType;
         private System.Windows.Forms.Label lbl_001;
         private System.Windows.Forms.Button btn_001;
+        private System.Windows.Forms.Button btn_init;
+        private System.Windows.Forms.Button btn_send;
     }
 }

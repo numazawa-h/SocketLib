@@ -30,6 +30,7 @@ namespace SocketLib
         int _next_tabidx;
 
         protected CommMessage _commMsg;
+        protected string _commMsgName;
         protected bool bInnerUpdate = false;
         protected int cbx_left { get; private set; }
         protected int cbx_width { get; private set; }
@@ -120,14 +121,44 @@ namespace SocketLib
             _next_y = _next_y + _hight;
         }
 
-        public void SetCommMessage(CommMessage msg)
+        public void SendCommMessage(CommSocket socket)
+        {
+            socket.Send(_commMsg);
+        }
+
+        public void InitCommMessage()
+        {
+            _commMsg = ScriptDefine.GetInstance().InitMessage(_commMsgName);
+            refresh();
+        }
+
+        private void refresh()
+        {
+            for (int idx = 0; idx < _comboBoxes.Count; idx++)
+            {
+                NComboBox cbx =_comboBoxes[idx];
+                if(cbx.Visible == false)
+                {
+                    break;
+                }
+                switch ((FieldAndBlock)cbx.Tag)
+                {
+                    case FieldObject fldobj:
+                        string val = _commMsg.GetFldValue(fldobj.fld.FldId).to_hex();
+                        cbx.Text = val;
+                        break;
+                }
+            }
+        }
+
+        public void SetCommMessage(CommMessage msg, string name)
         {
             foreach (Button btn in _buttons)
             {
                 btn.Visible = false;
                 btn.Text = "+";
             }
-            foreach (ComboBox cbx in _comboBoxes)
+            foreach (NComboBox cbx in _comboBoxes)
             {
                 cbx.Visible = false;
                 cbx.Tag = null;
@@ -138,6 +169,7 @@ namespace SocketLib
             }
 
             _commMsg = msg;
+            _commMsgName = name;
             expandBlock(msg.GetBlockDefine(), -1, -1);
         }
 

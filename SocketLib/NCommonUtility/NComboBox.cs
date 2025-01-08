@@ -106,6 +106,11 @@ namespace NCommonUtility
             }
         }
 
+        public string GetSelectedDisplay()
+        {
+            return ((Item)SelectedItem).display;
+        }
+
         protected override void OnCreateControl()
         {
             if (isInit == false)
