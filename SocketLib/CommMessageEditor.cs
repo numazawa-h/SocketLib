@@ -68,7 +68,7 @@ namespace SocketLib
 
         private void AddLine()
         {
-            int no = _comboBoxes.Count +1;
+            int no = _comboBoxes.Count + 1;
 
             Button btn = new Button();
             int btn_y = _next_y + (_buttons[0].Top - _comboBoxes[0].Top);
@@ -175,6 +175,10 @@ namespace SocketLib
 
         private void expandBlock(BlockDefine blk, int idx, int level)
         {
+            //
+            //AutoScrollを有効にしたフォームでGcResizeコンポーネントを使用した場合、フォームサイズを小さくしてスクロールバーが表示された状態で、フォーム上の子コントロールのLocation（TopやLeftなど）をコードで変更すると、その後でフォームをリサイズしたときに、Locationを変更した子コントロールの表示位置が不正になります。
+            //
+            _panel.AutoScroll = false;
             _panel.Parent.SuspendLayout();
             try
             {
@@ -221,6 +225,7 @@ namespace SocketLib
             finally
             {
                 _panel.Parent.ResumeLayout();
+                _panel.AutoScroll = true;
             }
         }
 
