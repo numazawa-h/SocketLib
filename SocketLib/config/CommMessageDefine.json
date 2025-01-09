@@ -48,12 +48,35 @@
 			{ "block":"blk", "name":"車線[#0]","ofs": 8, "len":16, "rep":2, "flds":[
 				{ "id":"b01", "ofs":0, "len":1, "disp":true, "dispname":true},
 				{ "id":"b02", "ofs":1, "len":1, "disp":true, "dispname":false},
-				{ "block":"a", "name":"a[#1]", "ofs":5, "len":1, "rep":5, "flds":[
-					{ "id":"sts", "name":"L#0S#1", "ofs":0, "len":1, "disp":true, "dispname":true},
+				{ "block":"a", "name":"a[#1]", "ofs":5, "len":5, "rep":5, "flds":[
+					{ "id":"sts_1", "name":"L#0S#1", "ofs":0, "len":1, "disp":true, "dispname":true},
+					{ "id":"sts_2", "name":"L#0S#1", "ofs":1, "len":1, "disp":true, "dispname":true},
+					{ "id":"sts_3", "name":"L#0S#1", "ofs":2, "len":1, "disp":true, "dispname":true},
+					{ "id":"sts_4", "name":"L#0S#1", "ofs":3, "len":1, "disp":true, "dispname":true},
+					{ "id":"sts_5", "name":"L#0S#1", "ofs":4, "len":1, "disp":true, "dispname":true},
 				  ]
 				},
-				{ "block":"b", "ofs":10, "len":1, "rep":5, "flds":[
-					{ "id":"sts", "ofs":0, "len":1, "disp":true},
+				{ "block":"b", "ofs":30, "len":20, "rep":5, "flds":[
+					{ "id":"sts_01", "ofs":0, "len":1, "disp":true},
+					{ "id":"sts_02", "ofs":1, "len":1, "disp":true},
+					{ "id":"sts_03", "ofs":2, "len":1, "disp":true},
+					{ "id":"sts_04", "ofs":3, "len":1, "disp":true},
+					{ "id":"sts_05", "ofs":4, "len":1, "disp":true},
+					{ "id":"sts_06", "ofs":5, "len":1, "disp":true},
+					{ "id":"sts_07", "ofs":6, "len":1, "disp":true},
+					{ "id":"sts_08", "ofs":7, "len":1, "disp":true},
+					{ "id":"sts_09", "ofs":8, "len":1, "disp":true},
+					{ "id":"sts_10", "ofs":9, "len":1, "disp":true},
+					{ "id":"sts_11", "ofs":10, "len":1, "disp":true},
+					{ "id":"sts_12", "ofs":11, "len":1, "disp":true},
+					{ "id":"sts_13", "ofs":12, "len":1, "disp":true},
+					{ "id":"sts_14", "ofs":13, "len":1, "disp":true},
+					{ "id":"sts_15", "ofs":14, "len":1, "disp":true},
+					{ "id":"sts_16", "ofs":15, "len":1, "disp":true},
+					{ "id":"sts_17", "ofs":16, "len":1, "disp":true},
+					{ "id":"sts_18", "ofs":17, "len":1, "disp":true},
+					{ "id":"sts_19", "ofs":18, "len":1, "disp":true},
+					{ "id":"sts_20", "ofs":19, "len":1, "disp":true},
 				  ]
 				},
 			  ]

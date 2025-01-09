@@ -175,43 +175,52 @@ namespace SocketLib
 
         private void expandBlock(BlockDefine blk, int idx, int level)
         {
-            bool bInsert = false;
-            if (idx < 0)
+            _panel.Parent.SuspendLayout();
+            try
             {
-                bInsert = true;
-            }
-            else if (_buttons[idx].Text == "+")
-            {
-                bInsert = true;
-                _buttons[idx].Text = "-";
-            }
-            foreach (FieldDefine fld in blk.GetFields())
-            {
-                ++idx;
-                FieldObject fldobj = new FieldObject(this, level + 1, fld);
-                if (bInsert)
+                bool bInsert = false;
+                if (idx < 0)
                 {
-                    InsertLine(idx);
+                    bInsert = true;
                 }
-                _comboBoxes[idx].Tag = fld;
-                fldobj.SetValues(_buttons[idx], _comboBoxes[idx], _labels[idx]);
-                _comboBoxes[idx].Text = _commMsg.GetFldValue(fld.FldId).to_hex();
-            }
+                else if (_buttons[idx].Text == "+")
+                {
+                    bInsert = true;
+                    _buttons[idx].Text = "-";
+                }
+                foreach (FieldDefine fld in blk.GetFields())
+                {
+                    ++idx;
+                    FieldObject fldobj = new FieldObject(this, level + 1, fld);
+                    if (bInsert)
+                    {
+                        InsertLine(idx);
+                    }
+                    _comboBoxes[idx].Tag = fld;
+                    fldobj.SetValues(_buttons[idx], _comboBoxes[idx], _labels[idx]);
+                    _comboBoxes[idx].Text = _commMsg.GetFldValue(fld.FldId).to_hex();
+                }
 
-            foreach (string grpid in blk.GetGroupIdList())
+                foreach (string grpid in blk.GetGroupIdList())
+                {
+                    ++idx;
+                    BlockObject blkobj = new BlockObject(this, level + 1, blk, grpid);
+                    if (bInsert)
+                    {
+                        InsertLine(idx);
+                    }
+                    else
+                    {
+                        ShrinkBlock(idx);
+                    }
+                    _comboBoxes[idx].Tag = blk;
+                    blkobj.SetValues(_buttons[idx], _comboBoxes[idx], _labels[idx]);
+                }
+
+            }
+            finally
             {
-                ++idx;
-                BlockObject blkobj = new BlockObject(this, level + 1, blk, grpid);
-                if (bInsert)
-                {
-                    InsertLine(idx);
-                }
-                else
-                {
-                    ShrinkBlock(idx);
-                }
-                _comboBoxes[idx].Tag = blk;
-                blkobj.SetValues(_buttons[idx], _comboBoxes[idx], _labels[idx]);
+                _panel.Parent.ResumeLayout();
             }
         }
 
@@ -221,26 +230,34 @@ namespace SocketLib
             {
                 return;
             }
-            _buttons[idx].Text = "+";
-            int lev = ((FieldAndBlock)_comboBoxes[idx++].Tag).level;
-            while(idx< _comboBoxes.Count)
+            _panel.SuspendLayout();
+            try
             {
-                FieldAndBlock fabobj = (FieldAndBlock)_comboBoxes[idx].Tag;
-                if (fabobj == null)
+                _buttons[idx].Text = "+";
+                int lev = ((FieldAndBlock)_comboBoxes[idx++].Tag).level;
+                while (idx < _comboBoxes.Count)
                 {
-                    break;
-                }
-                else if (lev < fabobj.level)
-                {
-                    DeleteLine(idx);
-                }
-                else
-                {
-                    break;
+                    FieldAndBlock fabobj = (FieldAndBlock)_comboBoxes[idx].Tag;
+                    if (fabobj == null)
+                    {
+                        break;
+                    }
+                    else if (lev < fabobj.level)
+                    {
+                        DeleteLine(idx);
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
+            finally
+            {
+                _panel.ResumeLayout();
+            }
         }
-
+        
         private void InsertLine(int idx)
         {
             while ((_comboBoxes.Count - 1) <= idx)
