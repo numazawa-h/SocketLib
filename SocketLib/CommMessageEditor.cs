@@ -265,7 +265,7 @@ namespace SocketLib
         
         private void InsertLine(int idx)
         {
-            while ((_comboBoxes.Count - 1) <= idx)
+            if (_comboBoxes[(_comboBoxes.Count - 1)].Visible)
             {
                 AddLine();
             }
