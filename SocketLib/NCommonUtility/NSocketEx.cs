@@ -224,7 +224,7 @@ namespace NCommonUtility
             try
             {
                 Socket soc = socket._soc.EndAccept(ar);
-                OnAccept(new NSocketEx(soc, this.HeaderSize, this.DataLenOffset, this.DataLenSize));
+                OnAccept(new NSocketEx(soc, this.HeaderSize, this.DataLenOffset, this.DataLenSize, this.DataLenIsPacketSize));
             }
             catch (Exception ex)
             {
