@@ -175,57 +175,84 @@ namespace SocketLib
 
         private void expandBlock(BlockDefine blk, int idx, int level)
         {
+            #region SuspendLayout メモ
             //
-            //AutoScrollを有効にしたフォームでGcResizeコンポーネントを使用した場合、フォームサイズを小さくしてスクロールバーが表示された状態で、フォーム上の子コントロールのLocation（TopやLeftなど）をコードで変更すると、その後でフォームをリサイズしたときに、Locationを変更した子コントロールの表示位置が不正になります。
+            // コードで子コントロールを大量に操作する場合、表示のちらつきを抑制するために使用する。
+            // あまり効果がないようにも思われるが一応使っている。
             //
-            _panel.AutoScroll = false;
+            #endregion
             _panel.Parent.SuspendLayout();
             try
             {
-                bool bInsert = false;
+                #region AutoScroll メモ
+                //
+                // AutoScrollを有効にしたパネルで子コントロールを生成する時、
+                // 子コントロールの表示位置が不正になる場合があるので、
+                // 子コントロールの生成処理中は AutoScrollをfalseにしておく。
+                //
+                #endregion
+                _panel.AutoScroll = false;
+
+                int expand_cnt = blk.GetFields().Length + blk.GetGroupIdList().Length;
                 if (idx < 0)
                 {
-                    bInsert = true;
+                    // _commMsgが切り替わった時、レベル0 の展開域を開ける
+                    InsertLine(0, expand_cnt);
                 }
                 else if (_buttons[idx].Text == "+")
                 {
-                    bInsert = true;
+                    // 展開していないブロックの時、該当ブロックの展開域を開ける
                     _buttons[idx].Text = "-";
+                    InsertLine(idx + 1, expand_cnt);
                 }
+                else
+                {
+                    // 展開しているブロックの時、配下のブロックを全て閉じる
+                    int lev = ((FieldAndBlock)_comboBoxes[idx].Tag).level;
+                    for (int i=idx+1;i< _comboBoxes.Count; i++)
+                    {
+                        if(_comboBoxes[i].Tag == null)
+                        {
+                            break;
+                        }
+                        if(_comboBoxes[i].Tag is FieldObject)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            BlockObject blkobj = (BlockObject)_comboBoxes[i].Tag;
+                            if (lev >= blkobj.level)
+                            {
+                                // 配下でないブロックまで来たら終了
+                                break;
+                            }
+                            ShrinkBlock(i);
+                        }
+                    }
+                }
+                // フィールドの展開
                 foreach (FieldDefine fld in blk.GetFields())
                 {
                     ++idx;
                     FieldObject fldobj = new FieldObject(this, level + 1, fld);
-                    if (bInsert)
-                    {
-                        InsertLine(idx);
-                    }
                     _comboBoxes[idx].Tag = fld;
                     fldobj.SetValues(_buttons[idx], _comboBoxes[idx], _labels[idx]);
                     _comboBoxes[idx].Text = _commMsg.GetFldValue(fld.FldId).to_hex();
                 }
-
+                // ブロックの展開
                 foreach (string grpid in blk.GetGroupIdList())
                 {
                     ++idx;
                     BlockObject blkobj = new BlockObject(this, level + 1, blk, grpid);
-                    if (bInsert)
-                    {
-                        InsertLine(idx);
-                    }
-                    else
-                    {
-                        ShrinkBlock(idx);
-                    }
                     _comboBoxes[idx].Tag = blk;
                     blkobj.SetValues(_buttons[idx], _comboBoxes[idx], _labels[idx]);
                 }
-
             }
             finally
             {
-                _panel.Parent.ResumeLayout();
                 _panel.AutoScroll = true;
+                _panel.Parent.ResumeLayout();
             }
         }
 
@@ -235,44 +262,72 @@ namespace SocketLib
             {
                 return;
             }
+
+            #region SuspendLayout メモ
+            //
+            // コードで子コントロールを大量に操作する場合、表示のちらつきを抑制するために使用する。
+            // あまり効果がないようにも思われるが一応使っている。
+            //
+            #endregion
             _panel.SuspendLayout();
             try
             {
                 _buttons[idx].Text = "+";
-                int lev = ((FieldAndBlock)_comboBoxes[idx++].Tag).level;
-                while (idx < _comboBoxes.Count)
+                // 折りたたむ行数を数える
+                int cnt = 0;
+                int lev = ((FieldAndBlock)_comboBoxes[idx].Tag).level;
+                for (int i = idx+1; i < _comboBoxes.Count; i++)
                 {
-                    FieldAndBlock fabobj = (FieldAndBlock)_comboBoxes[idx].Tag;
+                    FieldAndBlock fabobj = (FieldAndBlock)_comboBoxes[i].Tag;
                     if (fabobj == null)
                     {
                         break;
                     }
-                    else if (lev < fabobj.level)
-                    {
-                        DeleteLine(idx);
-                    }
-                    else
+                    else if (lev >= fabobj.level)
                     {
                         break;
                     }
+                    cnt++;
                 }
+                // 折りたたみ
+                DeleteLine(idx+1, cnt);
             }
             finally
             {
                 _panel.ResumeLayout();
             }
         }
-        
-        private void InsertLine(int idx)
+
+        /// <summary>
+        /// ブロック展開のために行を開ける
+        /// </summary>
+        /// <param name="idx">展開するブロックのインデックス（ここで指定されたインデックスの下に行を開ける）</param>
+        /// <param name="cnt">開ける行数</param>
+        /// <remarks>指定されたidxより下に存在するVisible行は開ける行数分下にずらす</remarks>
+        private void InsertLine(int idx, int cnt)
         {
-            if (_comboBoxes[(_comboBoxes.Count - 1)].Visible)
+            // 展開するブロックより下にあるVisible行を数える
+            int visible_cnt = 0;
+            for(int i = idx; i< _comboBoxes.Count; i++)
             {
-                AddLine();
+                if (_comboBoxes[i].Visible == false)
+                {
+                    break;
+                }
+                visible_cnt++;
             }
-            for (int i = _comboBoxes.Count - 1; i > idx; --i)
+
+            // コントロールの行数が足りなくなるなら追加しておく
+            if (_comboBoxes.Count < (idx+cnt+visible_cnt))
+            {
+                Enumerable.Range(0, (idx+cnt+visible_cnt) - _comboBoxes.Count).ToList().ForEach((_) => AddLine());
+            }
+
+            // 最下からずらしていく
+            for (int i = _comboBoxes.Count - 1; i > (idx+cnt-1); --i)
             {
                 int dst = i;
-                int src =i - 1;
+                int src = i - cnt;
                 if (_comboBoxes[src].Visible == true)
                 {
                     FieldAndBlock obj = (FieldAndBlock)_comboBoxes[src].Tag;
@@ -282,27 +337,60 @@ namespace SocketLib
                 }
             }
         }
-        private void DeleteLine(int idx)
+
+        /// <summary>
+        /// ブロック折りたたみのために行を削除する
+        /// </summary>
+        /// <param name="idx">折りたたむブロックのインデックス</param>
+        /// <param name="cnt">削除する行数（配下の行数）</param>
+        /// <remarks>指定されたブロック配下の行を削除して行数分上にずらす</remarks>
+        private void DeleteLine(int idx, int cnt)
         {
-            for (int i = idx; i < (_comboBoxes.Count - 1); ++i)
+            for (int i = idx; i < _comboBoxes.Count; ++i)
             {
                 int dst = i;
-                int src = i + 1;
-                if (_comboBoxes[src].Visible == true)
+                int src = i + cnt;
+                if (src < _comboBoxes.Count)
                 {
-                    FieldAndBlock obj = (FieldAndBlock)_comboBoxes[src].Tag;
-                    _comboBoxes[dst].Tag = obj;
-                    obj.SetValues(_buttons[dst], _comboBoxes[dst], _labels[dst]);
-                    _buttons[dst].Text = _buttons[src].Text;
+                    if (_comboBoxes[src].Visible == true)
+                    {
+                        // srcがVisibleならdstにコピー
+                        FieldAndBlock obj = (FieldAndBlock)_comboBoxes[src].Tag;
+                        _comboBoxes[dst].Tag = obj;
+                        obj.SetValues(_buttons[dst], _comboBoxes[dst], _labels[dst]);
+                        _buttons[dst].Text = _buttons[src].Text;
+                    }
+                    else if (_comboBoxes[dst].Visible == true)
+                    {
+                        // srcがVisibleでなくdastがVisibleならdstを初期化
+                        InitLine(dst);
+                    }
+                    else
+                    {
+                        // srcとdstの両方がVisibleでなければ終了
+                        break;
+                    }
                 }
                 else
                 {
-                    InitLine(dst);
+                    if (_comboBoxes[dst].Visible == true)
+                    {
+                        // srcが範囲外でdstがVisibleならdstを初期化
+                        InitLine(dst);
+                    }
+                    else
+                    {
+                        // srcが範囲外でdstがVisibleでなければ終了
+                        break;
+                    }
                 }
             }
-            InitLine(_comboBoxes.Count - 1);
         }
 
+        /// <summary>
+        /// 行の初期化
+        /// </summary>
+        /// <param name="idx">初期化する行のインデックス</param>
         private void InitLine(int idx)
         {
             _buttons[idx].Visible = false;

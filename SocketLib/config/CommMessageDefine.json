@@ -51,9 +51,6 @@
 				{ "block":"a", "name":"a[#1]", "ofs":5, "len":5, "rep":5, "flds":[
 					{ "id":"sts_1", "name":"L#0S#1", "ofs":0, "len":1, "disp":true, "dispname":true},
 					{ "id":"sts_2", "name":"L#0S#1", "ofs":1, "len":1, "disp":true, "dispname":true},
-					{ "id":"sts_3", "name":"L#0S#1", "ofs":2, "len":1, "disp":true, "dispname":true},
-					{ "id":"sts_4", "name":"L#0S#1", "ofs":3, "len":1, "disp":true, "dispname":true},
-					{ "id":"sts_5", "name":"L#0S#1", "ofs":4, "len":1, "disp":true, "dispname":true},
 				  ]
 				},
 				{ "block":"b", "ofs":30, "len":20, "rep":5, "flds":[
