@@ -35,8 +35,8 @@ namespace NCommonUtility
         public event SendRecvExEventHandler OnRecvExEvent;
 
 
-        public byte[] _comm_header=null;
-        public byte[] _comm_data=null;
+        protected byte[] _comm_header=null;
+        protected byte[] _comm_data=null;
         private int _head_recv_cnt = -1;
         private int _data_recv_cnt = -1;
         private int _data_length = -1;
