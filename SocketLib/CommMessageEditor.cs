@@ -66,13 +66,41 @@ namespace SocketLib
             cbx_wide_width = _width - _comboBoxes[0].Left;
         }
 
+        private void AddLine(int cnt)
+        {
+            #region AutoScroll メモ
+            //
+            // AutoScrollを有効にしたパネルで子コントロールを生成する時、
+            // 子コントロールの表示位置が不正になる場合があるので、
+            // 子コントロールの生成処理中は AutoScrollをfalseにしておく。
+            //
+            #endregion
+            int from = _comboBoxes.Count;
+            _panel.AutoScroll = false;
+            try
+            {
+                Enumerable.Range(0, cnt).ToList().ForEach((_) => AddLine());
+            }
+            finally
+            {
+                _panel.AutoScroll = true;
+            }
+            // パネルにコントロールを追加した後にVisible を falseとする
+            for (int i = 0; i < cnt; i++)
+            {
+                _buttons[from+i].Visible = false;
+                _comboBoxes[from + i].Visible = false;
+                _labels[from + i].Visible = false;
+            }
+        }
+
         private void AddLine()
         {
             int no = _comboBoxes.Count + 1;
 
             Button btn = new Button();
+            btn.Visible = true;
             int btn_y = _next_y + (_buttons[0].Top - _comboBoxes[0].Top);
-            btn.Visible = false;
             btn.Location = new System.Drawing.Point(_buttons[0].Left, btn_y);
             btn.Name = string.Format($"btn_{no:D4}");
             btn.Size = new System.Drawing.Size(_buttons[0].Width, _buttons[0].Height);
@@ -92,13 +120,13 @@ namespace SocketLib
             _panel.Controls.Add(btn);
 
             NComboBox cbx = new NCommonUtility.NComboBox();
-            cbx.Visible = false;
+            cbx.Visible = true;
             cbx.Tag = null;
             cbx.AllowEdit = true;
             cbx.FormattingEnabled = true;
-            cbx.Location = new System.Drawing.Point(_comboBoxes[0].Left, _next_y);
+            cbx.Location = new System.Drawing.Point(cbx_left, _next_y);
             cbx.Name = string.Format($"cbx_{no:D4}");
-            cbx.Size = new System.Drawing.Size(_comboBoxes[0].Width, _comboBoxes[0].Height);
+            cbx.Size = new System.Drawing.Size(cbx_width, _comboBoxes[0].Height);
             cbx.TabIndex = _next_tabidx++;
             cbx.SelectedIndexChanged += Cbx_SelectedIndexChanged;
             cbx.TextUpdate += Cbx_TextUpdate;
@@ -107,8 +135,8 @@ namespace SocketLib
             _panel.Controls.Add(cbx);
 
             Label lbl = new System.Windows.Forms.Label();
+            lbl.Visible = true;
             int label_y = _next_y + (_labels[0].Top - _comboBoxes[0].Top);
-            lbl.Visible = false;
             lbl.AutoSize = true;
             lbl.Location = new System.Drawing.Point(_labels[0].Left, label_y);
             lbl.Name = string.Format($"lbl_{no:D4}");
@@ -184,15 +212,6 @@ namespace SocketLib
             _panel.Parent.SuspendLayout();
             try
             {
-                #region AutoScroll メモ
-                //
-                // AutoScrollを有効にしたパネルで子コントロールを生成する時、
-                // 子コントロールの表示位置が不正になる場合があるので、
-                // 子コントロールの生成処理中は AutoScrollをfalseにしておく。
-                //
-                #endregion
-                _panel.AutoScroll = false;
-
                 int expand_cnt = blk.GetFields().Length + blk.GetGroupIdList().Length;
                 if (idx < 0)
                 {
@@ -251,7 +270,6 @@ namespace SocketLib
             }
             finally
             {
-                _panel.AutoScroll = true;
                 _panel.Parent.ResumeLayout();
             }
         }
@@ -320,7 +338,7 @@ namespace SocketLib
             // コントロールの行数が足りなくなるなら追加しておく
             if (_comboBoxes.Count < (idx+cnt+visible_cnt))
             {
-                Enumerable.Range(0, (idx+cnt+visible_cnt) - _comboBoxes.Count).ToList().ForEach((_) => AddLine());
+                AddLine((idx + cnt + visible_cnt) - _comboBoxes.Count);
             }
 
             // 最下からずらしていく
@@ -396,6 +414,7 @@ namespace SocketLib
             _buttons[idx].Visible = false;
             _buttons[idx].Text = "+";
             _comboBoxes[idx].Visible = false;
+            _comboBoxes[idx].Left = cbx_left;
             _comboBoxes[idx].Tag = null;
             _labels[idx].Visible = false;
         }
@@ -538,6 +557,7 @@ namespace SocketLib
             public override void SetValues(Button btn, NComboBox cbx, Label lbl)
             {
                 btn.Visible = false;
+                btn.Text = "+";
 
                 cbx.Visible = true;
                 cbx.AllowEdit = true;
@@ -580,6 +600,7 @@ namespace SocketLib
             public override void SetValues(Button btn, NComboBox cbx, Label lbl)
             {
                 btn.Visible = true;
+                btn.Text = "+";
 
                 cbx.Visible = true;
                 cbx.AllowEdit = false;
