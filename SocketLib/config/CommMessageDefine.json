@@ -50,7 +50,7 @@
 				{ "id":"b02", "ofs":1, "len":1, "disp":true, "dispname":false},
 				{ "block":"a", "name":"a[#1]", "ofs":5, "len":5, "rep":5, "flds":[
 					{ "id":"sts_1", "name":"L#0S#1", "ofs":0, "len":1, "disp":true, "dispname":true},
-					{ "id":"sts_2", "name":"L#0S#1", "ofs":1, "len":1, "disp":true, "dispname":true},
+					{ "id":"sts_2", "name":"L#0S#1", "ofs":1, "len":1, "dispname":true},
 				  ]
 				},
 				{ "block":"b", "ofs":30, "len":20, "rep":5, "flds":[

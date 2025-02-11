@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -119,22 +120,42 @@ namespace SocketTool
         public string GetFldDescription(string fldid)
         {
             FieldDefine fld = _data_def.GetFldDefine(fldid);
-            if (fld.isDispDesc == false)
+            if (fld.isDispDesc == false && fld.isDispName == false)
             {
+                // 表示項目でなければ表示しない
                 return string.Empty;
             }
             ByteArray val = GetFldValue(fldid);
-            string desc  = CommMessageDefine.GetInstance().GetValueDescription(fldid, val);
-            if (desc != string.Empty && fld.isDispName == true)
+            string desc = CommMessageDefine.GetInstance().GetValueDescription(fldid, val);
+            if(desc == string.Empty)
             {
-                if(fld.Name != null)
+                // 非表示指定の値なら表示しない
+                return string.Empty;
+            }
+            if (fld.isDispDesc == false)
+            {
+                // 値の説明は表示しない
+                desc = string.Empty;
+            }
+            string name = string.Empty;
+            if (fld.isDispName == true)
+            {
+                if (fld.Name != null)
                 {
-                    desc = $"{fld.Name}:{desc}";
+                    name = $"{fld.Name}";
                 }
                 else
                 {
-                    desc = $"{fld.FldId}:{desc}";
+                    name = $"{fld.FldId}";
                 }
+            }
+            if (name!=string.Empty && desc!=string.Empty)
+            {
+                desc = $"{name}:{desc}";
+            }
+            else
+            {
+                desc += name;   // どちらかはstring.Emptyなのでもう片方のみが設定される
             }
             return desc;
         }
