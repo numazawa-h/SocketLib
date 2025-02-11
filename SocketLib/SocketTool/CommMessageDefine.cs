@@ -313,13 +313,15 @@ namespace SocketTool
                 {
                     Name = def["name"];
                     // nameの#nをblockのインデックスで置き換える
-                    List<string> indexes = new List<string>();
+                    List<int> indexes = new List<int>();
                     foreach (Match match in new Regex("\\[([0-9]+)\\]").Matches(BlkId))
                     {
-                        indexes.Add(match.Groups[1].Value);
+                        int n = int.Parse(match.Groups[1].Value);
+                        indexes.Add(n);
                     }
                     for (int i = 0; i < indexes.Count; ++i)
                     {
+                        Name = new Regex($"##{i}").Replace(Name, (indexes[i]+1).ToString());
                         Name = new Regex($"#{i}").Replace(Name, indexes[i].ToString());
                     }
                 }
