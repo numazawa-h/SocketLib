@@ -348,10 +348,7 @@ namespace SocketLib
                 int src = i - cnt;
                 if (_comboBoxes[src].Visible == true)
                 {
-                    FieldAndBlock obj = (FieldAndBlock)_comboBoxes[src].Tag;
-                    _comboBoxes[dst].Tag = obj;
-                    obj.SetValues(_buttons[dst], _comboBoxes[dst], _labels[dst]);
-                    _buttons[dst].Text = _buttons[src].Text;
+                    CopyLine(src, dst);
                 }
             }
         }
@@ -373,10 +370,7 @@ namespace SocketLib
                     if (_comboBoxes[src].Visible == true)
                     {
                         // srcがVisibleならdstにコピー
-                        FieldAndBlock obj = (FieldAndBlock)_comboBoxes[src].Tag;
-                        _comboBoxes[dst].Tag = obj;
-                        obj.SetValues(_buttons[dst], _comboBoxes[dst], _labels[dst]);
-                        _buttons[dst].Text = _buttons[src].Text;
+                        CopyLine(src, dst);
                     }
                     else if (_comboBoxes[dst].Visible == true)
                     {
@@ -415,8 +409,28 @@ namespace SocketLib
             _buttons[idx].Text = "+";
             _comboBoxes[idx].Visible = false;
             _comboBoxes[idx].Left = cbx_left;
+            this.bInnerUpdate = true;
+            _comboBoxes[idx].ClearItems();
+            _comboBoxes[idx].Text = string.Empty;
+            this.bInnerUpdate = false;
             _comboBoxes[idx].Tag = null;
             _labels[idx].Visible = false;
+        }
+        private void CopyLine(int src, int dst)
+        {
+            _buttons[dst].Visible = _buttons[src].Visible;
+            _buttons[dst].Text = _buttons[src].Text;
+            _comboBoxes[dst].Visible = _comboBoxes[src].Visible;
+            _comboBoxes[dst].Tag = _comboBoxes[src].Tag;
+            _comboBoxes[dst].AllowEdit = _comboBoxes[src].AllowEdit;
+            _comboBoxes[dst].Left = _comboBoxes[src].Left;
+            _comboBoxes[dst].Width = _comboBoxes[src].Width;
+            this.bInnerUpdate = true;
+            _comboBoxes[dst].CopyItems(_comboBoxes[src]);
+            _comboBoxes[dst].Text = _comboBoxes[src].Text;
+            this.bInnerUpdate = false;
+            _labels[dst].Visible = _labels[src].Visible;
+            _labels[dst].Text = _labels[src].Text;
         }
 
         private void Btn_Clicked(object sender, EventArgs e)

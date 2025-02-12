@@ -106,6 +106,20 @@ namespace NCommonUtility
             }
         }
 
+        public void CopyItems(NComboBox other)
+        {
+            item_list.Clear();
+            foreach (var item in other.item_list)
+            {
+                item_list.Add(item);
+            }
+            if (isInit == true)
+            {
+                this.DataSource = null;
+                this.DataSource = item_list;
+            }
+        }
+
         public string GetSelectedDisplay()
         {
             return ((Item)SelectedItem).display;
