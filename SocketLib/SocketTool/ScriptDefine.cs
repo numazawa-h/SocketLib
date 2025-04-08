@@ -49,7 +49,7 @@ namespace SocketTool
         protected Dictionary<string, ScriptList> _script_recv = new Dictionary<string, ScriptList>();
         protected Dictionary<string, ScriptTimer> _script_timer = new Dictionary<string, ScriptTimer>();
         protected List<ScriptList> _script_select = new List<ScriptList>();
-        protected List<(string desc, IPEndPoint epoint)> _local_addr = new List<(string, IPEndPoint)>();
+        protected List<(string desc, IPEndPoint epoint, HashSet<string> remote)> _local_addr = new List<(string, IPEndPoint, HashSet<string>)>();
         protected List<(string desc, IPEndPoint epoint)> _remote_addr = new List<(string, IPEndPoint)>();
 
         protected Dictionary<string,CommandSet> _local_set = new Dictionary<string, CommandSet>();
@@ -130,10 +130,11 @@ namespace SocketTool
                     string iaddr = node["ip"].Required();
                     int portno = node["port"].Required();
                     IPEndPoint endPoint = NSocket.GetIPEndPoint(iaddr, portno);
+                    HashSet<string> remote = node.GetStringValues("remote");
                     switch (name)
                     {
                         case "local_addr":
-                            _local_addr.Add((desc, endPoint));
+                            _local_addr.Add((desc, endPoint,remote));
                             node.AddValue("id", desc);      // Commandクラスが'id'必須なので追加しておく
                             _local_set.Add(desc, new CommandSet(node));
                             break;
@@ -219,7 +220,7 @@ namespace SocketTool
             return _script_select.ToArray();
         }
 
-        public (string desc, IPEndPoint epoint)[] GetLocalAddr()
+        public (string desc, IPEndPoint epoint, HashSet<string>)[] GetLocalAddr()
         {
             return _local_addr.ToArray();
         }

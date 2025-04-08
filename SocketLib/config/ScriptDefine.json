@@ -22,15 +22,13 @@
 
     "mtype_src":"00",	// 自装置タイプlocal_addrを選択した時に設定される
     "local_addr":[
-    	{"desc":"サーバー", "ip":"localhost", "port":900, "values":{"mtype_src":"90" } },
-    	{"desc":"クライアント1", "ip":"192.168.179.2", "port":901, "values":{"mtype_src":"91" } },
-    	{"desc":"クライアント2", "ip":"192.168.179.2", "port":902, "values":{"mtype_src":"92" } },
+    	{"desc":"クライアント1", "ip":"localhost", "port":801, "values":{"mtype_src":"91" } },
+    	{"desc":"クライアント2", "ip":"localhost", "port":802, "values":{"mtype_src":"92" }, "remote":["サーバー2"] },
     ],
     "mtype_dst":"00",	// 相手装置タイプremote_addrを選択した時に設定される
     "remote_addr":[
-    	{"desc":"サーバー", "ip":"localhost", "port":900, "values":{"mtype_dst":"90" } },
-    	{"desc":"クライアント1", "ip":"192.168.179.2", "port":901, "values":{"mtype_dst":"91" } },
-    	{"desc":"クライアント2", "ip":"192.168.179.2", "port":902, "values":{"mtype_dst":"92" } },
+    	{"desc":"サーバー1", "ip":"localhost", "port":901, "values":{"mtype_dst":"90" } },
+    	{"desc":"サーバー2", "ip":"localhost", "port":902, "values":{"mtype_dst":"90" } },
     ],
   },
 

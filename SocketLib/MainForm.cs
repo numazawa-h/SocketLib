@@ -28,10 +28,10 @@ namespace SampleMain
             listensocket.OnAcceptEvent += OnAccept;
             listensocket.OnDisConnectEvent += OnDisConnect;
 
-            (string desc, IPEndPoint epoint)[] local = ScriptDefine.GetInstance().GetLocalAddr();
+            (string desc, IPEndPoint epoint, HashSet<string>remote)[] local = ScriptDefine.GetInstance().GetLocalAddr();
             foreach (var item in local)
             {
-               this.cbx_addr1.AddItem(item.desc, item.epoint);
+               this.cbx_addr1.AddItem(item.desc, (item.epoint, item.remote));
             }
             (string desc, IPEndPoint epoint)[] remote = ScriptDefine.GetInstance().GetRemoteAddr();
             foreach (var item in remote)
@@ -174,14 +174,32 @@ namespace SampleMain
 
         private void cbx_addr1_SelectedIndexChanged(object sender, EventArgs e)
         {
-           IPEndPoint val = (IPEndPoint)cbx_addr1.SelectedValue;
-            txt_ipAddr1.Text = val.Address.ToString();
-            txt_portNo1.Text = val.Port.ToString();
+            (IPEndPoint ep, HashSet<string> remote) val = ((IPEndPoint, HashSet<string>))cbx_addr1.SelectedValue;
+            txt_ipAddr1.Text = val.ep.Address.ToString();
+            txt_portNo1.Text = val.ep.Port.ToString();
             ScriptDefine.GetInstance().OnSelectLocal(cbx_addr1.Text);
+            (string desc, IPEndPoint epoint)[] remote = ScriptDefine.GetInstance().GetRemoteAddr();
+            cbx_addr2.ClearItems();
+            cbx_addr2.Text = "";
+            foreach (var item in remote)
+            {
+                if (val.remote.Count == 0 || val.remote.Contains(item.desc))
+                {
+                    this.cbx_addr2.AddItem(item.desc, item.epoint);
+                }
+            }
+            if (cbx_addr2.SelectedIndex < 0 && cbx_addr2.Items.Count >0)
+            {
+                cbx_addr2.SelectedItem = cbx_addr2.Items[0];
+            }
         }
         private void cbx_addr2_SelectedIndexChanged(object sender, EventArgs e)
         {
             IPEndPoint val = (IPEndPoint)cbx_addr2.SelectedValue;
+            if (val==null)
+            {
+                return;
+            }
             txt_ipAddr2.Text = val.Address.ToString();
             txt_portNo2.Text = val.Port.ToString();
             ScriptDefine.GetInstance().OnSelectRemote(cbx_addr2.Text);
