@@ -127,9 +127,9 @@ namespace SocketTool
                 try
                 {
                     string desc = node["desc"].Required();
-                    IPAddress iaddr = node["ip"].Required();
+                    string iaddr = node["ip"].Required();
                     int portno = node["port"].Required();
-                    IPEndPoint endPoint = new IPEndPoint(iaddr, portno);
+                    IPEndPoint endPoint = NSocket.GetIPEndPoint(iaddr, portno);
                     switch (name)
                     {
                         case "local_addr":

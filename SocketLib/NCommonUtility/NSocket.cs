@@ -40,6 +40,51 @@ namespace NCommonUtility
     /// </summary>
     public class NSocket
     {
+        static public IPEndPoint GetIPEndPoint(string str_iaddr, string str_portno)
+        {
+            int portno;
+            try
+            {
+                portno = int.Parse(str_portno);
+            }
+            catch (Exception e)
+            {
+                throw (new Exception("PortNo指定が不正です", e));
+            }
+
+            return GetIPEndPoint(str_iaddr, portno);
+        }
+        static public IPEndPoint GetIPEndPoint(string str_iaddr, int portno)
+        {
+            if (str_iaddr == "localhost")
+            {
+                return GetIPEndPoint(IPAddress.Loopback, portno);
+            }
+            IPAddress iaddr;
+            try
+            {
+                iaddr = IPAddress.Parse(str_iaddr);
+            }
+            catch (Exception e)
+            {
+                throw (new Exception("IPAddress指定が不正です", e));
+            }
+
+            return GetIPEndPoint(iaddr, portno);
+        }
+        static public IPEndPoint GetIPEndPoint(IPAddress iaddr, int portno)
+        {
+            IPEndPoint endPoint = null;
+            try
+            {
+                endPoint = new IPEndPoint(iaddr, portno);
+            }
+            catch (Exception e)
+            {
+                throw (new Exception($"IPEndPointが生成できません({e.Message})"));
+            }
+            return endPoint;
+        }
         protected Socket _soc = null;
         protected IPEndPoint _self_EndPoint = null;     // バインドするためのEndPoint
         protected byte[] _recv_buf = new byte[1024];
@@ -138,36 +183,11 @@ namespace NCommonUtility
 
         public void SetSelfEndPoint(string str_iaddr, string str_portno)
         {
-            int portno;
-            try
-            {
-                portno = int.Parse(str_portno);
-            }
-            catch (Exception e)
-            {
-                throw(new Exception("PortNo指定が不正です", e));
-            }
-            SetSelfEndPoint(str_iaddr, portno);
+            _self_EndPoint = GetIPEndPoint(str_iaddr, str_portno);
         }
         public void SetSelfEndPoint(string str_iaddr, int portno = 0)
         {
-            if (str_iaddr == "localhost")
-            {
-                SetSelfEndPoint(IPAddress.Loopback, portno);
-            }
-            else
-            {
-                IPAddress iaddr;
-                try
-                {
-                    iaddr = IPAddress.Parse(str_iaddr);
-                }
-                catch (Exception e)
-                {
-                    throw(new Exception("IPAddress指定が不正です", e));
-                }
-                SetSelfEndPoint(iaddr, portno);
-            }
+            _self_EndPoint = GetIPEndPoint(str_iaddr, portno);
         }
         public void SetSelfEndPoint(IPAddress iaddr, int portno = 0)
         {
@@ -179,7 +199,7 @@ namespace NCommonUtility
                     throw new Exception("指定されたIPアドレスがホストに存在しません");
                 }
             }
-            _self_EndPoint = new IPEndPoint(iaddr, portno);
+            _self_EndPoint = GetIPEndPoint(iaddr, portno);
         }
 
         public void Close()
@@ -236,44 +256,20 @@ namespace NCommonUtility
 
         public void Connect(string str_iaddr, string str_portno)
         {
-            IPAddress iaddr;
-            try
-            {
-                iaddr = IPAddress.Parse(str_iaddr);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("IPAddress指定が不正です", e));
-                return;
-            }
-            int portno;
-            try
-            {
-                portno = int.Parse(str_portno);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("PortNo指定が不正です", e));
-                return;
-            }
-
-            Connect(iaddr, portno);
+            IPEndPoint endPoint = GetIPEndPoint(str_iaddr, str_portno);
+            Connect(endPoint);
         }
         public void Connect(string str_iaddr, int portno)
         {
-            IPAddress iaddr;
-            try
-            {
-                iaddr = IPAddress.Parse(str_iaddr);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("IPAddress指定が不正です", e));
-                return;
-            }
-            Connect(iaddr, portno);
+            IPEndPoint endPoint = GetIPEndPoint(str_iaddr, portno);
+            Connect(endPoint);
         }
         public void Connect(IPAddress iaddr, int portno)
+        {
+            IPEndPoint endPoint = GetIPEndPoint(iaddr, portno);
+            Connect(endPoint);
+        }
+        public void Connect(IPEndPoint endPoint)
         {
             try
             {
@@ -283,7 +279,6 @@ namespace NCommonUtility
                     {
                         throw new Exception("Connect中にConnectしました");
                     }
-                    IPEndPoint endPoint = new IPEndPoint(iaddr, portno);
                     _soc = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     if (_self_EndPoint != null)
                     {
