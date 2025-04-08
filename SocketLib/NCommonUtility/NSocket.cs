@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static SocketLib.Program;
 
 namespace NCommonUtility
 {
@@ -135,20 +136,48 @@ namespace NCommonUtility
             OnSendEvent?.Invoke(this, new SendRecvEventArgs(this, buf));
         }
 
-        public void SetSelfEndPoint(string iaddr, string portno)
+        public void SetSelfEndPoint(string str_iaddr, string str_portno)
         {
-            SetSelfEndPoint(IPAddress.Parse(iaddr), int.Parse(portno));
+            int portno;
+            try
+            {
+                portno = int.Parse(str_portno);
+            }
+            catch (Exception e)
+            {
+                throw(new Exception("PortNo指定が不正です", e));
+            }
+            SetSelfEndPoint(str_iaddr, portno);
         }
-        public void SetSelfEndPoint(string iaddr, int portno = 0)
+        public void SetSelfEndPoint(string str_iaddr, int portno = 0)
         {
-            SetSelfEndPoint(IPAddress.Parse(iaddr), portno);
+            if (str_iaddr == "localhost")
+            {
+                SetSelfEndPoint(IPAddress.Loopback, portno);
+            }
+            else
+            {
+                IPAddress iaddr;
+                try
+                {
+                    iaddr = IPAddress.Parse(str_iaddr);
+                }
+                catch (Exception e)
+                {
+                    throw(new Exception("IPAddress指定が不正です", e));
+                }
+                SetSelfEndPoint(iaddr, portno);
+            }
         }
         public void SetSelfEndPoint(IPAddress iaddr, int portno = 0)
         {
-            IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-            if (!ipHostInfo.AddressList.Contains<IPAddress>(iaddr))
+            if (!IPAddress.IsLoopback(iaddr))
             {
-                throw new Exception("指定されたIPアドレスがホストに存在しません");
+                IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+                if (!ipHostInfo.AddressList.Contains<IPAddress>(iaddr))
+                {
+                    throw new Exception("指定されたIPアドレスがホストに存在しません");
+                }
             }
             _self_EndPoint = new IPEndPoint(iaddr, portno);
         }
@@ -164,44 +193,20 @@ namespace NCommonUtility
 
         public void Listen(string str_iaddr, string str_portno)
         {
-            IPAddress iaddr;
-            try
-            {
-                iaddr = IPAddress.Parse(str_iaddr);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("IPAddress指定が不正です", e));
-                return;
-            }
-            int portno;
-            try
-            {
-                portno = int.Parse(str_portno);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("PortNo指定が不正です", e));
-                return;
-            }
-            Listen(iaddr, portno);
+            SetSelfEndPoint(str_iaddr, str_portno);
+            Listen();
         }
         public void Listen(string str_iaddr, int portno)
         {
-            IPAddress iaddr;
-            try
-            {
-                iaddr = IPAddress.Parse(str_iaddr);
-            }
-            catch (Exception e)
-            {
-                OnException(new Exception("IPAddress指定が不正です", e));
-                return;
-            }
-
-            Listen(iaddr, portno);
+            SetSelfEndPoint(str_iaddr, portno);
+            Listen();
         }
         public void Listen(IPAddress iaddr, int portno)
+        {
+            SetSelfEndPoint(iaddr, portno);
+            Listen();
+        }
+        public void Listen()
         {
             lock (this)
             {
@@ -213,7 +218,6 @@ namespace NCommonUtility
                         needDisconnect = false;
                         throw new Exception("既にListen中です");
                     }
-                    SetSelfEndPoint(iaddr, portno);
                     _soc = new Socket(_self_EndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                     _soc.Bind(_self_EndPoint);
                     _soc.Listen(1);     // 一度に一個だけ受け付ける
