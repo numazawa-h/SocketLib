@@ -69,12 +69,18 @@ namespace NCommonUtility
         private int _dueTime;
         private int _period;
         private Timer _timer = null;
+        private CommMessage _msg = null;
         CommSocket _socket = null;
 
         public ScriptTimer(Node def, Dictionary<string, Command> comands): base(def, comands)
         {
             _dueTime = (int?)def["start"] is int v? v:0;
-            _period = def["interval"].Required(); 
+            _period = def["interval"].Required();
+            string msgname = def["msg"];
+            if(msgname != null)
+            {
+                _msg = ScriptDefine.GetInstance().GetValueMsg(msgname);
+            }
         }
 
         public void Start(CommSocket socket)
@@ -106,9 +112,10 @@ namespace NCommonUtility
             {
                 return;
             }
+
             foreach (var script in _scripts)
             {
-                script.Exec(_socket);
+                script.Exec(_socket, _msg);
             }
         }
 
