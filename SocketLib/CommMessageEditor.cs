@@ -582,11 +582,8 @@ namespace SocketLib
                 // フィールドの値を設定
                 owner.bInnerUpdate = true;
                 cbx.ClearItems();
-                CommMessageDefine comdef = CommMessageDefine.GetInstance();
-                foreach (var pair in comdef.GetFldDescription(fld.FldId))
+                foreach ((string vals, string desc) in fld.GetFldDescription())
                 {
-                    string vals = (string)pair.Key;
-                    string desc = (string)pair.Value;
                     cbx.AddItem(desc, vals);
                 }
                 owner.bInnerUpdate = false;

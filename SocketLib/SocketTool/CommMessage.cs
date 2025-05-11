@@ -119,47 +119,11 @@ namespace SocketTool
 
         public string GetFldDescription(string fldid)
         {
+            // todo: GetValueDescription(val)を FieldDefine に定義する
             FieldDefine fld = _data_def.GetFldDefine(fldid);
-            if (fld.isDispDesc == false && fld.isDispName == false)
-            {
-                // 表示項目でなければ表示しない
-                return string.Empty;
-            }
-            ByteArray val = GetFldValue(fldid);
-            string desc = CommMessageDefine.GetInstance().GetValueDescription(fldid, val);
-            if(desc == string.Empty)
-            {
-                // 非表示指定の値なら表示しない
-                return string.Empty;
-            }
-            if (fld.isDispDesc == false)
-            {
-                // 値の説明は表示しない
-                desc = string.Empty;
-            }
-            string name = string.Empty;
-            if (fld.isDispName == true)
-            {
-                if (fld.Name != null)
-                {
-                    name = $"{fld.Name}";
-                }
-                else
-                {
-                    name = $"{fld.FldId}";
-                }
-            }
-            if (name!=string.Empty && desc!=string.Empty)
-            {
-                desc = $"{name}:{desc}";
-            }
-            else
-            {
-                desc += name;   // どちらかはstring.Emptyなのでもう片方のみが設定される
-            }
-            return desc;
+            byte[] val = GetFldValue(fldid).GetData();
+            return fld.GetValueDescription(val);
         }
-
 
         public string GetDescription()
         {

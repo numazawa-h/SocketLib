@@ -96,48 +96,6 @@ namespace SocketTool
             return _values_def[id];
         }
 
-        public string GetValueDescription(string fldid,ByteArray val)
-        {
-            return GetValueDescription(fldid, val.GetData());
-        }
-        public string GetValueDescription(string fldid, byte[] val)
-        {
-            string valid = fldid;
-            if (valid.Contains("_"))
-            {
-                valid = valid.Substring(0, valid.IndexOf("_"));
-            }
-            if (valid.Contains("."))
-            {
-                valid = valid.Substring(valid.LastIndexOf(".")+1);
-            }
-            if (_values_def.ContainsKey(valid))
-            {
-                return _values_def[valid][val];
-            }
-
-            return "？？？";
-        }
-        public Dictionary<string, JsonValue> GetFldDescription(string fldid)
-        {
-            Dictionary<string, JsonValue> desc_list = new Dictionary<string, JsonValue>();
-            string valid = fldid;
-            if (valid.Contains("_"))
-            {
-                valid = valid.Substring(0, valid.IndexOf("_"));
-            }
-            if (valid.Contains("."))
-            {
-                valid = valid.Substring(valid.LastIndexOf(".") + 1);
-            }
-            if (_values_def.ContainsKey(valid))
-            {
-                desc_list = _values_def[valid].ValuesDef;
-            }
-
-            return desc_list;
-        }
-
         /// <summary>
         /// 通信電文定義
         /// </summary>
@@ -401,6 +359,10 @@ namespace SocketTool
             public bool isDispDesc { get; private set; }
             public bool isDispName { get; private set; }
 
+            private ValuesDefine _valuesDefine = null;
+            List<(string, string)> _valuesLDefist = new List<(string, string)>();
+
+
             public FieldDefine(Node def, int ofs, BlockDefine blk) :this(def)
             {
                 OwnerBlock = blk;
@@ -432,6 +394,21 @@ namespace SocketTool
                 Name = def["name"];
                 isDispDesc = (bool?)def["disp"] is bool v1 ? v1 : false;
                 isDispName = (bool?)def["dispname"] is bool v2 ? v2 : false;
+
+                string valid = FldId;
+                if (valid.Contains("_"))
+                {
+                    valid = valid.Substring(0, valid.IndexOf("_"));
+                }
+                if (valid.Contains("."))
+                {
+                    valid = valid.Substring(valid.LastIndexOf(".") + 1);
+                }
+                _valuesDefine = CommMessageDefine.GetInstance().GetValuesDefine(valid);
+                if (_valuesDefine != null)
+                {
+                   _valuesLDefist = _valuesDefine.ValuesDefList;
+                }
             }
 
             /// <summary>
@@ -443,8 +420,76 @@ namespace SocketTool
             {
                 Length = len;
             }
-        }
 
+            /// <summary>
+            /// 項目値の説明を返却する
+            /// </summary>
+            /// <remarks>
+            /// 項目値の説明が定義されていれば説明を返却する。
+            /// 定義されていなければ"？？？"を返却する。
+            /// 非表示指定の項目値ならstring.Emptyを返却する。
+            /// 項目名表示指定のフィールドなら、"[項目名]:[項目値の説明]"の形式で返却する。
+            /// </remarks>
+            /// <param name="val">項目値</param>
+            /// <returns>項目値の説明</returns>
+            public string GetValueDescription(byte[] val)
+            {
+                // todo: CommMessageDefineのGetValueDescriptionをこちらの呼び出しに変更する
+                if(_valuesDefine == null)
+                {
+                    // 項目値定義がなければ表示しない
+                    return string.Empty;
+                }
+                if (isDispDesc == false && isDispName == false)
+                {
+                    // 表示項目でなければ表示しない
+                    return string.Empty;
+                }
+
+                string desc = _valuesDefine[val];
+                if (desc == string.Empty)
+                {
+                    // 非表示指定の値なら表示しない
+                    return string.Empty;
+                }
+                if (isDispDesc == false)
+                {
+                    // 項目値非表示指定のフィールドなら項目値の説明なし（項目名のみを表示する）
+                    desc = string.Empty;
+                }
+
+                string name = string.Empty;
+                if (isDispName == true)
+                {
+                    if (Name != null)
+                    {
+                        name = $"{Name}";
+                    }
+                    else
+                    {
+                        name = $"{FldId}";
+                    }
+                }
+                if (name != string.Empty && desc != string.Empty)
+                {
+                    desc = $"{name}:{desc}";
+                }
+                else
+                {
+                    desc += name;   // どちらかはstring.Emptyなのでもう片方のみが設定される
+                }
+                return desc;
+            }
+
+            /// <summary>
+            /// 項目値の説明一覧を取得する
+            /// </summary>
+            /// <returns>項目値の説明リスト(BCD文字列の項目値, 項目値の説明)</returns>
+            public List<(string, string)> GetFldDescription()
+            {
+                return _valuesLDefist;
+            }
+        }
 
         public class ValuesDefine
         {
@@ -455,6 +500,7 @@ namespace SocketTool
             public Format FormatDef { get; private set; }
 
             Dictionary<string, JsonValue> _values_def = null;
+            List<(string, string)> _valuesLDefist = new List<(string, string)>();
             List<string> _notdisp = new List<string>();
 
             public ValuesDefine(Node def)
@@ -477,6 +523,12 @@ namespace SocketTool
                         _notdisp.Add((string)_values_def["notdisp"]);
                     }
                     _values_def.Remove("notdisp");
+                }
+                foreach (var pair in _values_def)
+                {
+                    string vals = (string)pair.Key;
+                    string desc = (string)pair.Value;
+                    _valuesLDefist.Add((vals, desc));
                 }
                 if (def.ContainsKey("format"))
                 {
@@ -502,6 +554,7 @@ namespace SocketTool
             /// <returns>値の説明</returns>
             public string this[byte[] val]
             {
+                // todo:キーを文字列にする
                 get
                 {
                     string bcd = new ByteArray(val).to_hex();
@@ -526,9 +579,9 @@ namespace SocketTool
             {
                 get { return _values_def.Keys.ToArray<string>(); }
             }
-            public Dictionary<string, JsonValue> ValuesDef
+            public List<(string, string)> ValuesDefList
             {
-                get { return _values_def; }
+                get { return _valuesLDefist; }
             }
         }
 
