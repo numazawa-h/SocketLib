@@ -434,7 +434,6 @@ namespace SocketTool
             /// <returns>項目値の説明</returns>
             public string GetValueDescription(byte[] val)
             {
-                // todo: CommMessageDefineのGetValueDescriptionをこちらの呼び出しに変更する
                 if(_valuesDefine == null)
                 {
                     // 項目値定義がなければ表示しない

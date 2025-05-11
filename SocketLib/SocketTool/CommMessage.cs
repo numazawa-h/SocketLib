@@ -119,7 +119,6 @@ namespace SocketTool
 
         public string GetFldDescription(string fldid)
         {
-            // todo: GetValueDescription(val)を FieldDefine に定義する
             FieldDefine fld = _data_def.GetFldDefine(fldid);
             byte[] val = GetFldValue(fldid).GetData();
             return fld.GetValueDescription(val);
