@@ -360,7 +360,7 @@ namespace SocketTool
             public bool isDispName { get; private set; }
 
             private ValuesDefine _valuesDefine = null;
-            List<(string, string)> _valuesLDefist = new List<(string, string)>();
+            List<(string, string)> _valuesDefList = new List<(string, string)>();
 
 
             public FieldDefine(Node def, int ofs, BlockDefine blk) :this(def)
@@ -407,7 +407,7 @@ namespace SocketTool
                 _valuesDefine = CommMessageDefine.GetInstance().GetValuesDefine(valid);
                 if (_valuesDefine != null)
                 {
-                   _valuesLDefist = _valuesDefine.ValuesDefList;
+                    _valuesDefList = _valuesDefine.ValuesDefList;
                 }
             }
 
@@ -487,7 +487,7 @@ namespace SocketTool
             /// <returns>項目値の説明リスト(BCD文字列の項目値, 項目値の説明)</returns>
             public List<(string, string)> GetFldDescription()
             {
-                return _valuesLDefist;
+                return _valuesDefList;
             }
         }
 
