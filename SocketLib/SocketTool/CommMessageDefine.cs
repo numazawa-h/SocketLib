@@ -356,9 +356,9 @@ namespace SocketTool
             public string Name { get; private set; }
             public int Length { get; private set; }
             public int Offset { get; private set; }
-            public bool isDispDesc { get; private set; }
-            public bool isDispName { get; private set; }
 
+            private bool _isDispDesc = false;
+            private bool _isDispName = false;
             private ValuesDefine _valuesDefine = null;
             List<(string, string)> _valuesDefList = new List<(string, string)>();
 
@@ -392,8 +392,8 @@ namespace SocketTool
                 Offset = def["ofs"].Required();
                 Length = def["len"].Required();
                 Name = def["name"];
-                isDispDesc = (bool?)def["disp"] is bool v1 ? v1 : false;
-                isDispName = (bool?)def["dispname"] is bool v2 ? v2 : false;
+                _isDispDesc = (bool?)def["disp"] is bool v1 ? v1 : false;
+                _isDispName = (bool?)def["dispname"] is bool v2 ? v2 : false;
 
                 string valid = FldId;
                 if (valid.Contains("_"))
@@ -440,7 +440,7 @@ namespace SocketTool
                     // 項目値定義がなければ表示しない
                     return string.Empty;
                 }
-                if (isDispDesc == false && isDispName == false)
+                if (_isDispDesc == false && _isDispName == false)
                 {
                     // 表示項目でなければ表示しない
                     return string.Empty;
@@ -452,14 +452,14 @@ namespace SocketTool
                     // 非表示指定の値なら表示しない
                     return string.Empty;
                 }
-                if (isDispDesc == false)
+                if (_isDispDesc == false)
                 {
                     // 項目値非表示指定のフィールドなら項目値の説明なし（項目名のみを表示する）
                     desc = string.Empty;
                 }
 
                 string name = string.Empty;
-                if (isDispName == true)
+                if (_isDispName == true)
                 {
                     if (Name != null)
                     {
