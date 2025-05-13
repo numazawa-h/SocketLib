@@ -32,7 +32,7 @@ namespace SocketLib
                 Log.Init(0);
                 Log.Info("Aplication Started*******************************************");
                 //            JsonTest();
-                ByteArrayTest("[ 1234 5678 9abc def0 ]");
+                // ByteArrayTest("[ 1234 5678 9abc def0 ]");
                 CommMessageDefine.GetInstance().ReadJson(".\\config\\CommMessageDefine.json");
                 ScriptDefine.GetInstance().ReadJson(".\\config\\ScriptDefine.json");
             }

@@ -178,8 +178,8 @@ namespace NCommonUtility
         /// <summary>
         /// データをコピーする
         /// </summary>
-        /// <param name="other">コピーするデータ</param>
-        /// <param name="ofs">コピーする位置</param>
+        /// <param name="other">コピー元データ</param>
+        /// <param name="ofs">コピー先位置（自身データのオフセット）</param>
         /// <param name="len">コピーする長さ</param>
         /// <returns>更新後のthis</returns>
         public ByteArray Copy(ByteArray other, int ofs = 0, int len = 0)
