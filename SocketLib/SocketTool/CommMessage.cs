@@ -82,30 +82,7 @@ namespace SocketTool
             }
             else
             {
-                if (_data_def.DLength == 0)
-                {
-                    // データ部なしメッセージ
-                    _data = System.Array.Empty<byte>();
-                }
-                if (_data_def.DLength > 0)
-                {
-                    // 固定長メッセージ
-                    _data = new byte[_data_def.DLength];
-                }
-                if (_data_def.DLength < 0)
-                {
-                    // 可変長メッセージ
-                    if (_data_def.MinLength > 0)
-                    {
-                        // 固定部分ありならその部分のみ生成
-                        _data = new byte[_data_def.MinLength];
-                    }
-                    else
-                    {
-                        // 固定部分がなければ空で生成
-                        _data = System.Array.Empty<byte>();
-                    }
-                }
+                _data = _data_def.GetDefaultValue();
             }
         }
         public void AppendData(byte[] val)

@@ -10,6 +10,7 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.UI;
+using System.Xml.Linq;
 using static NCommonUtility.JsonConfig;
 using static SocketTool.CommMessageDefine;
 
@@ -41,7 +42,7 @@ namespace SocketTool
         {
             RootNode root = JsonConfig.ReadJson(path);
 
-            // 先に値定義を読む（フィールド定義に"name"がなければ値定義の"name"をフィールド名とするため）
+            // 先に値定義を読む（フィールド定義を読み込む時に参照するため）
             _values_def.Clear();
             foreach (Node def in root["values-def"])
             {
@@ -111,8 +112,12 @@ namespace SocketTool
             public int MinLength { get; private set; }
             // ブロック定義
             public BlockDefine BlockDefine { get; private set; }
+
             // フィールド定義
             private Dictionary<string, FieldDefine> _fields_def = new Dictionary<string, FieldDefine>();
+
+            // フィールド定義のdefault値で初期化したデータ(CommMessageのコンストラクタで使用する)
+            private ByteArray _default_data = null;
 
             /// <summary>
             /// コンストラクタ
@@ -139,6 +144,9 @@ namespace SocketTool
                         BlockDefine.AddField(fld);
                     }
                 }
+
+                InitData();
+                SetDefaultValue();
             }
 
             private void readBlock(BlockDefine block, Node def, int offset=0)
@@ -191,6 +199,49 @@ namespace SocketTool
                     }
                 }
             }
+            private void InitData()
+            {
+                if (DLength == 0)
+                {
+                    // データ部なしメッセージ
+                    _default_data = new ByteArray();
+                }
+                else if (DLength > 0)
+                {
+                    // 固定長メッセージ
+                    _default_data = new ByteArray().Expand(DLength);
+                }
+                else
+                {
+                    // 可変長メッセージ
+                    if (MinLength > 0)
+                    {
+                        // 固定部分ありならその部分のみ生成
+                        _default_data = new ByteArray().Expand(MinLength);
+                    }
+                    else
+                    {
+                        // 固定部分がなければ空で生成
+                        _default_data = new ByteArray();
+                    }
+                }
+            }
+
+            private void SetDefaultValue()
+            {
+                foreach (var pair in _fields_def)
+                {
+                    FieldDefine fld = pair.Value as FieldDefine;
+                    if(fld.Default != null)
+                    {
+                        _default_data.Copy(fld.Default, fld.Offset, fld.Length);
+                    }
+                }
+            }
+            public byte[] GetDefaultValue()
+            {
+                return _default_data.GetData();
+            }
 
             // コピーコンストラクタ
             public MessageDefine(MessageDefine other)
@@ -200,6 +251,7 @@ namespace SocketTool
                 DLength = other.DLength;
                 MinLength = other.MinLength;
                 BlockDefine = other.BlockDefine;
+                _default_data = other._default_data;
                 foreach (KeyValuePair<string, FieldDefine> pair in other._fields_def)
                 {
                     _fields_def.Add(pair.Key, pair.Value);
@@ -362,6 +414,7 @@ namespace SocketTool
             private ValuesDefine _valuesDefine = null;
             List<(string, string)> _valuesDefList = new List<(string, string)>();
 
+            public byte[] Default { get; private set; } = null;
 
             public FieldDefine(Node def, int ofs, BlockDefine blk) :this(def)
             {
@@ -394,20 +447,32 @@ namespace SocketTool
                 Name = def["name"];
                 _isDispDesc = (bool?)def["disp"] is bool v1 ? v1 : false;
                 _isDispName = (bool?)def["dispname"] is bool v2 ? v2 : false;
-
-                string valid = FldId;
-                if (valid.Contains("_"))
+                string deflt =(string)def["default"];
+                if (deflt != null)
                 {
-                    valid = valid.Substring(0, valid.IndexOf("_"));
+                    Default = ByteArray.ParseHex(deflt);
                 }
+
+                // 項目値定義の取り込み
+                string valid = FldId;
                 if (valid.Contains("."))
                 {
+                    // blockで階層化されていれば、最後のフィールド名のみを項目値IDとする
                     valid = valid.Substring(valid.LastIndexOf(".") + 1);
+                }
+                if (valid.Contains("_"))
+                {
+                    // フィールド名に"_"があれば、"_"より前の部分を項目値IDとする
+                    valid = valid.Substring(0, valid.IndexOf("_"));
                 }
                 _valuesDefine = CommMessageDefine.GetInstance().GetValuesDefine(valid);
                 if (_valuesDefine != null)
                 {
                     _valuesDefList = _valuesDefine.ValuesDefList;
+                    if (Default == null)
+                    {
+                        Default = _valuesDefine.Default;
+                    }
                 }
             }
 
@@ -479,7 +544,7 @@ namespace SocketTool
                 }
                 return desc;
             }
-
+            
             /// <summary>
             /// 項目値の説明一覧を取得する
             /// </summary>
@@ -497,6 +562,7 @@ namespace SocketTool
             public string FldName { get; private set; }
 
             public Format FormatDef { get; private set; }
+            public byte[] Default { get; private set; } = null;
 
             Dictionary<string, JsonValue> _values_def = null;
             List<(string, string)> _valuesLDefist = new List<(string, string)>();
@@ -506,13 +572,18 @@ namespace SocketTool
             {
                 FldId = def["id"].Required();
                 FldName = def["name"];
+                string deflt = (string)def["default"];
+                if (deflt != null)
+                {
+                    Default = ByteArray.ParseHex(deflt);
+                }
 
                 _values_def = def["values"].GetValues();
                 if (_values_def.ContainsKey("notdisp"))
                 {
                     if (_values_def["notdisp"].GetValueKind() == System.Text.Json.JsonValueKind.Array)
                     {
-                        foreach(var val in _values_def["notdisp"].AsArray())
+                        foreach (var val in _values_def["notdisp"].AsArray())
                         {
                             _notdisp.Add((string)val);
                         }
@@ -553,7 +624,6 @@ namespace SocketTool
             /// <returns>値の説明</returns>
             public string this[byte[] val]
             {
-                // todo:キーを文字列にする
                 get
                 {
                     string bcd = new ByteArray(val).to_hex();
