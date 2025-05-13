@@ -32,7 +32,7 @@ namespace SocketLib
                 Log.Init(0);
                 Log.Info("Aplication Started*******************************************");
                 //            JsonTest();
-                //            ByteArrayTest("[ 1234 5678 9abc def0 ]");
+                ByteArrayTest("[ 1234 5678 9abc def0 ]");
                 CommMessageDefine.GetInstance().ReadJson(".\\config\\CommMessageDefine.json");
                 ScriptDefine.GetInstance().ReadJson(".\\config\\ScriptDefine.json");
             }
@@ -55,15 +55,21 @@ namespace SocketLib
         {
             Log.Trace(null,1);
             Log.Trace(hex,2);
+
+            ByteArray ba00 = new ByteArray().Expand(5, 0xff);
+            ByteArray ba01 = new ByteArray().Expand(2, 0x11);
+            ba00.Copy(ba01, 5);
+            ba00.Copy(ba01, 2);
+            ba00.Copy(ba01, 1, 3);
+            ba00.Copy(ba01, 0, 4);
+
             ByteArray ba1 = new ByteArray(ByteArray.ParseHex(hex));
             ByteArray ba2 = new ByteArray(ByteArray.ParseHex("[  31323334 c1c2c3c4 41424344]"));
             ByteArray ba3 = new ByteArray("テスト");
             ByteArray ba4 = new ByteArray("あいうえお", System.Text.Encoding.GetEncoding("Shift_JIS"));
 
 
-            ba1.Append(ba1);
-            ba1.Append(ba2);
-            ba1.Append(ba4);
+            ba1.Append(ba1).Append(ba2).Append(ba4);
 
             Log.Debug("ByteArrayTest:[" + ba1.ToString() +"]");
             Log.Debug("ByteArrayTest:[" + ba1.to_hex(4,0,"-") + "]");
