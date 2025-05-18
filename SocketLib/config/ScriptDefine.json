@@ -52,7 +52,7 @@
     { "id":"send-health", "cmd":"send", "dtype":"22", },
     { "id":"send-init", "cmd":"send", "dtype":"01" },
     { "id":"send-reset", "cmd":"send", "dtype":"02" },
-    { "id":"send-control", "cmd":"send", "dtype":"30" ,},
+    { "id":"send-control", "cmd":"send", "msg":"control",},
     { "id":"set-control", "cmd":"set", "msg":"control", "select":[
 	    	{ "case":{ "control-type":1 }, "values":{"control-type":2,  }},
 	    	{ "case":{ "control-type":2 }, "values":{"control-type":1,  }},
@@ -98,7 +98,7 @@
     { "id":"auto-ack", "checked":false, "when":"recv", "without":["91","92","22"], "cmd":"send-ack" },
     { "id":"health-check", "checked":false, "when":"timer", "start":2000, "interval":5000, "cmd":"send-health" },
     { "id":"send-resend", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":"send-resend" },
-    { "id":"send-control", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":["set-control", "send-control", ] },
+    { "id":"send-control", "checked":false, "when":"timer", "start":0, "interval":5000, "msg":"control", "cmd":["set-control", "send-control", ] },
     { "id":"auto-response", "checked":true, "when":"recv", "scripts":[
           { "dtype":"40", "cmd":"response-resend" },
           { "dtype":["01", "02"], "cmd":"send-status" },
