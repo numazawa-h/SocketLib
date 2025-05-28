@@ -43,24 +43,49 @@ namespace SocketTool
 
             foreach (var pair in _ivalues)
             {
-                msg.SetFldValue(pair.Key, (ulong)pair.Value);
+                string key = pair.Key;
+                if (key.Contains("#") == true)
+                {
+                    key = replaceVar(key, resmsg);
+                }
+                msg.SetFldValue(key, (ulong)pair.Value);
             }
             foreach (var pair in _bvalues)
             {
-                msg.SetFldValue(pair.Key, pair.Value);
+                string key = pair.Key;
+                if (key.Contains("#") == true)
+                {
+                    key = replaceVar(key, resmsg);
+                }
+                msg.SetFldValue(key, pair.Value);
             }
             foreach (var pair in _ivalues_runtime)
             {
-                msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
+                string key = pair.Key;
+                if (key.Contains("#") == true)
+                {
+                    key = replaceVar(key, resmsg);
+                }
+                msg.SetFldValue(key, (ulong)scdef.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
+                string key = pair.Key;
+                if (key.Contains("#") == true)
+                {
+                    key = replaceVar(key, resmsg);
+                }
+                msg.SetFldValue(key, scdef.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {
+                string key = pair.Key;
+                if (key.Contains("#") == true)
+                {
+                    key = replaceVar(key, resmsg);
+                }
                 string hex = DateTime.Now.ToString(pair.Value);
-                msg.SetFldValue(pair.Key, ByteArray.ParseHex(hex));
+                msg.SetFldValue(key, ByteArray.ParseHex(hex));
             }
 
             // 受信電文からのコピー処理
@@ -68,14 +93,59 @@ namespace SocketTool
             {
                 foreach (string key in _reqcopy)
                 {
-                    msg.SetFldValue(key, resmsg.GetFldValue(key));
+                    string k = key;
+                    if (key.Contains("#") == true)
+                    {
+                        k = replaceVar(key, resmsg);
+                    }
+                    msg.SetFldValue(k, resmsg.GetFldValue(k));
                 }
                 foreach (var pair in _msgcopy_runtime)
                 {
                     string key = pair.Key;
                     string val = pair.Value;
+                    if (key.Contains("#") == true)
+                    {
+                        key = replaceVar(key, resmsg);
+                    }
+                    if (val.Contains("#") == true)
+                    {
+                        val = replaceVar(val, resmsg);
+                    }
                     msg.SetFldValue(key, resmsg.GetFldValue(val));
                 }
+            }
+        }
+
+        private string replaceVar(string str, CommMessage resmsg)
+        {
+            int? ival = null;
+            string key = null;
+            foreach (var pair in _ivariable)
+            {
+                key = pair.Key.ToString();
+                JsonValue val = pair.Value;
+                if (str.Contains(key))
+                {
+                    switch (val.GetValueKind())
+                    {
+                        case System.Text.Json.JsonValueKind.Number:
+                            ival = val.GetValue<int>();
+                            break;
+                        case System.Text.Json.JsonValueKind.String:
+                            ival = resmsg.GetFldValue(val.ToString()).to_int();
+                            break;
+                    }
+                    break;
+                }
+            }
+            if (ival == null)
+            {
+                return str;
+            }
+            else 
+            {
+                return str.Replace(key, ival.ToString());
             }
         }
     }

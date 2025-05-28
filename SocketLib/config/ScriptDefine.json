@@ -19,6 +19,7 @@
     }},
     "control":{"dtype":"30",},
 
+    "stsa":["a1","a2","a3",],
 
     "mtype_src":"00",	// 自装置タイプlocal_addrを選択した時に設定される
     "local_addr":[
@@ -66,12 +67,20 @@
     { "id":"send-status", "cmd":"send", "msg":"status" },
     { "id":"set-status", "cmd":"set", "msg":"status", "select":[
 	    	{ "case":{ "control-type":1,  }, "select":[
-	    		{ "case":{ "type01.cmd":"99" }, "select":[
-			    	{ "case":{ "type01.idx":0 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[0].sts":"a0" }},
-			    	{ "case":{ "type01.idx":1 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[1].sts":"a1" }},
-			    	{ "case":{ "type01.idx":2 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[2].sts":"a2" }},
-				  ]
-				}
+	    		{ "case":{ "type01.cmd":"99" }, 
+					 "var":{ "#0":"type01.idx" }, 
+					 		"msgcopy":{ 
+					 			"sts003":"control-type", 
+					         	"blk[0].a[#0].sts_1":"type01.cmd", },
+							"values":{
+					         	"blk[1].a[#0].sts_1":9,}
+				},
+//	    		"select":[
+//			    	{ "case":{ "type01.idx":0 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[0].sts":"a0" }},
+//			    	{ "case":{ "type01.idx":1 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[1].sts":"a1" }},
+//			    	{ "case":{ "type01.idx":2 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[2].sts":"a2" }},
+//				  ]
+//				}
 			  ]
 	    	},
 	    	{ "case":{ "control-type":2 }, "msgcopy":{ "sts002":"type02.cmd" }},

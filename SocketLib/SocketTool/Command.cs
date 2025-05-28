@@ -29,6 +29,7 @@ namespace SocketTool
         protected Dictionary<string, string> _bvalues_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _datetime_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _msgcopy_runtime = new Dictionary<string, string>();
+        protected Dictionary<string, JsonValue> _ivariable = new Dictionary<string, JsonValue>();
         protected string[] _reqcopy;
 
 
@@ -44,7 +45,8 @@ namespace SocketTool
             other._bvalues_runtime = _bvalues_runtime;
             other._datetime_runtime = _datetime_runtime;
             other._msgcopy_runtime = _msgcopy_runtime;
-            other._reqcopy = _reqcopy;
+            other._msgcopy_runtime = _msgcopy_runtime;
+            other._ivariable = _ivariable;
             return other;
         }
 
@@ -61,7 +63,20 @@ namespace SocketTool
             _ivalues_runtime.Clear();
             _bvalues_runtime.Clear();
             _datetime_runtime.Clear();
+            _ivariable.Clear();
             _reqcopy = node.GetStringValues("reqcopy").ToArray();
+
+            foreach (var pair in node["var"].GetValues())
+            {
+                string key = pair.Key;
+                JsonValue value = pair.Value;
+
+                if (key.StartsWith("#"))
+                {
+                    _ivariable.Add(key, value);
+                }
+
+            }
 
             foreach (var pair in node["values"].GetValues())
             {
