@@ -68,19 +68,17 @@ namespace NCommonUtility
     {
         private int _dueTime;
         private int _period;
+        private int _phaseMax;
+        private int _phase =-1;
         private Timer _timer = null;
-        private CommMessage _msg = null;
         CommSocket _socket = null;
 
         public ScriptTimer(Node def, Dictionary<string, Command> comands): base(def, comands)
         {
             _dueTime = (int?)def["start"] is int v? v:0;
             _period = def["interval"].Required();
-            string msgname = def["msg"];
-            if(msgname != null)
-            {
-                _msg = ScriptDefine.GetInstance().GetValueMsg(msgname);
-            }
+            int phaseCnt = (int?)def["phaseCnt"] is int p ? p : 0;
+            _phaseMax = (phaseCnt > 0) ? phaseCnt - 1 : 0;
         }
 
         public void Start(CommSocket socket)
@@ -88,6 +86,7 @@ namespace NCommonUtility
             lock (this)
             {
                 Stop();
+                _phase = -1;
                 _socket = socket;
                 _timer = new Timer(new TimerCallback(TimerTask), this, _dueTime, _period);
             }
@@ -113,9 +112,21 @@ namespace NCommonUtility
                 return;
             }
 
+            if (_phase < _phaseMax)
+            {
+                ++_phase;
+            }
+            else
+            {
+                _phase = 0;
+            }
+
             foreach (var script in _scripts)
             {
-                script.Exec(_socket, _msg);
+                if (script.OnPhase(_phase))
+                {
+                    script.Exec(_socket);
+                }
             }
         }
 
@@ -130,12 +141,20 @@ namespace NCommonUtility
         ScriptList _owner;
         protected HashSet<string> _dtypes = new HashSet<string>();
         protected HashSet<string> _without = new HashSet<string>();
+        protected HashSet<int> _phase = new HashSet<int>();
+        protected CommMessage _msg = null;
         protected List<Command> _commands = new List<Command>();
 
         public Script(Node def, Dictionary<string, Command> comands, ScriptList owner)
         {
             _dtypes = def.GetStringValues("dtype");
             _without = def.GetStringValues("without");
+            _phase = def.GetIntValues("phase");
+            string msgname = def["msg"];
+            if (msgname != null)
+            {
+                _msg = ScriptDefine.GetInstance().GetValueMsg(msgname);
+            }
             _owner = owner;
             foreach(string cmdid in def.GetStringValues("cmd"))
             {
@@ -180,9 +199,17 @@ namespace NCommonUtility
 
             foreach (var command in _commands)
             {
-                command.Exec(socket, msg);
+                command.Exec(socket, (msg==null)?_msg:msg);
             }
             return true;
+        }
+        public bool OnPhase(int phase)
+        {
+            if (_phase.Count() == 0)
+            {
+                return true;
+            }
+            return _phase.Contains(phase);
         }
     }
 }

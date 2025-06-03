@@ -14,6 +14,7 @@ namespace SocketTool
 {
     internal class CommandSetValueMsgList : Command
     {
+        private string _owner_id;
         private string _msgname;
         private List<CaseList> _caselist = new List<CaseList>();
         private List<CommandSetValueMsg> _commands = new List<CommandSetValueMsg>();
@@ -22,8 +23,9 @@ namespace SocketTool
         {
         }
 
-        public CommandSetValueMsgList(Node node)
+        public CommandSetValueMsgList(Node node, string owner_id)
         {
+            _owner_id = owner_id;
             _msgname = node["msg"];
             string id = node["id"];
             foreach (Node node1 in node["select"].Required())
@@ -81,6 +83,7 @@ namespace SocketTool
         {
             if (resmsg == null)
             {
+                Log.Warn($"select-caseで条件判定するための電文が指定されていないのでこのコマンドは実行されません。({_owner_id})");
                 return;
             }
             int idx = 0;

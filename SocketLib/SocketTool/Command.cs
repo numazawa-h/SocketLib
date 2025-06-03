@@ -228,7 +228,7 @@ namespace SocketTool
                     {
                         if (node.ContainsKey("select"))
                         {
-                            cmd = new CommandSetValueMsgList(node);
+                            cmd = new CommandSetValueMsgList(node, cmdid);
                         }
                         else
                         {
