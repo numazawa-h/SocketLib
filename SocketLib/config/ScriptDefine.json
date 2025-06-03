@@ -31,6 +31,7 @@
     	{"desc":"サーバー1", "ip":"localhost", "port":901, "values":{"mtype_dst":"90" } },
     	{"desc":"サーバー2", "ip":"localhost", "port":902, "values":{"mtype_dst":"90" } },
     ],
+    "display_limit":5,	// 画面に表示する最大行数
   },
 
   // 実行するコマンドを定義する

@@ -24,6 +24,8 @@ namespace SampleMain
         CommSocket _Socket;
         List<CheckBox> _checkBoxes = new List<CheckBox>();
         CommMessageEditor _CommMessageEditor;
+        int _display_limit = -1;
+        int _display_line = 0;
 
         public SocketForm(CommSocket socket, string title=null)
         {
@@ -34,6 +36,12 @@ namespace SampleMain
             _Socket.OnSendCommEvent += OnSend;
 
             InitializeComponent();
+
+            ScriptDefine scd = ScriptDefine.GetInstance();
+            if (scd.ContainsKeyIntValue("display_limit"))
+            {
+                _display_limit = scd.GetIntValue("display_limit");
+            }
 
             txt_ipAddr1.Text = socket.LocalIPAddress?.ToString();
             txt_portNo1.Text = socket.LocalPortno?.ToString();
@@ -120,6 +128,12 @@ namespace SampleMain
 
         private void DisplayLog(string message)
         {
+            ++_display_line;
+            if (_display_limit>=0 && _display_line > _display_limit)
+            {
+                // 指定の表示行数を超えていたら表示しない
+                return;
+            }
             txt_log.Text += $"{DateTime.Now} {message}\r\n";
         }
 
@@ -223,6 +237,7 @@ namespace SampleMain
 
         private void btn_clear_Click(object sender, EventArgs e)
         {
+            _display_line = 0;
             this.txt_log.Clear();
         }
 
