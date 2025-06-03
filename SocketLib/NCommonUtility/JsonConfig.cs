@@ -227,14 +227,14 @@ namespace NCommonUtility
                 {
                     foreach (Node val in this[name])
                     {
-                        values.Add((int)val);
+                        values.Add((int)val.Required());
                     }
                 }
                 else
                 {
                     if (this.ContainsKey(name))
                     {
-                        values.Add((int)this[name]);
+                        values.Add((int)this[name].Required());
                     }
                 }
 
