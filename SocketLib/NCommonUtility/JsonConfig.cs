@@ -232,7 +232,10 @@ namespace NCommonUtility
                 }
                 else
                 {
-                    values.Add((int)this[name]);
+                    if (this.ContainsKey(name))
+                    {
+                        values.Add((int)this[name]);
+                    }
                 }
 
                 return values;
