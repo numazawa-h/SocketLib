@@ -1,11 +1,16 @@
 ﻿using NCommonUtility;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static NCommonUtility.JsonConfig;
+using System.Xml.Linq;
 using static SocketTool.CommMessageDefine;
 
 namespace SocketTool
@@ -258,5 +263,72 @@ namespace SocketTool
             }
             SetFldValue(fldid, fldvalue);
         }
+
+        public static CommMessage LoadFileBinary(string path)
+        {
+            CommMessage msg = null;
+            string fname = System.IO.Path.GetFileName(path);
+            int dtypelen = CommMessageDefine.GetInstance().GetMessageDefine("head").GetFldDefine("dtype").Length;
+            string dtype = fname.Substring(0, dtypelen * 2);
+            if (CommMessageDefine.GetInstance().Contains(dtype) == false)
+            {
+                throw new Exception($"dtype'{dtype}'が定義されていません");
+            }
+            using (System.IO.FileStream fs = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read))
+            {
+                byte[] dat = new byte[fs.Length];
+                fs.Read(dat, 0, dat.Length);
+                msg = new CommMessage(dtype, dat);
+            }
+
+            return msg;
+        }
+
+        public static CommMessage LoadFileText(string path)
+        {
+            CommMessage msg = null;
+
+            byte[] hed = System.Array.Empty<byte>();
+            byte[] dat = System.Array.Empty<byte>();
+            using (System.IO.StreamReader sr = new System.IO.StreamReader(path))
+            {
+                string filetext = sr.ReadToEnd();
+
+                // コメントと空白を削除
+                Regex reg_comment = new Regex("//.*\\n");
+                Regex reg_whitesp = new Regex("[\\r\\n\\s\\t]");
+                string txt = reg_whitesp.Replace(reg_comment.Replace(filetext, ""), "");
+
+                // [head][data]形式にマッチング
+                var matchs = Regex.Matches(txt, @"\[[0-9,a-f,A-F ]*\]");
+                if (matchs.Count != 2)
+                {
+                    throw new Exception($"フォーマットが[head][data]の形式ではありません");
+                }
+
+                // ヘッダとデータのHEX文字列から生成
+                Regex r = new Regex("[\\[\\] \\t]");
+                string hed_hex = r.Replace(matchs[0].Value, "");
+                string dat_hex = r.Replace(matchs[1].Value, "");
+                int dtypelen = CommMessageDefine.GetInstance().GetMessageDefine("head").GetFldDefine("dtype").Length;
+                if (hed_hex.Length == (dtypelen * 2))
+                {
+                    // データ種別指定の時
+                    string dtype = hed_hex;
+                    dat = ByteArray.ParseHex(dat_hex);
+                    msg = new CommMessage(dtype, dat);
+                }
+                else
+                {
+                    // ヘッダ全体指定の時
+                    hed = ByteArray.ParseHex(hed_hex);
+                    dat = ByteArray.ParseHex(dat_hex);
+                    msg = new CommMessage(hed, dat);
+                }
+            }
+
+            return msg;
+        }
+
     }
 }

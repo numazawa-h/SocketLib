@@ -284,71 +284,21 @@ namespace SampleMain
 
         public void FormMain_DragDrop(object sender, DragEventArgs e)
         {
-            int dtypelen = CommMessageDefine.GetInstance().GetMessageDefine("head").GetFldDefine("dtype").Length;
-
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string path in files)
             {
                 try
                 {
-                    string dtype = null;
-                    byte[] hed = System.Array.Empty<byte>();
-                    byte[] dat = System.Array.Empty<byte>();
-                    string fname = System.IO.Path.GetFileName(path);
-
                     string file_ext = Path.GetExtension(path);
                     if (file_ext == ".txt")
                     {
-                        dtype = null;
-                        hed = System.Array.Empty<byte>();
-                        dat = System.Array.Empty<byte>();
-                        using (System.IO.StreamReader sr = new System.IO.StreamReader(path))
-                        {
-                            string filetext = sr.ReadToEnd();
-                            Regex reg_comment = new Regex("//.*\\n");
-                            Regex reg_whitesp = new Regex("[\\r\\n\\s\\t]");
-                            string txt = reg_whitesp.Replace(reg_comment.Replace(filetext, ""), "");
-                            var matchs = Regex.Matches(txt, @"\[[0-9,a-f,A-F ]*\]");
-                            if (matchs.Count != 2)
-                            {
-                                throw new Exception($"フォーマットが[head][data]の形式ではありません");
-                            }
-                            Regex r = new Regex("[\\[\\] \\t]");
-                            string hed_bcd = r.Replace(matchs[0].Value, "");
-                            string dat_bcd = r.Replace(matchs[1].Value, "");
-                            if (hed_bcd.Length == (dtypelen*2))
-                            {
-                                dtype = hed_bcd;
-                                dat = ByteArray.ParseHex(dat_bcd);
-                            }
-                            else
-                            {
-                                hed = ByteArray.ParseHex(hed_bcd);
-                                dat = ByteArray.ParseHex(dat_bcd);
-                            }
-                        }
-                        if (dtype != null && dat.Length > 0)
-                        {
-                            _Socket.Send(new CommMessage(dtype, dat));
-                        }
-                        if (hed.Length > 0 && dat.Length > 0)
-                        {
-                            _Socket.Send(new CommMessage(hed, dat));
-                        }
+                        CommMessage msg = CommMessage.LoadFileText(path);
+                        _Socket.Send(msg);
                     }
                     else if (file_ext == ".bin")
                     {
-                        dtype = fname.Substring(0, dtypelen * 2);
-                        if (CommMessageDefine.GetInstance().Contains(dtype) == false)
-                        {
-                            throw new Exception($"dtype'{dtype}'が定義されていません");
-                        }
-                        using (System.IO.FileStream fs = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read))
-                        {
-                            dat = new byte[fs.Length];
-                            fs.Read(dat, 0, dat.Length);
-                        }
-                        _Socket.Send(new CommMessage(dtype, dat));
+                        CommMessage msg = CommMessage.LoadFileBinary(path);
+                        _Socket.Send(msg);
                     }
                     else if (file_ext == ".json")
                     {
@@ -381,6 +331,16 @@ namespace SampleMain
         private void Btn_send_Click(object sender, EventArgs e)
         {
             _CommMessageEditor.SendCommMessage(_Socket);
+        }
+
+        private void Btn_save_Click(object sender, EventArgs e)
+        {
+            _CommMessageEditor.Save();
+        }
+
+        private void Btn_load_Click(object sender, EventArgs e)
+        {
+            _CommMessageEditor.Load();
         }
     }
 }

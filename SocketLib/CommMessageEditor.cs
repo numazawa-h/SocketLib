@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Drawing.Drawing2D;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -627,6 +628,61 @@ namespace SocketLib
                 cbx.SelectedIndex = 0;
                 owner.bInnerUpdate = false;
                 lbl.Visible = false;
+            }
+        }
+
+        public void Save()
+        {
+            try
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Title = "ファイル選択ダイアログ";
+                    dlg.Filter = "テキストファイル(*.txt)|*.txt|すべてのファイル(*.*)|*.*";
+                    dlg.InitialDirectory = Directory.GetCurrentDirectory() + @"\config\";
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        using (FileStream fs = (FileStream)dlg.OpenFile())
+                        {
+                            string dat_hex = new ByteArray(_commMsg.GetData()).to_hex(0, 0, " ");
+                            string msg_hex = $"[{_commMsg.DType}][{dat_hex}]";
+                            byte[] buf = Encoding.ASCII.GetBytes(msg_hex);
+
+                            fs.Write(buf, 0, buf.Length);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"ファイルの書き込みに失敗しました。({ex.Message})");
+            }
+        }
+
+        public void Load()
+        {
+            try
+            {
+                using (OpenFileDialog dlg = new OpenFileDialog())
+                {
+                    dlg.Title = "ファイル選択ダイアログ";
+                    dlg.Filter = "テキストファイル(*.txt)|*.txt|すべてのファイル(*.*)|*.*";
+                    dlg.InitialDirectory = Directory.GetCurrentDirectory() + @"\config\";
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        string path = dlg.FileName;
+                        CommMessage msg = CommMessage.LoadFileText(path);
+                        if (msg.DType != _commMsg.DType){
+                            throw new Exception($"データ種別が異なります");
+                        }
+                        _commMsg = ScriptDefine.GetInstance().LoadMessage(_commMsgName, msg);
+                        refresh();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"ファイルの読み込みに失敗しました。({ex.Message})");
             }
         }
     }

@@ -308,6 +308,13 @@ namespace SocketTool
             return _commMessages[id];
         }
 
+        public CommMessage LoadMessage(string disp, CommMessage msg)
+        {
+            string id = _commMessagesDisp[disp];
+            _commMessages[id] = msg;
+            return msg;
+        }
+
         public void ExecOnConnect(CommSocket socket)
         {
             foreach (var pair in _script_timer)

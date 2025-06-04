@@ -59,14 +59,16 @@
             this.panel3 = new System.Windows.Forms.Panel();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.btn_send = new System.Windows.Forms.Button();
-            this.btn_init = new System.Windows.Forms.Button();
-            this.btn_001 = new System.Windows.Forms.Button();
-            this.cbx_001 = new NCommonUtility.NComboBox();
-            this.cbx_MessageType = new NCommonUtility.NComboBox();
-            this.lbl_001 = new System.Windows.Forms.Label();
             this.pnl_commMessage = new System.Windows.Forms.Panel();
+            this.cbx_001 = new NCommonUtility.NComboBox();
+            this.lbl_001 = new System.Windows.Forms.Label();
+            this.btn_001 = new System.Windows.Forms.Button();
             this.panel6 = new System.Windows.Forms.Panel();
+            this.btn_load = new System.Windows.Forms.Button();
+            this.btn_save = new System.Windows.Forms.Button();
+            this.btn_init = new System.Windows.Forms.Button();
+            this.btn_send = new System.Windows.Forms.Button();
+            this.cbx_MessageType = new NCommonUtility.NComboBox();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -414,27 +416,37 @@
             this.panel4.Size = new System.Drawing.Size(907, 529);
             this.panel4.TabIndex = 0;
             // 
-            // btn_send
+            // pnl_commMessage
             // 
-            this.btn_send.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_send.Location = new System.Drawing.Point(781, 42);
-            this.btn_send.Name = "btn_send";
-            this.btn_send.Size = new System.Drawing.Size(112, 40);
-            this.btn_send.TabIndex = 53;
-            this.btn_send.Text = "送信";
-            this.btn_send.UseVisualStyleBackColor = true;
-            this.btn_send.Click += new System.EventHandler(this.Btn_send_Click);
+            this.pnl_commMessage.AutoScroll = true;
+            this.pnl_commMessage.Controls.Add(this.cbx_001);
+            this.pnl_commMessage.Controls.Add(this.lbl_001);
+            this.pnl_commMessage.Controls.Add(this.btn_001);
+            this.pnl_commMessage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnl_commMessage.Location = new System.Drawing.Point(0, 85);
+            this.pnl_commMessage.Name = "pnl_commMessage";
+            this.pnl_commMessage.Size = new System.Drawing.Size(907, 444);
+            this.pnl_commMessage.TabIndex = 56;
             // 
-            // btn_init
+            // cbx_001
             // 
-            this.btn_init.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btn_init.Location = new System.Drawing.Point(14, 42);
-            this.btn_init.Name = "btn_init";
-            this.btn_init.Size = new System.Drawing.Size(112, 40);
-            this.btn_init.TabIndex = 44;
-            this.btn_init.Text = "初期化";
-            this.btn_init.UseVisualStyleBackColor = true;
-            this.btn_init.Click += new System.EventHandler(this.Btn_init_Click);
+            this.cbx_001.AllowEdit = true;
+            this.cbx_001.DisplayMember = "display";
+            this.cbx_001.FormattingEnabled = true;
+            this.cbx_001.Location = new System.Drawing.Point(49, 13);
+            this.cbx_001.Name = "cbx_001";
+            this.cbx_001.Size = new System.Drawing.Size(549, 32);
+            this.cbx_001.TabIndex = 61;
+            this.cbx_001.ValueMember = "value";
+            // 
+            // lbl_001
+            // 
+            this.lbl_001.AutoSize = true;
+            this.lbl_001.Location = new System.Drawing.Point(606, 21);
+            this.lbl_001.Name = "lbl_001";
+            this.lbl_001.Size = new System.Drawing.Size(91, 24);
+            this.lbl_001.TabIndex = 62;
+            this.lbl_001.Text = "label001";
             // 
             // btn_001
             // 
@@ -448,16 +460,60 @@
             this.btn_001.Text = "+";
             this.btn_001.UseVisualStyleBackColor = true;
             // 
-            // cbx_001
+            // panel6
             // 
-            this.cbx_001.AllowEdit = true;
-            this.cbx_001.DisplayMember = "display";
-            this.cbx_001.FormattingEnabled = true;
-            this.cbx_001.Location = new System.Drawing.Point(49, 13);
-            this.cbx_001.Name = "cbx_001";
-            this.cbx_001.Size = new System.Drawing.Size(549, 32);
-            this.cbx_001.TabIndex = 61;
-            this.cbx_001.ValueMember = "value";
+            this.panel6.Controls.Add(this.btn_load);
+            this.panel6.Controls.Add(this.btn_save);
+            this.panel6.Controls.Add(this.btn_init);
+            this.panel6.Controls.Add(this.btn_send);
+            this.panel6.Controls.Add(this.cbx_MessageType);
+            this.panel6.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel6.Location = new System.Drawing.Point(0, 0);
+            this.panel6.Name = "panel6";
+            this.panel6.Size = new System.Drawing.Size(907, 85);
+            this.panel6.TabIndex = 55;
+            // 
+            // btn_load
+            // 
+            this.btn_load.Location = new System.Drawing.Point(244, 42);
+            this.btn_load.Name = "btn_load";
+            this.btn_load.Size = new System.Drawing.Size(106, 40);
+            this.btn_load.TabIndex = 55;
+            this.btn_load.Text = "読込";
+            this.btn_load.UseVisualStyleBackColor = true;
+            this.btn_load.Click += new System.EventHandler(this.Btn_load_Click);
+            // 
+            // btn_save
+            // 
+            this.btn_save.Location = new System.Drawing.Point(132, 42);
+            this.btn_save.Name = "btn_save";
+            this.btn_save.Size = new System.Drawing.Size(106, 40);
+            this.btn_save.TabIndex = 54;
+            this.btn_save.Text = "保存";
+            this.btn_save.UseVisualStyleBackColor = true;
+            this.btn_save.Click += new System.EventHandler(this.Btn_save_Click);
+            // 
+            // btn_init
+            // 
+            this.btn_init.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_init.Location = new System.Drawing.Point(14, 42);
+            this.btn_init.Name = "btn_init";
+            this.btn_init.Size = new System.Drawing.Size(112, 40);
+            this.btn_init.TabIndex = 44;
+            this.btn_init.Text = "初期化";
+            this.btn_init.UseVisualStyleBackColor = true;
+            this.btn_init.Click += new System.EventHandler(this.Btn_init_Click);
+            // 
+            // btn_send
+            // 
+            this.btn_send.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btn_send.Location = new System.Drawing.Point(781, 42);
+            this.btn_send.Name = "btn_send";
+            this.btn_send.Size = new System.Drawing.Size(112, 40);
+            this.btn_send.TabIndex = 53;
+            this.btn_send.Text = "送信";
+            this.btn_send.UseVisualStyleBackColor = true;
+            this.btn_send.Click += new System.EventHandler(this.Btn_send_Click);
             // 
             // cbx_MessageType
             // 
@@ -471,38 +527,6 @@
             this.cbx_MessageType.TabIndex = 43;
             this.cbx_MessageType.ValueMember = "value";
             this.cbx_MessageType.SelectedIndexChanged += new System.EventHandler(this.Cbx_MessageType_SelectedIndexChanged);
-            // 
-            // lbl_001
-            // 
-            this.lbl_001.AutoSize = true;
-            this.lbl_001.Location = new System.Drawing.Point(606, 21);
-            this.lbl_001.Name = "lbl_001";
-            this.lbl_001.Size = new System.Drawing.Size(91, 24);
-            this.lbl_001.TabIndex = 62;
-            this.lbl_001.Text = "label001";
-            // 
-            // pnl_commMessage
-            // 
-            this.pnl_commMessage.AutoScroll = true;
-            this.pnl_commMessage.Controls.Add(this.cbx_001);
-            this.pnl_commMessage.Controls.Add(this.lbl_001);
-            this.pnl_commMessage.Controls.Add(this.btn_001);
-            this.pnl_commMessage.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnl_commMessage.Location = new System.Drawing.Point(0, 85);
-            this.pnl_commMessage.Name = "pnl_commMessage";
-            this.pnl_commMessage.Size = new System.Drawing.Size(907, 444);
-            this.pnl_commMessage.TabIndex = 56;
-            // 
-            // panel6
-            // 
-            this.panel6.Controls.Add(this.btn_init);
-            this.panel6.Controls.Add(this.btn_send);
-            this.panel6.Controls.Add(this.cbx_MessageType);
-            this.panel6.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel6.Location = new System.Drawing.Point(0, 0);
-            this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(907, 85);
-            this.panel6.TabIndex = 55;
             // 
             // SocketForm
             // 
@@ -578,5 +602,7 @@
         private System.Windows.Forms.Button btn_send;
         private System.Windows.Forms.Panel pnl_commMessage;
         private System.Windows.Forms.Panel panel6;
+        private System.Windows.Forms.Button btn_save;
+        private System.Windows.Forms.Button btn_load;
     }
 }
