@@ -117,10 +117,10 @@
     { "id":"auto-ack", "checked":false, "when":"recv", "without":["91","92","22"], "cmd":"send-ack" },
     { "id":"health-check", "checked":false, "when":"timer", "start":2000, "interval":5000, "cmd":"send-health" },
     { "id":"send-resend", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":"send-resend" },
-    { "id":"send-control", "checked":false, "when":"timer", "start":0, "interval":1000, 
-    	"phaseCnt":10,"scripts":[
+    { "id":"send-control", "checked":false, "when":"timer", "start":0, "interval":200, 
+    	"phaseCnt":30,"scripts":[
         	{ "phase":0, "cmd":["set-control1", "send-control", ] },
-        	{ "phase":[2,4],"msg":"control", "cmd":["set-control2", "send-control", ] },
+        	{ "phase":[2,4, "0x6", "8", {"<":3, "range":[10,15], ">":20 }],"msg":"control", "cmd":["set-control2", "send-control", ] },
     	]
     },
     { "id":"auto-response", "checked":true, "when":"recv", "scripts":[

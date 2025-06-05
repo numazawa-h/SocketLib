@@ -5,6 +5,8 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -142,6 +144,8 @@ namespace NCommonUtility
         protected HashSet<string> _dtypes = new HashSet<string>();
         protected HashSet<string> _without = new HashSet<string>();
         protected HashSet<int> _phase = new HashSet<int>();
+        protected int _phase_less_than = -1;
+        protected int _phase_greater_than = -1;
         protected CommMessage _msg = null;
         protected List<Command> _commands = new List<Command>();
 
@@ -150,6 +154,34 @@ namespace NCommonUtility
             _dtypes = def.GetStringValues("dtype");
             _without = def.GetStringValues("without");
             _phase = def.GetIntValues("phase");
+            foreach (Node node1 in def["phase"])
+            {
+                foreach (var pair in node1.GetValues())
+                {
+                    string key = pair.Key;
+                    JsonValue val = pair.Value;
+                    switch (key)
+                    {
+                        case "<":
+                            if(val.GetValueKind() != JsonValueKind.Number)
+                            {
+                                throw new Exception($"'phase'の'<'が数値以外の値です");
+                            }
+                            _phase_less_than = val.GetValue<int>();
+                            break;
+                        case ">":
+                            if (val.GetValueKind() != JsonValueKind.Number)
+                            {
+                                throw new Exception($"'phase'の'<'が数値以外の値です");
+                            }
+                            _phase_greater_than = val.GetValue<int>();
+                            break;
+                        case "range":
+                            // TODO:range処理
+                            break;
+                    }
+                }
+            }
             string msgname = def["msg"];
             if (msgname != null)
             {
@@ -205,11 +237,27 @@ namespace NCommonUtility
         }
         public bool OnPhase(int phase)
         {
-            if (_phase.Count() == 0)
+            if (_phase.Count == 0 && _phase_less_than < 0 && _phase_greater_than < 0)
             {
+                // 条件が何も指定されなければ、常に該当phase
                 return true;
             }
-            return _phase.Contains(phase);
+            if (_phase.Count > 0 &&_phase.Contains(phase))
+            {
+                // phase一覧に存在すれば、該当phase
+                return true;
+            }
+            if (_phase_less_than >= 0 && phase < _phase_less_than)
+            {
+                // 指定されたless_thanより小さければ、該当phase
+                return true;
+            }
+            if (_phase_greater_than >= 0 && phase > _phase_greater_than)
+            {
+                // 指定されたgreater_thanより大きければ、該当phase
+                return true;
+            }
+            return false;
         }
     }
 }
