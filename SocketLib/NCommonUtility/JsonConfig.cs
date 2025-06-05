@@ -225,16 +225,22 @@ namespace NCommonUtility
 
                 if (this[name].isArray())
                 {
-                    foreach (Node val in this[name])
+                    foreach (JsonNode val in this[name]._jsonNode.AsArray())
                     {
-                        values.Add((int)val.Required());
+                        if(val.GetValueKind() == JsonValueKind.Number)
+                        {
+                            values.Add(val.GetValue<int>());
+                        }
                     }
                 }
                 else
                 {
                     if (this.ContainsKey(name))
                     {
-                        values.Add((int)this[name].Required());
+                        if (this[name]._jsonNode.GetValueKind() == JsonValueKind.Number)
+                        {
+                            values.Add((int)this[name].Required());
+                        }
                     }
                 }
 
@@ -362,12 +368,14 @@ namespace NCommonUtility
                         _parent = null;
                         _array = null;
                     }
+                    else if (node._jsonNode.GetValueKind() != JsonValueKind.Array)
+                    {
+                        //  throw new InvalidOperationException($"配列ではありません({node.PropertyNames}) in {node.FilePath}");
+                        _parent = null;
+                        _array = null;
+                    }
                     else
                     {
-                        if (node._jsonNode.GetValueKind() != JsonValueKind.Array)
-                        {
-                            throw new InvalidOperationException($"配列ではありません({node.PropertyNames}) in {node.FilePath}");
-                        }
                         try
                         {
                             _parent = node;
