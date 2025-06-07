@@ -121,7 +121,7 @@ namespace SocketTool
 
             _local_addr.Clear();
             _remote_addr.Clear();
-            foreach (Node node in root["Working-area"].GetArrayObject())
+            foreach (Node node in root["Working-area"].GetArrayObjects())
             {
                 string name = node._name.Split('[')[0];
                 try

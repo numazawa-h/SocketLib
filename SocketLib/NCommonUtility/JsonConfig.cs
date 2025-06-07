@@ -203,16 +203,23 @@ namespace NCommonUtility
 
                 if (this[name].isArray())
                 {
-                    foreach (Node val in this[name])
+                    foreach (JsonNode val in this[name]._jsonNode.AsArray())
                     {
-                        values.Add((string)val);
+                        if (val.GetValueKind() == JsonValueKind.String)
+                        {
+                            values.Add(val.ToString());
+                        }
                     }
                 }
                 else
                 {
                     if (this.ContainsKey(name))
                     {
-                        values.Add((string)this[name]);
+                        JsonNode val = this[name]._jsonNode;
+                        if (val.GetValueKind() == JsonValueKind.String)
+                        {
+                            values.Add(val.ToString());
+                        }
                     }
                 }
 
@@ -237,9 +244,39 @@ namespace NCommonUtility
                 {
                     if (this.ContainsKey(name))
                     {
-                        if (this[name]._jsonNode.GetValueKind() == JsonValueKind.Number)
+                        JsonNode val = this[name]._jsonNode;
+                        if (val.GetValueKind() == JsonValueKind.Number)
                         {
-                            values.Add((int)this[name].Required());
+                            values.Add(val.GetValue<int>());
+                        }
+                    }
+                }
+
+                return values;
+            }
+            public HashSet<Node> GetObjectValues(string name)
+            {
+                HashSet<Node> values = new HashSet<Node>();
+
+                if (this[name].isArray())
+                {
+                    int idx = 0;
+                    foreach (JsonNode val in this[name]._jsonNode.AsArray())
+                    {
+                        if (val.GetValueKind() == JsonValueKind.Object)
+                        {
+                            values.Add(new Node(this, val, $"{name}[{idx++}]"));
+                        }
+                    }
+                }
+                else
+                {
+                    if (this.ContainsKey(name))
+                    {
+                        JsonNode val = this[name]._jsonNode;
+                        if (val.GetValueKind() == JsonValueKind.Object)
+                        {
+                            values.Add(new Node(this, val, name));
                         }
                     }
                 }
@@ -315,7 +352,7 @@ namespace NCommonUtility
                 }
                 return vals.ToArray();
             }
-            public Node[] GetArrayObject()
+            public Node[] GetArrayObjects()
             {
                 List<Node> vals = new List<Node>();
                 if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
@@ -332,9 +369,8 @@ namespace NCommonUtility
                                 {
                                     if (node1.GetValueKind() == JsonValueKind.Object)
                                     {
-                                        vals.Add(new Node(this, node1, $"{name}[{idx}]"));
+                                        vals.Add(new Node(this, node1, $"{name}[{idx++}]"));
                                     }
-                                    idx++;
                                 }
                                 break;
                         }
