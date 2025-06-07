@@ -156,7 +156,7 @@ namespace NCommonUtility
             _phase = def.GetIntValues("phase");
             foreach (Node node1 in def["phase"])
             {
-                foreach (var pair in node1.GetValues())
+                foreach (var pair in node1.GetPropertyValues())
                 {
                     string key = pair.Key;
                     JsonValue val = pair.Value;

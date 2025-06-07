@@ -25,7 +25,7 @@ namespace SocketTool
             _bvalues_runtime.Clear();
             _datetime_runtime.Clear();
 
-            Dictionary<string, JsonValue> values = node["values"].GetValues();
+            Dictionary<string, JsonValue> values = node["values"].GetPropertyValues();
             foreach (var pair in values)
             {
                 string key = pair.Key;

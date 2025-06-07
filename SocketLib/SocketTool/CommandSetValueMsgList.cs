@@ -106,8 +106,8 @@ namespace SocketTool
 
             public CaseList(Node node)
             {
-                _values = node["case"].Required().GetValues();
-                _array_values = node["case"].Required().GetArrayValue();
+                _values = node["case"].Required().GetPropertyValues();
+                _array_values = node["case"].Required().GetPropertyArrayValue();
             }
 
             public CaseList Add(CaseList other)

@@ -284,7 +284,7 @@ namespace NCommonUtility
                 return values;
             }
 
-            public Dictionary<string, JsonValue> GetValues()
+            public Dictionary<string, JsonValue> GetPropertyValues()
             {
                 Dictionary<string, JsonValue> vals = new Dictionary<string, JsonValue>();
                 if(_jsonNode !=null && _jsonNode.GetValueKind() == JsonValueKind.Object)
@@ -303,7 +303,7 @@ namespace NCommonUtility
                 }
                 return vals;
             }
-            public Dictionary<string, JsonValue[]> GetArrayValue()
+            public Dictionary<string, JsonValue[]> GetPropertyArrayValue()
             {
                 var vals = new Dictionary<string, JsonValue[]>();
                 if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
@@ -333,7 +333,7 @@ namespace NCommonUtility
                 } 
                 return vals;
             }
-            public Node[] GetObjects()
+            public Node[] GetPropertyObjects()
             {
                 List<Node> vals = new List<Node>();
                 if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)
@@ -352,7 +352,7 @@ namespace NCommonUtility
                 }
                 return vals.ToArray();
             }
-            public Node[] GetArrayObjects()
+            public Node[] GetPropertyArrayObjects()
             {
                 List<Node> vals = new List<Node>();
                 if (_jsonNode != null && _jsonNode.GetValueKind() == JsonValueKind.Object)

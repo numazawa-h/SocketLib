@@ -63,7 +63,7 @@ namespace SocketTool
             _ivalues.Clear();
             _bvalues.Clear();
             _incriment_values.Clear();
-            foreach (var pair in root["Working-area"].GetValues())
+            foreach (var pair in root["Working-area"].GetPropertyValues())
             {
                 string key = pair.Key;
                 JsonValue value = pair.Value;
@@ -96,7 +96,7 @@ namespace SocketTool
             }
 
             _commMessages.Clear();
-            foreach (Node node in root["Working-area"].GetObjects())
+            foreach (Node node in root["Working-area"].GetPropertyObjects())
             {
                 string id = node._name;
                 try
@@ -121,7 +121,7 @@ namespace SocketTool
 
             _local_addr.Clear();
             _remote_addr.Clear();
-            foreach (Node node in root["Working-area"].GetArrayObjects())
+            foreach (Node node in root["Working-area"].GetPropertyArrayObjects())
             {
                 string name = node._name.Split('[')[0];
                 try

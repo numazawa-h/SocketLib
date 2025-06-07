@@ -66,7 +66,7 @@ namespace SocketTool
             _ivariable.Clear();
             _reqcopy = node.GetStringValues("reqcopy").ToArray();
 
-            foreach (var pair in node["var"].GetValues())
+            foreach (var pair in node["var"].GetPropertyValues())
             {
                 string key = pair.Key;
                 JsonValue value = pair.Value;
@@ -78,7 +78,7 @@ namespace SocketTool
 
             }
 
-            foreach (var pair in node["values"].GetValues())
+            foreach (var pair in node["values"].GetPropertyValues())
             {
                 string key = pair.Key;
                 JsonValue value = pair.Value;
@@ -130,7 +130,7 @@ namespace SocketTool
             }
 
             _msgcopy_runtime.Clear();
-            foreach (var pair in node["msgcopy"].GetValues())
+            foreach (var pair in node["msgcopy"].GetPropertyValues())
             {
                 string key = pair.Key;
                 JsonValue value = pair.Value;

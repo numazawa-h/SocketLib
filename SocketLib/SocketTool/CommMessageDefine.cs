@@ -578,7 +578,7 @@ namespace SocketTool
                     Default = ByteArray.ParseHex(deflt);
                 }
 
-                _values_def = def["values"].GetValues();
+                _values_def = def["values"].GetPropertyValues();
                 if (_values_def.ContainsKey("notdisp"))
                 {
                     if (_values_def["notdisp"].GetValueKind() == System.Text.Json.JsonValueKind.Array)
