@@ -181,10 +181,10 @@ namespace SocketTool
                                 }
                                 break;
                         }
-                        if(or == false)
-                        {
-                            return false;
-                        }
+                    }
+                    if (or == false)
+                    {
+                        return false;
                     }
                 }
                 return true;
