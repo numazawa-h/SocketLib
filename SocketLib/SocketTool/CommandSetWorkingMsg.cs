@@ -10,27 +10,27 @@ using System.Text.Json.Nodes;
 
 namespace SocketTool
 {
-    public class CommandSetValueMsg : Command
+    public class CommandSetWorkingMsg : Command
     {
         private string _msgname;
 
-        private CommandSetValueMsg()
+        private CommandSetWorkingMsg()
         {
         }
 
-        public CommandSetValueMsg(Node node):base(node) 
+        public CommandSetWorkingMsg(Node node):base(node) 
         {
             _msgname = node["msg"];
         }
 
-        public CommandSetValueMsg(Node node, string name) : base(node)
+        public CommandSetWorkingMsg(Node node, string name) : base(node)
         {
             _msgname = name;
         }
 
         public override Command Copy()
         {
-            CommandSetValueMsg cmd = new CommandSetValueMsg();
+            CommandSetWorkingMsg cmd = new CommandSetWorkingMsg();
             base.Copy(cmd);
             cmd._msgname = _msgname;
             return cmd;

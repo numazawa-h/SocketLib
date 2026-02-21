@@ -8,22 +8,22 @@ using static NCommonUtility.JsonConfig;
 
 namespace SocketTool
 {
-    public class CommandSendValueMsg: Command
+    public class CommandSendWorkingMsg: Command
     {
         private string _name;
 
-        private CommandSendValueMsg()
+        private CommandSendWorkingMsg()
         {
         }
 
-        public CommandSendValueMsg(Node node) : base(node)
+        public CommandSendWorkingMsg(Node node) : base(node)
         {
             _name = node["msg"];
         }
 
         public override Command Copy()
         {
-            CommandSendValueMsg cmd = new CommandSendValueMsg();
+            CommandSendWorkingMsg cmd = new CommandSendWorkingMsg();
             base.Copy(cmd);
             cmd._name = _name;
             return cmd;

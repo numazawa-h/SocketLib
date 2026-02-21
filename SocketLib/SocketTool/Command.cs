@@ -228,11 +228,11 @@ namespace SocketTool
                     {
                         if (node.ContainsKey("select"))
                         {
-                            cmd = new CommandSetValueMsgList(node, cmdid);
+                            cmd = new CommandSetWorkingMsgConditional(node, cmdid);
                         }
                         else
                         {
-                            cmd = new CommandSetValueMsg(node);
+                            cmd = new CommandSetWorkingMsg(node);
                         }
                     }
                     else
@@ -243,7 +243,7 @@ namespace SocketTool
                 case "send":
                     if (node.ContainsKey("msg"))
                     {
-                        cmd = new CommandSendValueMsg(node);
+                        cmd = new CommandSendWorkingMsg(node);
                     }
                     else
                     {

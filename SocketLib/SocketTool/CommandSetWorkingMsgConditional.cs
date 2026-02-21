@@ -12,18 +12,18 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
 
 namespace SocketTool
 {
-    internal class CommandSetValueMsgList : Command
+    internal class CommandSetWorkingMsgConditional : Command
     {
         private string _owner_id;
         private string _msgname;
         private List<CaseList> _caselist = new List<CaseList>();
-        private List<CommandSetValueMsg> _commands = new List<CommandSetValueMsg>();
+        private List<CommandSetWorkingMsg> _commands = new List<CommandSetWorkingMsg>();
 
-        private CommandSetValueMsgList()
+        private CommandSetWorkingMsgConditional()
         {
         }
 
-        public CommandSetValueMsgList(Node node, string owner_id)
+        public CommandSetWorkingMsgConditional(Node node, string owner_id)
         {
             _owner_id = owner_id;
             _msgname = node["msg"];
@@ -35,7 +35,7 @@ namespace SocketTool
                 {
                     _caselist.Add(case1);
                     node1.AddValue("id", node1._name);      // Commandクラスが'id'必須なので追加しておく
-                    _commands.Add(new CommandSetValueMsg(node1, _msgname));
+                    _commands.Add(new CommandSetWorkingMsg(node1, _msgname));
                 }
                 else
                 {
@@ -46,7 +46,7 @@ namespace SocketTool
                         {
                             _caselist.Add(case2);
                             node2.AddValue("id", node2._name);      // Commandクラスが'id'必須なので追加しておく
-                            _commands.Add(new CommandSetValueMsg(node2, _msgname));
+                            _commands.Add(new CommandSetWorkingMsg(node2, _msgname));
                         }
                         else
                         {
@@ -57,7 +57,7 @@ namespace SocketTool
                                 {
                                     _caselist.Add(case3);
                                     node3.AddValue("id", node3._name);      // Commandクラスが'id'必須なので追加しておく
-                                    _commands.Add(new CommandSetValueMsg(node3, _msgname));
+                                    _commands.Add(new CommandSetWorkingMsg(node3, _msgname));
                                 }
                                 else
                                 {
@@ -72,10 +72,10 @@ namespace SocketTool
 
         public override Command Copy()
         {
-            CommandSetValueMsgList cmd = new CommandSetValueMsgList();
+            CommandSetWorkingMsgConditional cmd = new CommandSetWorkingMsgConditional();
             base.Copy(cmd);
             cmd._msgname = _msgname;
-            cmd._commands = new List<CommandSetValueMsg>(_commands);
+            cmd._commands = new List<CommandSetWorkingMsg>(_commands);
             return cmd;
         }
 
