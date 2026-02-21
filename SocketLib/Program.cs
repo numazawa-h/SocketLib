@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -30,7 +31,9 @@ namespace SocketLib
             try
             {
                 Log.Init(0);
-                Log.Info("Aplication Started*******************************************");
+                var assembly = Assembly.GetExecutingAssembly().GetName();
+                var ver = assembly.Version;
+                Log.Info($"{assembly.Name} (version{ver.Major}.{ver.Minor}.{ver.Build}) Started*******************************************");
                 //            JsonTest();
                 // ByteArrayTest("[ 1234 5678 9abc def0 ]");
                 CommMessageDefine.GetInstance().ReadJson(".\\config\\CommMessageDefine.json");
