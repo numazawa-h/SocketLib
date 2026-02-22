@@ -70,7 +70,7 @@ namespace SampleMain
             // 電文表示指定チェックボックスセットアップ
             int cmdidx =0;
             int dispidx = 8;
-            foreach (ScriptList script in ScriptDefine.GetInstance().GetScriptList())
+            foreach (ScriptList script in ScriptDefine.GetInstance().GetScriptListOnDisplay())
             {
                 if (script.Display)
                 {

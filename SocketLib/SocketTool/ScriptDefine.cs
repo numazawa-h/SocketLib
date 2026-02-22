@@ -48,7 +48,7 @@ namespace SocketTool
         protected Dictionary<string, ScriptList> _script_send = new Dictionary<string, ScriptList>();
         protected Dictionary<string, ScriptList> _script_recv = new Dictionary<string, ScriptList>();
         protected Dictionary<string, ScriptTimer> _script_timer = new Dictionary<string, ScriptTimer>();
-        protected List<ScriptList> _script_select = new List<ScriptList>();
+        protected List<ScriptList> _script_list_on_display = new List<ScriptList>();
         protected List<(string desc, IPEndPoint epoint, HashSet<string> remote)> _local_addr = new List<(string, IPEndPoint, HashSet<string>)>();
         protected List<(string desc, IPEndPoint epoint)> _remote_addr = new List<(string, IPEndPoint)>();
 
@@ -170,7 +170,7 @@ namespace SocketTool
             _script_send.Clear();
             _script_recv.Clear();
             _script_timer.Clear();
-            _script_select.Clear();
+            _script_list_on_display.Clear();
             foreach (Node def in root["Scripts"])
             {
                 try
@@ -201,7 +201,7 @@ namespace SocketTool
                     }
                     if(script !=null && script.Display == true)
                     {
-                        _script_select.Add(script);
+                        _script_list_on_display.Add(script);
                     }
                 }
                 catch (Exception ex)
@@ -215,9 +215,9 @@ namespace SocketTool
         /// 画面に表示するスクリプト一覧を取得
         /// </summary>
         /// <returns></returns>
-        public ScriptList[] GetScriptList()
+        public ScriptList[] GetScriptListOnDisplay()
         {
-            return _script_select.ToArray();
+            return _script_list_on_display.ToArray();
         }
 
         public (string desc, IPEndPoint epoint, HashSet<string>)[] GetLocalAddr()
