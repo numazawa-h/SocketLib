@@ -83,9 +83,10 @@
     <Compile Include="NCommonUtility\NComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="SocketTool\CommandSendValueMsg.cs" />
-    <Compile Include="SocketTool\CommandSetValueMsg.cs" />
-    <Compile Include="SocketTool\CommandSetValueMsgList.cs" />
+    <Compile Include="SocketTool\CaseList.cs" />
+    <Compile Include="SocketTool\CommandSendWorkingMsg.cs" />
+    <Compile Include="SocketTool\CommandSetWorkingMsg.cs" />
+    <Compile Include="SocketTool\CommandSetWorkingMsgConditional.cs" />
     <Compile Include="SocketTool\Script.cs" />
     <Compile Include="SocketTool\Command.cs" />
     <Compile Include="SocketTool\CommandHead.cs" />
