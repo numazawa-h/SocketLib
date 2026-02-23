@@ -1,0 +1,5 @@
+{
+  "Commands":[
+    { "id":"初期化", "cmd":"send", "dtype":"01" },
+  ]
+}

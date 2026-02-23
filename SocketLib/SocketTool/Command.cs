@@ -250,6 +250,16 @@ namespace SocketTool
                         cmd = new CommandSend(node);
                     }
                     break;
+                case "timer":
+                    if (node.ContainsKey("select"))
+                    {
+                        cmd = new CommandTimerConditional(node, cmdid);
+                    }
+                    else
+                    {
+                        cmd = new CommandTimer(node);
+                    }
+                    break;
                 default:
                     throw new Exception($"Commandsの'{cmdid}'でcmd指定('{cmdtype}')が不正です");
             }

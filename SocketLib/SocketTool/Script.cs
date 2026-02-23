@@ -33,7 +33,7 @@ namespace NCommonUtility
             else
             {
                 Display = false;
-                Enabled = true;
+                Enabled = false;
             }
             if (def.ContainsKey("scripts"))
             {
@@ -103,6 +103,13 @@ namespace NCommonUtility
                 _socket = null;
             }
         }
+
+        public void Reset(bool enable)
+        {
+            _phase = -1;
+            Enabled = enable;
+        }
+
         private void Exec()
         {
             if (_socket != null && _socket.isOpen == false)

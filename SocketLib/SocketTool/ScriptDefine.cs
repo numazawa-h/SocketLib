@@ -209,6 +209,19 @@ namespace SocketTool
                     throw new InvalidOperationException($"Scriptsで読み込みエラー({def.PropertyNames}) in {path}", ex);
                 }
             }
+
+            // CommandTimerから呼び出すScriptをScript定義読み込み後に設定する
+            foreach (var pair in _comands)
+            {
+                if(pair.Value is CommandTimer)
+                {
+                    (pair.Value as CommandTimer).SetTimerScript();
+                }
+                if (pair.Value is CommandTimerConditional)
+                {
+                    (pair.Value as CommandTimerConditional).SetTimerScript();
+                }
+            }
         }
 
         /// <summary>
@@ -218,6 +231,11 @@ namespace SocketTool
         public ScriptList[] GetScriptListOnDisplay()
         {
             return _script_list_on_display.ToArray();
+        }
+
+        public ScriptTimer GetScriptTimer(string name)
+        {
+            return _script_timer[name];
         }
 
         public (string desc, IPEndPoint epoint, HashSet<string>)[] GetLocalAddr()
