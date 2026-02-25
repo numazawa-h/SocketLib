@@ -39,7 +39,7 @@ namespace SocketTool
                         {
                             _caselist.Add(case2);
                             node2.AddValue("id", node2._name);      // Commandクラスが'id'必須なので追加しておく
-                            _commands.Add(new CommandTimer(node1));
+                            _commands.Add(new CommandTimer(node2));
                         }
                         else
                         {
@@ -50,7 +50,7 @@ namespace SocketTool
                                 {
                                     _caselist.Add(case3);
                                     node3.AddValue("id", node3._name);      // Commandクラスが'id'必須なので追加しておく
-                                    _commands.Add(new CommandTimer(node1));
+                                    _commands.Add(new CommandTimer(node3));
                                 }
                                 else
                                 {
