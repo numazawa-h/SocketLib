@@ -71,17 +71,19 @@ namespace NCommonUtility
     {
         private int _dueTime;
         private int _period;
-        private int _phaseMax;
-        private int _phase =-1;
+        private int _phaseCnt;
+        private int _repeatCnt;
+        private int _phase = 0;
+        private int _repeat = 0;
         private Timer _timer = null;
         CommSocket _socket = null;
 
         public ScriptTimer(Node def, Dictionary<string, Command> comands): base(def, comands)
         {
-            _dueTime = (int?)def["start"] is int v? v:0;
+            _dueTime = (int?)def["start"] is int v1? v1:0;
             _period = def["interval"].Required();
-            int phaseCnt = (int?)def["phaseCnt"] is int p ? p : 0;
-            _phaseMax = (phaseCnt > 0) ? phaseCnt - 1 : 0;
+            _phaseCnt = (int?)def["phaseCnt"] is int v2 ? v2: 0;
+            _repeatCnt = (int?)def["repeatCnt"] is int v3 ? v3 : 0;
         }
 
         public void Start(CommSocket socket)
@@ -89,7 +91,8 @@ namespace NCommonUtility
             lock (this)
             {
                 Stop();
-                _phase = -1;
+                _phase = 0;
+                _repeat = 0;
                 _socket = socket;
                 _timer = new Timer(new TimerCallback(TimerTask), this, _dueTime, _period);
             }
@@ -107,7 +110,8 @@ namespace NCommonUtility
 
         public void Reset(bool enable)
         {
-            _phase = -1;
+            _phase = 0;
+            _repeat = 0;
             Enabled = enable;
         }
 
@@ -121,14 +125,9 @@ namespace NCommonUtility
             {
                 return;
             }
-
-            if (_phase < _phaseMax)
+            if (_repeatCnt > 0 && _repeat >= _repeatCnt)
             {
-                ++_phase;
-            }
-            else
-            {
-                _phase = 0;
+                return;
             }
 
             foreach (var script in _scripts)
@@ -136,6 +135,19 @@ namespace NCommonUtility
                 if (script.OnPhase(_phase))
                 {
                     script.Exec(_socket);
+                }
+            }
+
+            if (_phase < _phaseCnt)
+            {
+                ++_phase;
+                if (_phase == _phaseCnt)
+                {
+                    _phase = 0;
+                    if (_repeatCnt > 0)
+                    {
+                        ++_repeat;
+                    }
                 }
             }
         }

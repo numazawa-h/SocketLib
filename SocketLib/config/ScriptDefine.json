@@ -135,10 +135,10 @@
         	{ "phase":[2,4, {"<":3}, {">=":10, "<":15}, {">":20 }],"msg":"control", "cmd":["set-control2", "send-control", ] },
     	]
     },
-    { "id":"timer-ack", "when":"timer", "start":0, "interval":1000, 
+    { "id":"timer-ack", "when":"timer", "start":0, "interval":1000, "repeatCnt":1,
     	"phaseCnt":10,"scripts":[
         	{ "phase":{"<":9,}, "cmd":["send-ack", ] },
-        	{ "phase":[9], "cmd":["send-nak", "timer-ack-stop", ] },
+        	{ "phase":[9], "cmd":["send-nak",  ] },
     	]
     },
     { "id":"auto-response", "checked":true, "when":"recv", "scripts":[
