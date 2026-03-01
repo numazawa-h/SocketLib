@@ -34,7 +34,14 @@ namespace NCommonUtility
             else
             {
                 Display = false;
-                Enabled = false;
+                if(When == "timer")
+                {
+                    Enabled = false;
+                }
+                else
+                {
+                    Enabled = true;
+                }
             }
             if (def.ContainsKey("scripts"))
             {
