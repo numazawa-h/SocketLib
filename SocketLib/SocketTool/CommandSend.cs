@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -63,7 +64,22 @@ namespace SocketTool
 
             if (File.Exists(path))
             {
-                return new CommMessage(dtype, File.ReadAllBytes(path));
+                CommMessage msg = null;
+                string file_ext = Path.GetExtension(path);
+                if (file_ext == ".txt")
+                {
+                    msg = CommMessage.LoadFileText(path);
+                }
+                else if (file_ext == ".bin")
+                {
+                    msg = CommMessage.LoadFileBinary(path);
+                }
+                else
+                {
+                    throw new Exception($" tmpl('{tmpl}') に指定できるのは、*.txt か *.bin だけです");
+                }
+
+                return msg;
             }
             else
             {
