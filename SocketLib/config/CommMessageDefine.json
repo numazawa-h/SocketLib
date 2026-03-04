@@ -34,9 +34,11 @@
 				{ "id":"cmd", "ofs": 1, "len":1, },
 			  ],
 			},
-			// control-typeが"0002"の時
+			// control-typeが"0002"の時→ofsを同じにすることで同一領域に複数定義できる
 			{ "block":"type02", "ofs":2, "flds":[
 				{ "id":"cmd", "ofs": 1, "len":1, },
+				{ "id":"param1", "ofs": 2, "len":1, },
+				{ "id":"param2", "ofs": 3, "len":1, },
 			  ],
 			},
 		  ],
@@ -62,7 +64,7 @@
 					{ "id":"sts_2", "name":"L##0S#1", "ofs":1, "len":1, "dispname":true},
 				  ]
 				},
-				{ "block":"b", "ofs":30, "len":20, "rep":5, "flds":[
+				{ "block":"b", "ofs":40, "len":50, "rep":5, "flds":[
 					{ "id":"sts_01", "ofs":0, "len":1, "disp":true},
 					{ "id":"sts_02", "ofs":1, "len":1, "disp":true},
 					{ "id":"sts_03", "ofs":2, "len":1, "disp":true},
@@ -72,7 +74,7 @@
 					{ "id":"sts_07", "ofs":6, "len":1, "disp":true},
 					{ "id":"sts_08", "ofs":7, "len":1, "disp":true},
 					{ "id":"sts_09", "ofs":8, "len":1, "disp":true},
-					{ "block":"b1", "ofs":50, "len":20, "rep":5, "flds":[
+					{ "block":"b1", "ofs":10, "len":20, "rep":5, "flds":[
 						{ "id":"sts_01", "ofs":0, "len":1, "disp":true},
 						{ "id":"sts_02", "ofs":1, "len":1, "disp":true},
 						{ "id":"sts_03", "ofs":2, "len":1, "disp":true},
@@ -95,7 +97,7 @@
 						{ "id":"sts_20", "ofs":19, "len":1, "disp":true},
 					  ]
 					},
-					{ "block":"b2", "ofs":70, "len":20, "rep":5, "flds":[
+					{ "block":"b2", "ofs":30, "len":20, "rep":5, "flds":[
 						{ "id":"sts_01", "ofs":0, "len":1, "disp":true},
 						{ "id":"sts_02", "ofs":1, "len":1, "disp":true},
 						{ "id":"sts_03", "ofs":2, "len":1, "disp":true},
@@ -120,7 +122,7 @@
 					},
 				  ]
 				},
-				{ "block":"c", "ofs":150, "len":20, "rep":5, "flds":[
+				{ "block":"c", "ofs":300, "len":20, "rep":5, "flds":[
 					{ "id":"sts_01", "ofs":0, "len":1, "disp":true},
 					{ "id":"sts_02", "ofs":1, "len":1, "disp":true},
 					{ "id":"sts_03", "ofs":2, "len":1, "disp":true},
@@ -153,7 +155,7 @@
 		{ "id":"send-id", "name":"送信ID", "format":{ "type":"int", "fmt":"#{0}" } },
 		{ "id":"b01", "name":"状態b1", "values":{"01":"開始", "02":"一時停止", "03":"終了", "00":"", },"default":"01" },
 		{ "id":"b02", "name":"状態b2", "values":{"00":"aa", "01":"bb", "02":"cc",}, "default":"02" },
-		{ "id":"sts", "name":"状態", "values":{"00":"正常", "01":"異常",  "notdisp":"00"} },
+		{ "id":"sts", "name":"状態", "values":{"00":"正常", "01":"異常", "09":"注意",  "notdisp":"00"} },
 		{ "id":"control-type", "name":"制御種類", "values":{"0001":"開始", "0002":"一時停止", "0003":"終了" } },
 		{ "id":"reson-nak", "name":"否定理由", "values":{"0001":"シーケンスエラー", "3132":"その他" } },
 		{ "id":"carno", "name":"車両番号", "format":{ "type":"int", "fmt":"#{0:D}" , "minvalue":1 } },	// 車両番号が0なら表示しない

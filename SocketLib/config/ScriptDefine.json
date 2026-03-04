@@ -15,7 +15,7 @@
   "Working-area":{	
     "++seqno":123,
     "status":{"name":"状態送信電文", "dtype":"14", "values":{
-    	"blk[0].b02_3":3,
+    	"blk[0].b02_3":0,
     }},
     "control":{"dtype":"30",},
 
@@ -81,7 +81,7 @@
     { "id":"send-status", "cmd":"send", "msg":"status" },
     { "id":"set-status", "cmd":"set", "msg":"status", "select":[
 	    	{ "case":{ "control-type":1,  }, "select":[
-	    		{ "case":{ "type01.cmd":"99" }, 
+	    		{ "case":{ "type01.cmd":9 }, 
 					 "var":{ "#0":"type01.idx" }, // "var"を使うと任意の項目の値を変数にセットできる。"#"は数値項目を表す（数値項目以外は未対応）
 					 		"msgcopy":{ 
 					 			"sts003":"control-type", 
