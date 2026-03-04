@@ -38,13 +38,20 @@ namespace SocketTool
         {
             foreach (var pair in _values)
             {
+                CommMessage msg = resmsg;
                 string key = pair.Key;
                 JsonValue val = pair.Value;
-                if (resmsg.ContainsFldKey(key) == false)
+                if (key.Contains(":"))
+                {
+                    string[] strings = key.Split(':');
+                    key = strings[1];
+                    msg = ScriptDefine.GetInstance().GetValueMsg(strings[0]);
+                }
+                if (msg.ContainsFldKey(key) == false)
                 {
                     return false;
                 }
-                ByteArray fldval = resmsg.GetFldValue(key);
+                ByteArray fldval = msg.GetFldValue(key);
                 switch (val.GetValueKind())
                 {
                     case System.Text.Json.JsonValueKind.Number:
@@ -65,13 +72,20 @@ namespace SocketTool
             }
             foreach (var pair in _array_values)
             {
+                CommMessage msg = resmsg;
                 string key = pair.Key;
                 JsonValue[] vals = pair.Value;
-                if (resmsg.ContainsFldKey(key) == false)
+                if (key.Contains(":"))
+                {
+                    string[] strings = key.Split(':');
+                    key = strings[1];
+                    msg = ScriptDefine.GetInstance().GetValueMsg(strings[0]);
+                }
+                if (msg.ContainsFldKey(key) == false)
                 {
                     return false;
                 }
-                ByteArray fldval = resmsg.GetFldValue(key);
+                ByteArray fldval = msg.GetFldValue(key);
                 bool or = false;
                 foreach (JsonValue val in vals)
                 {

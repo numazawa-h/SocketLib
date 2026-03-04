@@ -111,6 +111,14 @@
 				 	}],
 			 	}],
 		 	},
+	    	{ "case":{ "control-type":3,  }, 
+	    		"select":[
+			    	{ "case":{ "status:sts001":0 }, "values":{ "blk[1].b02_2":7 }},
+			    	{ "case":{ "status:sts001":1 }, "values":{ "blk[1].b02_2":8 }},
+			    	{ "case":{ "status:sts001":2 }, "values":{ "blk[1].b02_2":9 }},
+			    	{ "case":{ "status:sts001":[3,4]} , "values":{ "blk[1].b02_1":0, "blk[1].b02_2":1, "blk[1].b02_3":2 }},
+				  ]
+		 	},
 	    	{ "case":{ }, // 無条件実行
 	    			"msgcopy":{ "sts003":"control-type" },
 	    	}

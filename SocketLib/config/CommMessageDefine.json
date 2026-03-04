@@ -44,6 +44,11 @@
 				{ "id":"param5", "ofs": 6, "len":1, },
 			  ],
 			},
+			// control-typeが"0003"の時
+			{ "block":"type03", "ofs":2, "flds":[
+				{ "id":"cmd", "ofs": 1, "len":1, },
+			  ],
+			},
 		  ],
 		},
 		{ "id":"14", "name":"状態", "len":  640,"flds":[
@@ -157,7 +162,7 @@
 		{ "id":"hdatm", "name":"ヘッダ日時", "format":{ "type":"datetime", "valfmt":"yyyyMMddHHmmss", "fmt":"yyyy/MM/dd-HH:mm:ss" } },
 		{ "id":"send-id", "name":"送信ID", "format":{ "type":"int", "fmt":"#{0}" } },
 		{ "id":"b01", "name":"状態b1", "values":{"01":"開始", "02":"一時停止", "03":"終了", "00":"", },"default":"01" },
-		{ "id":"b02", "name":"状態b2", "values":{"00":"aa", "01":"bb", "02":"cc", "07":"YY", "08":"XX", "09":"ZZ", }, "default":"02" },
+		{ "id":"b02", "name":"状態b2", "values":{"00":"aa", "01":"bb", "02":"cc", "07":"XX", "08":"YY", "09":"ZZ", }, "default":"02" },
 		{ "id":"sts", "name":"状態", "values":{"00":"正常", "01":"異常", "09":"注意",  "notdisp":"00"} },
 		{ "id":"control-type", "name":"制御種類", "values":{"0001":"開始", "0002":"一時停止", "0003":"終了" } },
 		{ "id":"reson-nak", "name":"否定理由", "values":{"0001":"シーケンスエラー", "3132":"その他" } },
