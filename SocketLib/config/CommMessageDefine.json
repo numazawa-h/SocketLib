@@ -45,13 +45,19 @@
 			{ "id":"sts001", "ofs": 0, "len":1, },
 			{ "id":"sts002", "ofs": 1, "len":1, },
 			{ "id":"sts003", "ofs": 2, "len":2, },
-			// "##0"はレベル0(ここでは"blk")のblockインデックスに１を加算した数値になる
+
+			// #n, ##n は、blockのインデックスを文字列として埋め込むために使用する(n はblock の階層レベル)
+			// #nはインデックス(0 始まり)、##nはインデックスに１を加算した数値になる
+			// 例えば以下において "##0"は階層レベル0である"blk"のインデックスに１を加算した数値、"#1"は階層レベル1である"a"のインデックスになる
+			//
+			//   "車線[##0]"  →"車線[1]","車線[2]"
 			{ "block":"blk", "name":"車線[##0]","ofs": 8, "len":16, "rep":2, "flds":[
 				{ "id":"b01", "ofs":0, "len":1, "disp":true, "dispname":true},
 				{ "id":"b02_1", "ofs":1, "len":1, "disp":true, "default":"01"},
 				{ "id":"b02_2", "ofs":2, "len":1, "disp":true,},
 				{ "id":"b02_3", "ofs":3, "len":1, "disp":true,},
 				{ "block":"a", "name":"a[#1]", "ofs":5, "len":5, "rep":5, "flds":[
+					// "L##0S#1"  →"L1S0", "L1S1", "L1S2", "L1S3", "L1S4", "L2S0", "L2S1", "L2S2", "L2S3", "L2S4", 
 					{ "id":"sts_1", "name":"L##0S#1", "ofs":0, "len":1, "disp":true, "dispname":true},
 					{ "id":"sts_2", "name":"L##0S#1", "ofs":1, "len":1, "dispname":true},
 				  ]
