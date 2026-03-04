@@ -61,9 +61,35 @@ namespace SocketTool
                                 }
                                 else
                                 {
-                                    throw new Exception($"selectのネストは３階層までです({id})");
+                                    foreach (Node node4 in node3["select"])
+                                    {
+                                        var case4 = new CaseList(node4).Add(case3);
+                                        if (node4.ContainsKey("select") == false)
+                                        {
+                                            _caselist.Add(case4);
+                                            node4.AddValue("id", node4._name);      // Commandクラスが'id'必須なので追加しておく
+                                            _commands.Add(new CommandSetWorkingMsg(node4, _msgname));
+                                        }
+                                        else
+                                        {
+                                            foreach (Node node5 in node4["select"])
+                                            {
+                                                var case5 = new CaseList(node5).Add(case4);
+                                                if (node5.ContainsKey("select") == false)
+                                                {
+                                                    _caselist.Add(case5);
+                                                    node5.AddValue("id", node5._name);      // Commandクラスが'id'必須なので追加しておく
+                                                    _commands.Add(new CommandSetWorkingMsg(node5, _msgname));
+                                                }
+                                                else
+                                                {
+                                                    throw new Exception($"select-caseのネストは5階層までです({id})");
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
-                            }
+                            } 
                         }
                     }
                 }

@@ -98,7 +98,19 @@
 //				}
 			  ]
 	    	},
-	    	{ "case":{ "control-type":2 }, "msgcopy":{ "sts002":"type02.cmd" }},
+	    	{ "case":{ "control-type":2,  }, 
+	    		"select":[{"case":{ "type02.param1":10 }, 
+		    		"select":[{"case":{ "type02.param2":11 }, 
+			    		"select":[{"case":{ "type02.param3":12 }, 
+	    					"select":[{"case":{ "type02.param4":13 }, 
+		    					//"select":[{"case":{ "type02.param5":14 },  // select-caseは5階層までしか定義できない
+							 		"values":{ "blk[0].b02_1":8, },
+							 	//}],
+						 	}],
+					 	}],
+				 	}],
+			 	}],
+		 	},
 	    	{ "case":{ }, // 無条件実行
 	    			"msgcopy":{ "sts003":"control-type" },
 	    	}
