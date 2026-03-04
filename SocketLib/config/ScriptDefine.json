@@ -82,17 +82,18 @@
     { "id":"set-status", "cmd":"set", "msg":"status", "select":[
 	    	{ "case":{ "control-type":1,  }, "select":[
 	    		{ "case":{ "type01.cmd":"99" }, 
-					 "var":{ "#0":"type01.idx" }, 
+					 "var":{ "#0":"type01.idx" }, // "var"を使うと任意の項目の値を変数にセットできる。"#"は数値項目を表す（数値項目以外は未対応）
 					 		"msgcopy":{ 
 					 			"sts003":"control-type", 
 					         	"blk[0].a[#0].sts_1":"type01.cmd", },
 							"values":{
 					         	"blk[1].a[#0].sts_1":9,}
 				},
+				// 上記のselect-caseは、以下のコメントアウトしたselectt-caseと同じ動作になる
 //	    		"select":[
-//			    	{ "case":{ "type01.idx":0 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[0].sts":"a0" }},
-//			    	{ "case":{ "type01.idx":1 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[1].sts":"a1" }},
-//			    	{ "case":{ "type01.idx":2 }, "msgcopy":{ "sts001":"type01.cmd" }, "values":{ "blk[0].a[2].sts":"a2" }},
+//			    	{ "case":{ "type01.idx":0 }, "msgcopy":{ "sts003":"control-type", "blk[0].a[0].sts_1":"type01.cmd" }, "values":{ "blk[1].a[0].sts_1":9 }},
+//			    	{ "case":{ "type01.idx":1 }, "msgcopy":{ "sts003":"control-type", "blk[0].a[1].sts_1":"type01.cmd" }, "values":{ "blk[1].a[1].sts_1":9 }},
+//			    	{ "case":{ "type01.idx":2 }, "msgcopy":{ "sts003":"control-type", "blk[0].a[2].sts_1":"type01.cmd" }, "values":{ "blk[1].a[2].sts_1":9 }},
 //				  ]
 //				}
 			  ]
