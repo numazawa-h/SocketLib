@@ -1,0 +1,32 @@
+﻿{
+  "listen_addr": [
+    {
+      "desc": "サーバー1",
+      "ip": "localhost",
+      "port": 901,
+      "remote-ip": "localhost",
+      "remote-port": 801,
+    },
+    {
+      "desc": "サーバー2",
+      "ip": "localhost",
+      "port": 902,
+    },
+  ],
+  "connect_addr": [
+    {
+      "desc": "クライアント1",
+      "ip": "localhost",
+      "port": 901,
+      "local-ip": "localhost",
+      "local-port": 801,
+    },
+    {
+      "desc": "クライアント2",
+      "ip": "localhost",
+      "port": 902,
+      "local-ip": "localhost",
+      "local-port": 802,
+    },
+  ]
+}

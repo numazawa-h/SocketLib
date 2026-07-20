@@ -89,6 +89,7 @@
     <Compile Include="SocketTool\CommandSetWorkingMsgConditional.cs" />
     <Compile Include="SocketTool\CommandTimer.cs" />
     <Compile Include="SocketTool\CommandTimerConditional.cs" />
+    <Compile Include="SocketTool\NetworkDefine.cs" />
     <Compile Include="SocketTool\Script.cs" />
     <Compile Include="SocketTool\Command.cs" />
     <Compile Include="SocketTool\CommandHead.cs" />
@@ -136,6 +137,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="config\CommMessageDefine.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="config\NetworkDefine.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="config\ScriptDefine.json">
