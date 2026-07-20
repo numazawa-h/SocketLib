@@ -15,14 +15,14 @@ using static NCommonUtility.JsonConfig;
 
 namespace NCommonUtility
 {
-    public class ScriptList
+    public class ScriptGroup
     {
         public string ID { get; protected set; }
         public string When { get; protected set; }
         public bool Display { get; protected set; }
         public bool Enabled = false;
         protected List<Script> _scripts = new List<Script>();
-        public ScriptList(Node def, Dictionary<string, Command> comands)
+        public ScriptGroup(Node def, Dictionary<string, Command> comands)
         {
             ID = def["id"].Required();
             When = def["when"].Required();
@@ -74,7 +74,7 @@ namespace NCommonUtility
         }
     }
 
-    public class ScriptTimer : ScriptList
+    public class ScriptGroupOnTimer : ScriptGroup
     {
         private int _dueTime;
         private int _period;
@@ -85,7 +85,7 @@ namespace NCommonUtility
         private Timer _timer = null;
         CommSocket _socket = null;
 
-        public ScriptTimer(Node def, Dictionary<string, Command> comands): base(def, comands)
+        public ScriptGroupOnTimer(Node def, Dictionary<string, Command> comands): base(def, comands)
         {
             _dueTime = (int?)def["start"] is int v1? v1:0;
             _period = def["interval"].Required();
@@ -161,13 +161,13 @@ namespace NCommonUtility
 
         private static void TimerTask(object obj)
         {
-            (obj as ScriptTimer).Exec();
+            (obj as ScriptGroupOnTimer).Exec();
         }
     }
 
     public class Script
     {
-        ScriptList _owner;
+        ScriptGroup _owner;
         protected HashSet<string> _dtypes = new HashSet<string>();
         protected HashSet<string> _without = new HashSet<string>();
         protected HashSet<int> _phase = new HashSet<int>();
@@ -176,7 +176,7 @@ namespace NCommonUtility
         protected CommMessage _msg = null;
         protected List<Command> _commands = new List<Command>();
 
-        public Script(Node def, Dictionary<string, Command> comands, ScriptList owner)
+        public Script(Node def, Dictionary<string, Command> comands, ScriptGroup owner)
         {
             _dtypes = def.GetStringValues("dtype");
             _without = def.GetStringValues("without");

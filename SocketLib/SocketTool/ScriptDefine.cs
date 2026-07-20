@@ -44,11 +44,11 @@ namespace SocketTool
         protected Dictionary<string, CommMessage> _commMessagesInit = new Dictionary<string, CommMessage>();
         protected Dictionary<string, string> _commMessagesDisp = new Dictionary<string, string>();
         protected Dictionary<string, Command> _comands = new Dictionary<string, Command>();
-        protected Dictionary<string, ScriptList> _script_connect = new Dictionary<string, ScriptList>();
-        protected Dictionary<string, ScriptList> _script_send = new Dictionary<string, ScriptList>();
-        protected Dictionary<string, ScriptList> _script_recv = new Dictionary<string, ScriptList>();
-        protected Dictionary<string, ScriptTimer> _script_timer = new Dictionary<string, ScriptTimer>();
-        protected List<ScriptList> _script_list_on_display = new List<ScriptList>();
+        protected Dictionary<string, ScriptGroup> _script_connect = new Dictionary<string, ScriptGroup>();
+        protected Dictionary<string, ScriptGroup> _script_send = new Dictionary<string, ScriptGroup>();
+        protected Dictionary<string, ScriptGroup> _script_recv = new Dictionary<string, ScriptGroup>();
+        protected Dictionary<string, ScriptGroupOnTimer> _script_timer = new Dictionary<string, ScriptGroupOnTimer>();
+        protected List<ScriptGroup> _script_list_on_display = new List<ScriptGroup>();
 
         public void ReadJson(string path)
         {
@@ -136,27 +136,27 @@ namespace SocketTool
                 try
                 {
                     string scrid = def["id"].Required();
-                    ScriptList script = null;
+                    ScriptGroup script = null;
                     switch ((string)def["when"].Required())
                     {
                         case "send":
-                            script = new ScriptList(def, _comands);
+                            script = new ScriptGroup(def, _comands);
                             _script_send.Add(scrid, script);
                             break;
                         case "connect":
-                            script = new ScriptList(def, _comands);
+                            script = new ScriptGroup(def, _comands);
                             _script_connect.Add(scrid, script);
                             break;
                         case "recv":
-                            script = new ScriptList(def, _comands);
+                            script = new ScriptGroup(def, _comands);
                             _script_recv.Add(scrid, script);
                             break;
                         case "timer":
-                            script = new ScriptTimer(def, _comands);
-                            _script_timer.Add(scrid, (ScriptTimer)script);
+                            script = new ScriptGroupOnTimer(def, _comands);
+                            _script_timer.Add(scrid, (ScriptGroupOnTimer)script);
                             break;
                         case "disp":
-                            script = new ScriptList(def, _comands);
+                            script = new ScriptGroup(def, _comands);
                             break;
                     }
                     if(script !=null && script.Display == true)
@@ -188,12 +188,12 @@ namespace SocketTool
         /// 画面に表示するスクリプト一覧を取得
         /// </summary>
         /// <returns></returns>
-        public ScriptList[] GetScriptListOnDisplay()
+        public ScriptGroup[] GetScriptListOnDisplay()
         {
             return _script_list_on_display.ToArray();
         }
 
-        public ScriptTimer GetScriptTimer(string name)
+        public ScriptGroupOnTimer GetScriptTimer(string name)
         {
             return _script_timer[name];
         }
@@ -280,13 +280,13 @@ namespace SocketTool
             foreach (var pair in _script_timer)
             {
                 string key = pair.Key;
-                ScriptTimer script = pair.Value;
+                ScriptGroupOnTimer script = pair.Value;
                 script.Start(socket);
             }
             foreach (var pair in _script_connect)
             {
                 string key = pair.Key;
-                ScriptList script = pair.Value;
+                ScriptGroup script = pair.Value;
                 script.Exec(socket);
             }
         }
@@ -295,7 +295,7 @@ namespace SocketTool
             foreach (var pair in _script_timer)
             {
                 string key = pair.Key;
-                ScriptTimer script = pair.Value;
+                ScriptGroupOnTimer script = pair.Value;
                 script.Stop();
             }
         }
@@ -305,7 +305,7 @@ namespace SocketTool
             foreach ( var pair in _script_send)
             {
                 string key = pair.Key;
-                ScriptList script = pair.Value;
+                ScriptGroup script = pair.Value;
                 script.Exec(socket, msg);
             }
         }
@@ -314,7 +314,7 @@ namespace SocketTool
             foreach (var pair in _script_recv)
             {
                 string key = pair.Key;
-                ScriptList script = pair.Value;
+                ScriptGroup script = pair.Value;
                 script.Exec(socket, msg);
             }
         }

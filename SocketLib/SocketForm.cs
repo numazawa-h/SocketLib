@@ -70,7 +70,7 @@ namespace SampleMain
             // 電文表示指定チェックボックスセットアップ
             int cmdidx =0;
             int dispidx = 8;
-            foreach (ScriptList script in ScriptDefine.GetInstance().GetScriptListOnDisplay())
+            foreach (ScriptGroup script in ScriptDefine.GetInstance().GetScriptListOnDisplay())
             {
                 if (script.Display)
                 {
@@ -221,7 +221,7 @@ namespace SampleMain
             for (int i = 8; i < 12; i++)
             {
                 CheckBox cb = this._checkBoxes[i];
-                ScriptList scr = (ScriptList)cb.Tag;
+                ScriptGroup scr = (ScriptGroup)cb.Tag;
                 if(scr!=null && scr.Exec(_Socket, msg) == true)
                 {
                     return cb.Checked;
@@ -259,7 +259,7 @@ namespace SampleMain
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox cb =(CheckBox)sender;
-            ((ScriptList)cb.Tag).Enabled = cb.Checked;
+            ((ScriptGroup)cb.Tag).Enabled = cb.Checked;
         }
 
 
