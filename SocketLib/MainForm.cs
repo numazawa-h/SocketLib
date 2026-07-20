@@ -49,8 +49,20 @@ namespace SampleMain
         {
             string iaddr1 = txt_ipAddr1.Text.Trim();
             string portno1 = txt_portNo1.Text.Trim();
+            if (iaddr1.Length == 0)
+            {
+                OnException(this, new ThreadExceptionEventArgs(new Exception("Local ipアドレスが指定されていません。")));
+                return;
+            }
             DisplayLog($"listen [{iaddr1} Port#{portno1}]");
-            listensocket.Listen(iaddr1, portno1);
+            try
+            {
+                listensocket.Listen(iaddr1, portno1);
+            }
+            catch (Exception ex)
+            {
+                OnException(this, new ThreadExceptionEventArgs(new Exception("Remote ipアドレスの指定が不正です。", ex)));
+            }
         }
         private void btn_stopListen_Click(object sender, EventArgs e)
         {
@@ -89,7 +101,22 @@ namespace SampleMain
             }
             string iaddr2 = txt_ipAddr2.Text.Trim();
             string portno2 = txt_portNo2.Text.Trim();
-            socket.Connect(iaddr2, portno2);
+            if (iaddr2.Length == 0)
+            {
+                OnException(this, new ThreadExceptionEventArgs(new Exception("Remote ipアドレスが指定されていません。")));
+                socket.Close();
+                return;
+            }
+            try
+            {
+                socket.Connect(iaddr2, portno2);
+            }
+            catch (Exception ex)
+            {
+                OnException(this, new ThreadExceptionEventArgs(new Exception("Remote ipアドレスの指定が不正です。", ex)));
+                socket.Close();
+                return;
+            }
         }
 
 
