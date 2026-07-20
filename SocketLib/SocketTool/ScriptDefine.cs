@@ -49,12 +49,6 @@ namespace SocketTool
         protected Dictionary<string, ScriptList> _script_recv = new Dictionary<string, ScriptList>();
         protected Dictionary<string, ScriptTimer> _script_timer = new Dictionary<string, ScriptTimer>();
         protected List<ScriptList> _script_list_on_display = new List<ScriptList>();
-        protected List<(string desc, IPEndPoint epoint, HashSet<string> remote)> _local_addr = new List<(string, IPEndPoint, HashSet<string>)>();
-        protected List<(string desc, IPEndPoint epoint)> _remote_addr = new List<(string, IPEndPoint)>();
-
-        protected Dictionary<string,CommandSet> _local_set = new Dictionary<string, CommandSet>();
-        protected Dictionary<string, CommandSet> _remote_set = new Dictionary<string, CommandSet>();
-
 
         public void ReadJson(string path)
         {
@@ -116,40 +110,6 @@ namespace SocketTool
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException($"ScriptDefineのvalues('{id}')で読み込みエラー in {path}", ex);
-                }
-            }
-
-            _local_addr.Clear();
-            _remote_addr.Clear();
-            foreach (Node node in root["Working-area"].GetPropertyArrayObjects())
-            {
-                string name = node._name.Split('[')[0];
-                try
-                {
-                    string desc = node["desc"].Required();
-                    string iaddr = node["ip"].Required();
-                    int portno = node["port"].Required();
-                    IPEndPoint endPoint = NSocket.GetIPEndPoint(iaddr, portno);
-                    HashSet<string> remote = node.GetStringValues("remote");
-                    switch (name)
-                    {
-                        case "local_addr":
-                            _local_addr.Add((desc, endPoint,remote));
-                            node.AddValue("id", desc);      // Commandクラスが'id'必須なので追加しておく
-                            _local_set.Add(desc, new CommandSet(node));
-                            break;
-                        case "remote_addr":
-                            _remote_addr.Add((desc, endPoint));
-                            node.AddValue("id", desc);      // Commandクラスが'id'必須なので追加しておく
-                            _remote_set.Add(desc, new CommandSet(node));
-                            break;
-                        default:
-                            throw new Exception($"配列項目で指定できるのは'local_addr'と'remote_addr'だけです");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"ScriptDefineのvalues('{name}')で読み込みエラー in {path}", ex);
                 }
             }
 
@@ -236,24 +196,6 @@ namespace SocketTool
         public ScriptTimer GetScriptTimer(string name)
         {
             return _script_timer[name];
-        }
-
-        public (string desc, IPEndPoint epoint, HashSet<string>)[] GetLocalAddr()
-        {
-            return _local_addr.ToArray();
-        }
-        public (string desc, IPEndPoint epoint)[] GetRemoteAddr()
-        {
-            return _remote_addr.ToArray();
-        }
-
-        public void OnSelectLocal(string desc)
-        {
-            _local_set[desc].Exec(null);
-        }
-        public void OnSelectRemote(string desc)
-        {
-            _remote_set[desc].Exec(null);
         }
 
         public string[] GetValueMsgKeyList()
