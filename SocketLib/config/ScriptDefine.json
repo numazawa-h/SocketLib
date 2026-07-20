@@ -10,8 +10,6 @@
   //   値にオブジェクトを指定する時は'dtype'が必須になる
   //   値にオブジェクトを指定する時は'dtype'の電文が「CommMessageDefine.config」に定義されていなければならない
   //   値にオブジェクトを指定する時はvaluesで初期値を指定できる
-  //   local_addrとremote_addrは特殊な項目で、メイン画面の装置選択コンボボックスの内容を指定する
-  //   local_addrとremote_addrには選択された時に実行する変数setをvalues定義できる
   "Working-area":{	
     "++seqno":123,
     "status":{"name":"状態送信電文", "dtype":"14", "values":{
