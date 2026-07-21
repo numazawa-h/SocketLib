@@ -39,7 +39,7 @@ namespace SocketTool
         public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
             ScriptDefine scdef = ScriptDefine.GetInstance();
-            CommMessage msg = scdef.GetValueMsg(_msgname);
+            CommMessage msg = scdef.Working.GetValueMsg(_msgname);
 
             foreach (var pair in _ivalues)
             {
@@ -66,7 +66,7 @@ namespace SocketTool
                 {
                     key = replaceVar(key, resmsg);
                 }
-                msg.SetFldValue(key, (ulong)scdef.GetIntValue(pair.Value));
+                msg.SetFldValue(key, (ulong)scdef.Working.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
@@ -75,7 +75,7 @@ namespace SocketTool
                 {
                     key = replaceVar(key, resmsg);
                 }
-                msg.SetFldValue(key, scdef.GetByteValue(pair.Value));
+                msg.SetFldValue(key, scdef.Working.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {

@@ -45,7 +45,7 @@ namespace SocketTool
                 {
                     string[] strings = key.Split(':');
                     key = strings[1];
-                    msg = ScriptDefine.GetInstance().GetValueMsg(strings[0]);
+                    msg = ScriptDefine.GetInstance().Working.GetValueMsg(strings[0]);
                 }
                 if (msg.ContainsFldKey(key) == false)
                 {
@@ -79,7 +79,7 @@ namespace SocketTool
                 {
                     string[] strings = key.Split(':');
                     key = strings[1];
-                    msg = ScriptDefine.GetInstance().GetValueMsg(strings[0]);
+                    msg = ScriptDefine.GetInstance().Working.GetValueMsg(strings[0]);
                 }
                 if (msg.ContainsFldKey(key) == false)
                 {

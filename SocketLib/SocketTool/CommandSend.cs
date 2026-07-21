@@ -98,11 +98,11 @@ namespace SocketTool
             ScriptDefine scdef = ScriptDefine.GetInstance();
             foreach (var pair in _ivalues_runtime)
             {
-                msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
+                msg.SetFldValue(pair.Key, (ulong)scdef.Working.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
+                msg.SetFldValue(pair.Key, scdef.Working.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {

@@ -35,14 +35,14 @@ namespace SocketTool
                 switch (value.GetValueKind())
                 {
                     case System.Text.Json.JsonValueKind.Number:
-                        if (scdef.ContainsKeyIntValue(key)==false)
+                        if (scdef.Working.ContainsKeyIntValue(key)==false)
                         {
                             throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
                         }
                         _ivalues.Add(key, value.GetValue<int>());
                         break;
                     case System.Text.Json.JsonValueKind.String:
-                        if (scdef.ContainsKeyByteValue(key) == false)
+                        if (scdef.Working.ContainsKeyByteValue(key) == false)
                         {
                             throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
                         }
@@ -65,11 +65,11 @@ namespace SocketTool
             ScriptDefine scdef = ScriptDefine.GetInstance();
             foreach (var pair in _ivalues)
             {
-                scdef.SetIntValue(pair.Key, pair.Value);
+                scdef.Working.SetIntValue(pair.Key, pair.Value);
             }
             foreach (var pair in _bvalues)
             {
-                scdef.SetByteValue(pair.Key, pair.Value);
+                scdef.Working.SetByteValue(pair.Key, pair.Value);
             }
         }
     }

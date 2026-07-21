@@ -112,11 +112,11 @@ namespace SocketTool
                         {
                             // ScriptDefineの Working-area定義項目の時の処理
                             ScriptDefine scdef = ScriptDefine.GetInstance();
-                            if (scdef.ContainsKeyIntValue(sval))
+                            if (scdef.Working.ContainsKeyIntValue(sval))
                             {
                                 _ivalues_runtime.Add(key, sval);
                             }
-                            else if (scdef.ContainsKeyByteValue(sval))
+                            else if (scdef.Working.ContainsKeyByteValue(sval))
                             {
                                 _bvalues_runtime.Add(key, sval);
                             }

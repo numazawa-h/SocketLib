@@ -32,15 +32,15 @@ namespace SocketTool
         public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
             ScriptDefine scdef = ScriptDefine.GetInstance();
-            CommMessage msg = scdef.GetValueMsg(_name);
+            CommMessage msg = scdef.Working.GetValueMsg(_name);
 
             foreach (var pair in _ivalues_runtime)
             {
-                msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
+                msg.SetFldValue(pair.Key, (ulong)scdef.Working.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
+                msg.SetFldValue(pair.Key, scdef.Working.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {

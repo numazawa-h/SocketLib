@@ -157,7 +157,7 @@ namespace SocketLib
 
         public void InitCommMessage()
         {
-            _commMsg = ScriptDefine.GetInstance().InitMessage(_commMsgName);
+            _commMsg = ScriptDefine.GetInstance().Working.InitMessage(_commMsgName);
             refresh();
         }
 
@@ -675,7 +675,7 @@ namespace SocketLib
                         if (msg.DType != _commMsg.DType){
                             throw new Exception($"データ種別が異なります");
                         }
-                        _commMsg = ScriptDefine.GetInstance().LoadMessage(_commMsgName, msg);
+                        _commMsg = ScriptDefine.GetInstance().Working.LoadMessage(_commMsgName, msg);
                         refresh();
                     }
                 }

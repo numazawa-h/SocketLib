@@ -38,9 +38,9 @@ namespace SampleMain
             InitializeComponent();
 
             ScriptDefine scd = ScriptDefine.GetInstance();
-            if (scd.ContainsKeyIntValue("display_limit"))
+            if (scd.Working.ContainsKeyIntValue("display_limit"))
             {
-                _display_limit = scd.GetIntValue("display_limit");
+                _display_limit = scd.Working.GetIntValue("display_limit");
             }
 
             txt_ipAddr1.Text = socket.LocalIPAddress?.ToString();
@@ -100,10 +100,10 @@ namespace SampleMain
             }
 
             // 電文編集タブのセットアップ
-            foreach ( string id in ScriptDefine.GetInstance().GetValueMsgKeyList())
+            foreach ( string id in ScriptDefine.GetInstance().Working.GetValueMsgKeyList())
             {
-                CommMessage msg= ScriptDefine.GetInstance().GetValueMsg(id);
-                string disp = ScriptDefine.GetInstance().GetValueMsgDisp(id);
+                CommMessage msg= ScriptDefine.GetInstance().Working.GetValueMsg(id);
+                string disp = ScriptDefine.GetInstance().Working.GetValueMsgDisp(id);
                 cbx_MessageType.AddItem(disp, msg);
             }
             _CommMessageEditor= new CommMessageEditor(pnl_commMessage, btn_001, cbx_001, lbl_001, cbx_MessageType.Width - 20, cbx_001.Height + 4);
