@@ -90,6 +90,8 @@ namespace SocketTool
             }
 
             _commMessages.Clear();
+            _commMessagesInit.Clear();
+            _commMessagesDisp.Clear();
             foreach (Node node in root["Working-area"].GetPropertyObjects())
             {
                 string id = node._name;
