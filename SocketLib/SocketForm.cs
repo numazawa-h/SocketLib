@@ -70,7 +70,7 @@ namespace SampleMain
             // 電文表示指定チェックボックスセットアップ
             int cmdidx =0;
             int dispidx = 8;
-            foreach (ScriptGroup script in ScriptDefine.GetInstance().GetScriptListOnDisplay())
+            foreach (ScriptGroup script in ScriptDefine.GetInstance().Scripts.GetScriptListOnDisplay())
             {
                 if (script.Display)
                 {
@@ -162,7 +162,7 @@ namespace SampleMain
                     DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
                 }
                 Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
-                ScriptDefine.GetInstance().ExecOnRecv(_Socket, msg);
+                ScriptDefine.GetInstance().Scripts.ExecOnRecv(_Socket, msg);
                 _CommMessageEditor.refresh();
             }
             catch (Exception ex)
@@ -183,7 +183,7 @@ namespace SampleMain
             CommMessage msg = (args.CommMsg);
             try
             {
-                ScriptDefine.GetInstance().ExecOnSend(_Socket, msg);
+                ScriptDefine.GetInstance().Scripts.ExecOnSend(_Socket, msg);
             }
             catch (Exception ex)
             {
@@ -232,7 +232,7 @@ namespace SampleMain
         private void SocketForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _Socket.Close();
-            ScriptDefine.GetInstance().ExecOnDisconnect();
+            ScriptDefine.GetInstance().Scripts.ExecOnDisconnect();
         }
 
         private void btn_clear_Click(object sender, EventArgs e)
@@ -245,7 +245,7 @@ namespace SampleMain
         {
             try
             {
-                ScriptDefine.GetInstance().ExecOnConnect(_Socket);
+                ScriptDefine.GetInstance().Scripts.ExecOnConnect(_Socket);
             }
             catch (Exception ex)
             {

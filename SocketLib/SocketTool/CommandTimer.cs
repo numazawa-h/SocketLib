@@ -48,10 +48,8 @@ namespace SocketTool
             return cmd;
         }
 
-        public void SetTimerScript()
+        public void SetTimerScript(ScriptGroupDefine scr)
         {
-            ScriptDefine scr = ScriptDefine.GetInstance();
-
             _timer_on.Clear();
             foreach (string name in _timer_on_name)
             {

@@ -99,11 +99,11 @@ namespace SocketTool
             return cmd;
         }
 
-        public void SetTimerScript()
+        public void SetTimerScript(ScriptGroupDefine scr)
         {
             foreach (CommandTimer cmd in _commands)
             {
-                cmd.SetTimerScript();
+                cmd.SetTimerScript(scr);
             }
         }
 
