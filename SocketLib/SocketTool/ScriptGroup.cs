@@ -16,8 +16,10 @@ namespace SocketTool
         public bool Display { get; protected set; }
         public bool Enabled = false;
         protected List<Script> _scripts = new List<Script>();
-        public ScriptGroup(Node def, Dictionary<string, Command> comands)
+        WorkingArea _workarea;
+        public ScriptGroup(Node def, Dictionary<string, Command> comands, WorkingArea workarea)
         {
+            _workarea = workarea;
             ID = def["id"].Required();
             When = def["when"].Required();
             if (def.ContainsKey("checked"))
@@ -50,6 +52,11 @@ namespace SocketTool
             }
         }
 
+        public CommMessage GetValueMsg(string id)
+        {
+            return _workarea.GetValueMsg(id);
+        }
+
         public bool Exec(CommSocket socket, CommMessage msg = null)
         {
             if (When == "disp")
@@ -79,7 +86,7 @@ namespace SocketTool
         private Timer _timer = null;
         CommSocket _socket = null;
 
-        public ScriptGroupOnTimer(Node def, Dictionary<string, Command> comands) : base(def, comands)
+        public ScriptGroupOnTimer(Node def, Dictionary<string, Command> comands, WorkingArea workarea) : base(def, comands, workarea)
         {
             _dueTime = (int?)def["start"] is int v1 ? v1 : 0;
             _period = def["interval"].Required();

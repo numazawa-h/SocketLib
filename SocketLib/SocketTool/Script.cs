@@ -125,7 +125,7 @@ namespace NCommonUtility
             string msgname = def["msg"];
             if (msgname != null)
             {
-                _msg = ScriptDefine.GetInstance().Working.GetValueMsg(msgname);
+                _msg = _owner.GetValueMsg(msgname);
             }
             _owner = owner;
             foreach(string cmdid in def.GetStringValues("cmd"))

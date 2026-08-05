@@ -17,7 +17,7 @@ namespace SocketTool
         protected Dictionary<string, ScriptGroupOnTimer> _script_timer = new Dictionary<string, ScriptGroupOnTimer>();
         protected List<ScriptGroup> _script_list_on_display = new List<ScriptGroup>();
 
-        public void ReadJson(string path, Dictionary<string, Command> comands)
+        public void ReadJson(string path, Dictionary<string, Command> comands, WorkingArea workarea)
         {
             RootNode root = JsonConfig.ReadJson(path);
             _script_connect.Clear();
@@ -34,23 +34,23 @@ namespace SocketTool
                     switch ((string)def["when"].Required())
                     {
                         case "send":
-                            script = new ScriptGroup(def, comands);
+                            script = new ScriptGroup(def, comands, workarea);
                             _script_send.Add(scrid, script);
                             break;
                         case "connect":
-                            script = new ScriptGroup(def, comands);
+                            script = new ScriptGroup(def, comands, workarea);
                             _script_connect.Add(scrid, script);
                             break;
                         case "recv":
-                            script = new ScriptGroup(def, comands);
+                            script = new ScriptGroup(def, comands, workarea);
                             _script_recv.Add(scrid, script);
                             break;
                         case "timer":
-                            script = new ScriptGroupOnTimer(def, comands);
+                            script = new ScriptGroupOnTimer(def, comands, workarea);
                             _script_timer.Add(scrid, (ScriptGroupOnTimer)script);
                             break;
                         case "disp":
-                            script = new ScriptGroup(def, comands);
+                            script = new ScriptGroup(def, comands, workarea);
                             break;
                     }
                     if (script != null && script.Display == true)

@@ -326,7 +326,7 @@ namespace SampleMain
 
         private void Btn_init_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.InitCommMessage();
+            _CommMessageEditor.InitCommMessage(_RuntimeWorkingArea.Working);
         }
 
         private void Btn_send_Click(object sender, EventArgs e)
@@ -341,7 +341,7 @@ namespace SampleMain
 
         private void Btn_load_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.Load();
+            _CommMessageEditor.Load(_RuntimeWorkingArea.Working);
         }
     }
 }

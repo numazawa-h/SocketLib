@@ -34,7 +34,7 @@ namespace SocketTool
             return this;
         }
 
-        public bool isTarget(CommMessage resmsg)
+        public bool isTarget(CommMessage resmsg, WorkingArea workarea)
         {
             foreach (var pair in _values)
             {
@@ -45,7 +45,7 @@ namespace SocketTool
                 {
                     string[] strings = key.Split(':');
                     key = strings[1];
-                    msg = ScriptDefine.GetInstance().Working.GetValueMsg(strings[0]);
+                    msg = workarea.GetValueMsg(strings[0]);
                 }
                 if (msg.ContainsFldKey(key) == false)
                 {
@@ -79,7 +79,7 @@ namespace SocketTool
                 {
                     string[] strings = key.Split(':');
                     key = strings[1];
-                    msg = ScriptDefine.GetInstance().Working.GetValueMsg(strings[0]);
+                    msg = workarea.GetValueMsg(strings[0]);
                 }
                 if (msg.ContainsFldKey(key) == false)
                 {

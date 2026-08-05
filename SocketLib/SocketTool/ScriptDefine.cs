@@ -41,10 +41,6 @@ namespace SocketTool
         protected WorkingArea _working = null;
         protected ScriptGroupDefine _scripts = null;
 
-        public WorkingArea Working { get { return _working; } }
-        public ScriptGroupDefine Scripts { get { return _scripts; } }
-
-
         public (WorkingArea, ScriptGroupDefine) ReadJson(string path)
         {
             _working = new WorkingArea();
@@ -65,7 +61,7 @@ namespace SocketTool
             }
 
             _scripts = new ScriptGroupDefine();
-            _scripts.ReadJson(path, comands);
+            _scripts.ReadJson(path, comands, _working);
 
             return (_working, _scripts);
         }

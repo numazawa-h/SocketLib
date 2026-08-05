@@ -117,7 +117,7 @@ namespace SocketTool
             int idx = 0;
             foreach (CaseList caselist in _caselist)
             {
-                if (caselist.isTarget(resmsg))
+                if (caselist.isTarget(resmsg, _workarea))
                 {
                     _commands[idx].Exec(socket, resmsg);
                     break;
