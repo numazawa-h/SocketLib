@@ -105,7 +105,7 @@ namespace SocketTool
             string script_path = _working_define[working].script_path;
             WorkingArea workarea;
             ScriptGroupDefine scripts;
-            (workarea,scripts) = ScriptDefine.GetInstance().ReadJson(script_path);
+            (workarea,scripts) = ScriptDefine.ReadJson(script_path);
 
             return new RuntimeWorkingArea(workarea, scripts, messages, values);
         }

@@ -24,27 +24,10 @@ namespace SocketTool
 {
     public class ScriptDefine
     {
-        // シングルトン
-        static private ScriptDefine _instance = null;
-        static public ScriptDefine GetInstance()
+        static public (WorkingArea, ScriptGroupDefine) ReadJson(string path)
         {
-            if (_instance == null)
-            {
-                _instance = new ScriptDefine();
-            }
-            return _instance;
-        }
-        private ScriptDefine() : base()
-        {
-        }
-
-        protected WorkingArea _working = null;
-        protected ScriptGroupDefine _scripts = null;
-
-        public (WorkingArea, ScriptGroupDefine) ReadJson(string path)
-        {
-            _working = new WorkingArea();
-            _working.ReadJson(path);
+            WorkingArea working = new WorkingArea();
+            working.ReadJson(path);
 
             RootNode root = JsonConfig.ReadJson(path);
             Dictionary<string, Command> comands = new Dictionary<string, Command>();
@@ -52,7 +35,7 @@ namespace SocketTool
             {
                 try
                 {
-                    comands.Add(def["id"].Required(), Command.ReadJson(def, _working));
+                    comands.Add(def["id"].Required(), Command.ReadJson(def, working));
                 }
                 catch (Exception ex)
                 {
@@ -60,10 +43,10 @@ namespace SocketTool
                 }
             }
 
-            _scripts = new ScriptGroupDefine();
-            _scripts.ReadJson(path, comands, _working);
+            ScriptGroupDefine scripts = new ScriptGroupDefine();
+            scripts.ReadJson(path, comands, working);
 
-            return (_working, _scripts);
+            return (working, scripts);
         }
     }
 }
