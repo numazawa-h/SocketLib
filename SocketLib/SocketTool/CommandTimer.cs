@@ -19,7 +19,7 @@ namespace SocketTool
         {
         }
 
-        public CommandTimer(Node node) : base(node)
+        public CommandTimer(Node node)
         {
             if (node.ContainsKey("timer-on")==false && node.ContainsKey("timer-off")==false)
             {

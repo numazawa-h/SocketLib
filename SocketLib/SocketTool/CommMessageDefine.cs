@@ -38,7 +38,7 @@ namespace SocketTool
         // データの値の説明定義
         protected Dictionary<string, ValuesDefine> _values_def = new Dictionary<string, ValuesDefine>();
 
-        public void ReadJson(string path)
+        public (Dictionary<string, MessageDefine>, Dictionary<string, ValuesDefine>) ReadJson(string path)
         {
             RootNode root = JsonConfig.ReadJson(path);
 
@@ -70,6 +70,7 @@ namespace SocketTool
                     throw new InvalidOperationException($"CommMessageDefineで読み込みエラー({def.PropertyNames}) in {path}", ex);
                 }
             }
+            return (_message_def, _values_def);
         }
 
         public bool Contains(string dtype)

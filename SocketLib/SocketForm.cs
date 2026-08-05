@@ -21,14 +21,16 @@ namespace SampleMain
 {
     public partial class SocketForm : Form
     {
+        RuntimeWorkingArea _RuntimeWorkingArea;
         CommSocket _Socket;
         List<CheckBox> _checkBoxes = new List<CheckBox>();
         CommMessageEditor _CommMessageEditor;
         int _display_limit = -1;
         int _display_line = 0;
 
-        public SocketForm(CommSocket socket, string title=null)
+        public SocketForm(RuntimeWorkingArea working, CommSocket socket, string title =null)
         {
+            _RuntimeWorkingArea = working;
             _Socket = socket;
             _Socket.OnDisConnectEvent += OnDisConnect;
             _Socket.OnRecvCommEvent += OnReceive;
@@ -37,10 +39,9 @@ namespace SampleMain
 
             InitializeComponent();
 
-            ScriptDefine scd = ScriptDefine.GetInstance();
-            if (scd.Working.ContainsKeyIntValue("display_limit"))
+            if (working.Working.ContainsKeyIntValue("display_limit"))
             {
-                _display_limit = scd.Working.GetIntValue("display_limit");
+                _display_limit = working.Working.GetIntValue("display_limit");
             }
 
             txt_ipAddr1.Text = socket.LocalIPAddress?.ToString();
@@ -70,7 +71,7 @@ namespace SampleMain
             // 電文表示指定チェックボックスセットアップ
             int cmdidx =0;
             int dispidx = 8;
-            foreach (ScriptGroup script in ScriptDefine.GetInstance().Scripts.GetScriptListOnDisplay())
+            foreach (ScriptGroup script in working.Scripts.GetScriptListOnDisplay())
             {
                 if (script.Display)
                 {
@@ -100,10 +101,10 @@ namespace SampleMain
             }
 
             // 電文編集タブのセットアップ
-            foreach ( string id in ScriptDefine.GetInstance().Working.GetValueMsgKeyList())
+            foreach ( string id in working.Working.GetValueMsgKeyList())
             {
-                CommMessage msg= ScriptDefine.GetInstance().Working.GetValueMsg(id);
-                string disp = ScriptDefine.GetInstance().Working.GetValueMsgDisp(id);
+                CommMessage msg= working.Working.GetValueMsg(id);
+                string disp = working.Working.GetValueMsgDisp(id);
                 cbx_MessageType.AddItem(disp, msg);
             }
             _CommMessageEditor= new CommMessageEditor(pnl_commMessage, btn_001, cbx_001, lbl_001, cbx_MessageType.Width - 20, cbx_001.Height + 4);
@@ -162,7 +163,7 @@ namespace SampleMain
                     DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
                 }
                 Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
-                ScriptDefine.GetInstance().Scripts.ExecOnRecv(_Socket, msg);
+                _RuntimeWorkingArea.Scripts.ExecOnRecv(_Socket, msg);
                 _CommMessageEditor.refresh();
             }
             catch (Exception ex)
@@ -183,7 +184,7 @@ namespace SampleMain
             CommMessage msg = (args.CommMsg);
             try
             {
-                ScriptDefine.GetInstance().Scripts.ExecOnSend(_Socket, msg);
+                _RuntimeWorkingArea.Scripts.ExecOnSend(_Socket, msg);
             }
             catch (Exception ex)
             {
@@ -232,7 +233,7 @@ namespace SampleMain
         private void SocketForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _Socket.Close();
-            ScriptDefine.GetInstance().Scripts.ExecOnDisconnect();
+            _RuntimeWorkingArea.Scripts.ExecOnDisconnect();
         }
 
         private void btn_clear_Click(object sender, EventArgs e)
@@ -245,7 +246,7 @@ namespace SampleMain
         {
             try
             {
-                ScriptDefine.GetInstance().Scripts.ExecOnConnect(_Socket);
+                _RuntimeWorkingArea.Scripts.ExecOnConnect(_Socket);
             }
             catch (Exception ex)
             {
@@ -305,7 +306,7 @@ namespace SampleMain
                         JsonConfig.RootNode root = JsonConfig.ReadJson(path);
                         foreach (Node def in root["Commands"])
                         {
-                            Command.ReadJson(def).Exec(_Socket);
+                            Command.ReadJson(def, _RuntimeWorkingArea.Working).Exec(_Socket);
                         }
                     }
                 }

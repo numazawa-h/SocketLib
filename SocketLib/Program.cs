@@ -36,8 +36,6 @@ namespace SocketLib
                 Log.Info($"{assembly.Name} (version{ver.Major}.{ver.Minor}.{ver.Build}) Started*******************************************");
                 //            JsonTest();
                 // ByteArrayTest("[ 1234 5678 9abc def0 ]");
-                CommMessageDefine.GetInstance().ReadJson(".\\config\\CommMessageDefine.json");
-                ScriptDefine.GetInstance().ReadJson(".\\config\\ScriptDefine.json");
                 NetworkDefine.GetInstance().ReadJson(".\\config\\NetworkDefine.json");
             }
             catch (Exception ex)

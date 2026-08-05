@@ -56,7 +56,7 @@ namespace SocketTool
             {
                 try
                 {
-                    comands.Add(def["id"].Required(), Command.ReadJson(def));
+                    comands.Add(def["id"].Required(), Command.ReadJson(def, _working));
                 }
                 catch (Exception ex)
                 {

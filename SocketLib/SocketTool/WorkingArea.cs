@@ -66,8 +66,9 @@ namespace SocketTool
                 string id = node._name;
                 try
                 {
+                    // valuesやtmpで初期化したmsgを得るためにCommandSendを使う
                     node.AddValue("id", id);      // Commandクラスが'id'必須なので追加しておく
-                    CommandSend cmd = new CommandSend(node);
+                    CommandSend cmd = new CommandSend(node, this);
                     CommMessage msg = cmd.GetMessage();
                     _commMessages.Add(id, msg);
                     _commMessagesInit.Add(id, new CommMessage(msg));

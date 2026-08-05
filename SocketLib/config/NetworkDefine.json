@@ -1,32 +1,48 @@
 ﻿{
+  "working": [
+    {
+      "name": "server",
+      "script": ".\\config\\ScriptDefine.json",
+      "message": ".\\config\\CommMessageDefine.json"
+    },
+    {
+      "name": "client",
+      "script": ".\\config\\ScriptDefine.json",
+      "message": ".\\config\\CommMessageDefine.json"
+    }
+  ],
   "listen_addr": [
     {
       "desc": "サーバー1",
+      "working": "server1",
       "ip": "localhost",
       "port": 901,
       "remote-ip": "localhost",
-      "remote-port": 801,
+      "remote-port": 801
     },
     {
       "desc": "サーバー2",
+      "working": "server",
       "ip": "localhost",
-      "port": 902,
-    },
+      "port": 902
+    }
   ],
   "connect_addr": [
     {
       "desc": "クライアント1",
+      "working": "client",
       "ip": "localhost",
       "port": 901,
       "local-ip": "localhost",
-      "local-port": 801,
+      "local-port": 801
     },
     {
       "desc": "クライアント2",
+      "working": "client",
       "ip": "localhost",
       "port": 902,
       "local-ip": "localhost",
-      "local-port": 802,
-    },
+      "local-port": 802
+    }
   ]
 }

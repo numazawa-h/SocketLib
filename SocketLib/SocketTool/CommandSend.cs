@@ -20,8 +20,8 @@ namespace SocketTool
         {
         }
 
-        public CommandSend(Node node) : base(node)
-        {
+        public CommandSend(Node node, WorkingArea workarea) : base(node, workarea)
+        { 
             // ひな形読み込み
             string dtype = node["dtype"].Required();
             string tmpl = node["tmpl"];
@@ -95,14 +95,13 @@ namespace SocketTool
         public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
             CommMessage msg = new CommMessage(_msg);
-            ScriptDefine scdef = ScriptDefine.GetInstance();
             foreach (var pair in _ivalues_runtime)
             {
-                msg.SetFldValue(pair.Key, (ulong)scdef.Working.GetIntValue(pair.Value));
+                msg.SetFldValue(pair.Key, (ulong)_workarea.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                msg.SetFldValue(pair.Key, scdef.Working.GetByteValue(pair.Value));
+                msg.SetFldValue(pair.Key, _workarea.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {

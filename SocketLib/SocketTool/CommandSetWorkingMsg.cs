@@ -18,12 +18,12 @@ namespace SocketTool
         {
         }
 
-        public CommandSetWorkingMsg(Node node):base(node) 
+        public CommandSetWorkingMsg(Node node, WorkingArea workarea):base(node, workarea) 
         {
             _msgname = node["msg"];
         }
 
-        public CommandSetWorkingMsg(Node node, string name) : base(node)
+        public CommandSetWorkingMsg(Node node, WorkingArea workarea, string name) : base(node, workarea)
         {
             _msgname = name;
         }
@@ -38,8 +38,7 @@ namespace SocketTool
 
         public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
-            ScriptDefine scdef = ScriptDefine.GetInstance();
-            CommMessage msg = scdef.Working.GetValueMsg(_msgname);
+            CommMessage msg = _workarea.GetValueMsg(_msgname);
 
             foreach (var pair in _ivalues)
             {
@@ -66,7 +65,7 @@ namespace SocketTool
                 {
                     key = replaceVar(key, resmsg);
                 }
-                msg.SetFldValue(key, (ulong)scdef.Working.GetIntValue(pair.Value));
+                msg.SetFldValue(key, (ulong)_workarea.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
@@ -75,7 +74,7 @@ namespace SocketTool
                 {
                     key = replaceVar(key, resmsg);
                 }
-                msg.SetFldValue(key, scdef.Working.GetByteValue(pair.Value));
+                msg.SetFldValue(key, _workarea.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {

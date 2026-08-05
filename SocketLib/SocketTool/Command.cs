@@ -22,6 +22,7 @@ namespace SocketTool
 
     public abstract class Command
     {
+        protected WorkingArea _workarea;
         public string CommandId { get; protected set; }
         protected Dictionary<string, int> _ivalues = new Dictionary<string, int>();
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
@@ -38,6 +39,7 @@ namespace SocketTool
 
         protected Command Copy(Command other)
         {
+            other._workarea = _workarea;
             other.CommandId = CommandId;
             other._ivalues = _ivalues;
             other._bvalues = _bvalues;
@@ -55,8 +57,9 @@ namespace SocketTool
 
         }
 
-        protected Command(Node node)
+        protected Command(Node node, WorkingArea workarea)
         {
+            _workarea = workarea;
             CommandId = node["id"].Required();
             _ivalues.Clear();
             _bvalues.Clear();
@@ -111,12 +114,11 @@ namespace SocketTool
                         else
                         {
                             // ScriptDefineの Working-area定義項目の時の処理
-                            ScriptDefine scdef = ScriptDefine.GetInstance();
-                            if (scdef.Working.ContainsKeyIntValue(sval))
+                            if (_workarea.ContainsKeyIntValue(sval))
                             {
                                 _ivalues_runtime.Add(key, sval);
                             }
-                            else if (scdef.Working.ContainsKeyByteValue(sval))
+                            else if (_workarea.ContainsKeyByteValue(sval))
                             {
                                 _bvalues_runtime.Add(key, sval);
                             }
@@ -213,7 +215,7 @@ namespace SocketTool
             _bvalues.Add(key, ByteArray.ParseHex(sval));
         }
 
-        public static Command ReadJson(Node node)
+        public static Command ReadJson(Node node, WorkingArea workarea)
         {
             Command cmd = null;
             string cmdid = node["id"].Required();
@@ -221,33 +223,33 @@ namespace SocketTool
             switch (cmdtype)
             {
                 case "head":
-                    cmd = new CommandHead(node);
+                    cmd = new CommandHead(node, workarea);
                     break;
                 case "set":
                     if (node.ContainsKey("msg"))
                     {
                         if (node.ContainsKey("select"))
                         {
-                            cmd = new CommandSetWorkingMsgConditional(node, cmdid);
+                            cmd = new CommandSetWorkingMsgConditional(node, workarea, cmdid);
                         }
                         else
                         {
-                            cmd = new CommandSetWorkingMsg(node);
+                            cmd = new CommandSetWorkingMsg(node, workarea);
                         }
                     }
                     else
                     {
-                        cmd = new CommandSet(node);
+                        cmd = new CommandSet(node,workarea);
                     }
                     break;
                 case "send":
                     if (node.ContainsKey("msg"))
                     {
-                        cmd = new CommandSendWorkingMsg(node);
+                        cmd = new CommandSendWorkingMsg(node, workarea);
                     }
                     else
                     {
-                        cmd = new CommandSend(node);
+                        cmd = new CommandSend(node, workarea);
                     }
                     break;
                 case "timer":

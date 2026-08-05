@@ -19,15 +19,12 @@ namespace SampleMain
 {
     public partial class MainForm : Form
     {
-        CommSocket listensocket = new CommSocket();
+        CommSocket listensocket = null;
         Point SocketFormLocation = new Point(-1, -1);
 
         public MainForm()
         {
             InitializeComponent();
-            listensocket.OnExceptionEvent += OnException;
-            listensocket.OnAcceptEvent += OnAccept;
-            listensocket.OnDisConnectEvent += OnDisConnect;
 
             foreach (var item in NetworkDefine.GetInstance().GetNames())
             {
@@ -45,8 +42,16 @@ namespace SampleMain
             string iaddr1 = txt_ipAddr1.Text.Trim();
             string portno1 = txt_portNo1.Text.Trim();
             DisplayLog($"listen [{iaddr1} Port#{portno1}]");
-                listensocket.Listen(iaddr1, portno1);
+            if(listensocket != null)
+            {
+                listensocket.Close();
             }
+            listensocket = new CommSocket();
+            listensocket.OnExceptionEvent += OnException;
+            listensocket.OnAcceptEvent += OnAccept;
+            listensocket.OnDisConnectEvent += OnDisConnect;
+            listensocket.Listen(iaddr1, portno1);
+        }
         private void btn_stopListen_Click(object sender, EventArgs e)
         {
             if (listensocket.isOpen == false)
@@ -132,7 +137,8 @@ namespace SampleMain
             {
                 title = cbx_NetworkName.Text;
             }
-            var frm = new SocketForm(socket, title);
+            RuntimeWorkingArea working =  (RuntimeWorkingArea)cbx_NetworkName.SelectedItem;
+            var frm = new SocketForm(working, socket, title);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);
@@ -166,7 +172,8 @@ namespace SampleMain
             {
                 title = cbx_NetworkName.Text;
             }
-            var frm = new SocketForm((CommSocket)args.Socket, title);
+            RuntimeWorkingArea working = (RuntimeWorkingArea)cbx_NetworkName.SelectedItem;
+            var frm = new SocketForm(working, (CommSocket)args.Socket, title);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);
