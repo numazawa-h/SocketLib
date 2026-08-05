@@ -1,5 +1,5 @@
 ﻿{
-  "working": [
+  "config": [
     {
       "name": "server",
       "script": ".\\config\\ScriptDefine.json",
@@ -14,7 +14,7 @@
   "listen_addr": [
     {
       "desc": "サーバー1",
-      "working": "server",
+      "config": "server",
       "ip": "localhost",
       "port": 901,
       "remote-ip": "localhost",
@@ -22,7 +22,7 @@
     },
     {
       "desc": "サーバー2",
-      "working": "server",
+      "config": "server",
       "ip": "localhost",
       "port": 902
     }
@@ -30,7 +30,7 @@
   "connect_addr": [
     {
       "desc": "クライアント1",
-      "working": "client",
+      "config": "client",
       "ip": "localhost",
       "port": 901,
       "local-ip": "localhost",
@@ -38,7 +38,7 @@
     },
     {
       "desc": "クライアント2",
-      "working": "client",
+      "config": "client",
       "ip": "localhost",
       "port": 902,
       "local-ip": "localhost",

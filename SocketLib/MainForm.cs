@@ -138,8 +138,9 @@ namespace SampleMain
                 title = cbx_NetworkName.Text;
             }
             string name = (string)cbx_NetworkName.SelectedItem;
-            RuntimeWorkingArea working = NetworkDefine.GetInstance().GetListenRuntime(name);
-            var frm = new SocketForm(working, socket, title);
+            string config = NetworkDefine.GetInstance().GetConfig(name);
+            RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+            var frm = new SocketForm(runtime, socket, title);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);
@@ -174,8 +175,9 @@ namespace SampleMain
                 title = cbx_NetworkName.Text;
             }
             string name = (string)cbx_NetworkName.SelectedItem;
-            RuntimeWorkingArea working = NetworkDefine.GetInstance().GetConnectRuntime(name);
-            var frm = new SocketForm(working, (CommSocket)args.Socket, title);
+            string config = NetworkDefine.GetInstance().GetConfig(name);
+            RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+            var frm = new SocketForm(runtime, (CommSocket)args.Socket, title);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);
