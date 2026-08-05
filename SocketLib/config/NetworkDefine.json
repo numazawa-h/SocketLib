@@ -14,7 +14,7 @@
   "listen_addr": [
     {
       "desc": "サーバー1",
-      "working": "server1",
+      "working": "server",
       "ip": "localhost",
       "port": 901,
       "remote-ip": "localhost",
