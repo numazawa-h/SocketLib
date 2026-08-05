@@ -153,5 +153,25 @@ namespace SocketTool
             }
             return null;
         }
+
+        public RuntimeWorkingArea GetConnectRuntime(string name)
+        {
+            if (_connect_addr.ContainsKey(name))
+            {
+                (_, RuntimeWorkingArea runtime, _, _) = _connect_addr[name];
+                return runtime;
+            }
+            return null;
+        }
+
+        public RuntimeWorkingArea GetListenRuntime(string name)
+        {
+            if (_listen_addr.ContainsKey(name))
+            {
+                (_, RuntimeWorkingArea runtime, _, _) = _listen_addr[name];
+                return runtime;
+            }
+            return null;
+        }
     }
 }

@@ -28,6 +28,7 @@ namespace NCommonUtility
 
         public Script(Node def, Dictionary<string, Command> comands, ScriptGroup owner)
         {
+            _owner = owner;
             _dtypes = def.GetStringValues("dtype");
             _without = def.GetStringValues("without");
             _phase = def.GetIntValues("phase");
