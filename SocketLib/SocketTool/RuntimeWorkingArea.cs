@@ -37,12 +37,13 @@ namespace SocketTool
         {
             return _message_def.ContainsKey(name);
         }
-        public MessageDefine GetMessageDefine(string name) {
-            if (_message_def.ContainsKey(name) == false)
+        public MessageDefine GetMessageDefine(string dtype) {
+            dtype = dtype.ToLower();
+            if (_message_def.ContainsKey(dtype) == false)
             {
-                return null;
+                throw new Exception($"定義されていないデータ種別({dtype})");
             }
-            return _message_def[name];  
+            return new MessageDefine(_message_def[dtype]);
         }
         public ValuesDefine GetValuesDefine(string name)
         {

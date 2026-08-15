@@ -58,22 +58,6 @@ namespace SocketTool
             return _message_def;
         }
 
-        public bool Contains(string dtype)
-        {
-            dtype = dtype.ToLower();
-            return _message_def.ContainsKey(dtype);
-        }
-
-        public MessageDefine GetMessageDefine(string dtype)
-        {
-            dtype = dtype.ToLower();
-            if (_message_def.ContainsKey(dtype) == false)
-            {
-                throw new Exception($"定義されていないデータ種別({dtype})");
-            }
-            return new MessageDefine(_message_def[dtype]);
-        }
-
         public ValuesDefine GetValuesDefine(string id)
         {
             if ( _values_def.ContainsKey(id) == false)
