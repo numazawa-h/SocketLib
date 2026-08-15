@@ -29,8 +29,7 @@ namespace SocketTool
             _message_def = CommMessageDefine.ReadJson(_message_path, this);
 
             _script_path = NetworkDefine.GetInstance().GetScriptPath(config);
-            _workarea = new WorkingArea();
-            _workarea.ReadJson(_script_path, this);
+            _workarea = WorkingArea.ReadJson(_script_path, this);
             _scripts = ScriptDefine.ReadJson(_script_path, this);
         }
         public bool ContainsMessageDefine(string name)

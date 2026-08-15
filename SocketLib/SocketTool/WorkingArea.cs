@@ -19,13 +19,15 @@ namespace SocketTool
         protected Dictionary<string, CommMessage> _commMessagesInit = new Dictionary<string, CommMessage>();
         protected Dictionary<string, string> _commMessagesDisp = new Dictionary<string, string>();
 
-        public void ReadJson(string path, RuntimeWorkingArea runtime)
+        private WorkingArea()
+        {
+            // コンストラクタは不使用(ReadJsonのみ使用する)
+        }
+
+        static public WorkingArea ReadJson(string path, RuntimeWorkingArea runtime)
         {
             RootNode root = JsonConfig.ReadJson(path);
-
-            _ivalues.Clear();
-            _bvalues.Clear();
-            _incriment_values.Clear();
+            WorkingArea working = new WorkingArea();
             foreach (var pair in root["Working-area"].GetPropertyValues())
             {
                 string key = pair.Key;
@@ -36,7 +38,7 @@ namespace SocketTool
                     {
                         case JsonValueKind.String:
                             string sval = value.ToString();
-                            _bvalues.Add(key, ByteArray.StrToByte(sval));
+                            working._bvalues.Add(key, ByteArray.StrToByte(sval));
                             break;
                         case JsonValueKind.Number:
                             int ival = value.GetValue<int>();
@@ -44,9 +46,9 @@ namespace SocketTool
                             {
                                 // インクリメント処理サポート(取得するたびにカウントアップする)
                                 key = key.Substring(2);
-                                _incriment_values.Add(key);
+                                working._incriment_values.Add(key);
                             }
-                            _ivalues.Add(key, ival);
+                            working._ivalues.Add(key, ival);
                             break;
                         default:
                             throw new Exception($"数値と文字列以外が指定されました");
@@ -58,9 +60,6 @@ namespace SocketTool
                 }
             }
 
-            _commMessages.Clear();
-            _commMessagesInit.Clear();
-            _commMessagesDisp.Clear();
             foreach (Node node in root["Working-area"].GetPropertyObjects())
             {
                 string id = node._name;
@@ -70,20 +69,21 @@ namespace SocketTool
                     node.AddValue("id", id);      // Commandクラスが'id'必須なので追加しておく
                     CommandSend cmd = new CommandSend(node, runtime);
                     CommMessage msg = cmd.GetMessage();
-                    _commMessages.Add(id, msg);
-                    _commMessagesInit.Add(id, new CommMessage(msg));
+                    working._commMessages.Add(id, msg);
+                    working._commMessagesInit.Add(id, new CommMessage(msg));
                     string display = node["name"];
                     if (display == null)
                     {
                         display = msg.DName;
                     }
-                    _commMessagesDisp.Add(display, id);
+                    working._commMessagesDisp.Add(display, id);
                 }
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException($"ScriptDefineのvalues('{id}')で読み込みエラー in {path}", ex);
                 }
             }
+            return working;
         }
 
         public string[] GetValueMsgKeyList()
