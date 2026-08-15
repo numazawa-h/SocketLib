@@ -19,8 +19,9 @@ namespace SocketTool
         {
         }
 
-        public CommandTimer(Node node)
+        public CommandTimer(Node node, RuntimeWorkingArea runtime)
         {
+            _runtime = runtime;
             if (node.ContainsKey("timer-on")==false && node.ContainsKey("timer-off")==false)
             {
                 throw new Exception($"Timerコマンド'{CommandId}'には'timer-on'または'timer-off'が必要です");

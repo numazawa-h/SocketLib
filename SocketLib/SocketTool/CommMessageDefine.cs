@@ -38,24 +38,9 @@ namespace SocketTool
         // データの値の説明定義
         protected Dictionary<string, ValuesDefine> _values_def = new Dictionary<string, ValuesDefine>();
 
-        public (Dictionary<string, MessageDefine>, Dictionary<string, ValuesDefine>) ReadJson(string path)
+        public Dictionary<string, MessageDefine> ReadJson(string path, Dictionary<string, ValuesDefine> values_def)
         {
             RootNode root = JsonConfig.ReadJson(path);
-
-            // 先に値定義を読む（フィールド定義を読み込む時に参照するため）
-            _values_def.Clear();
-            foreach (Node def in root["values-def"])
-            {
-                try
-                {
-                    string id = def["id"].Required();
-                    _values_def.Add(id, new ValuesDefine(def));
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"CommMessageDefineで読み込みエラー({def.PropertyNames}) in {path}", ex);
-                }
-            }
 
             // メッセージ定義読み込み
             _message_def.Clear();
@@ -70,7 +55,7 @@ namespace SocketTool
                     throw new InvalidOperationException($"CommMessageDefineで読み込みエラー({def.PropertyNames}) in {path}", ex);
                 }
             }
-            return (_message_def, _values_def);
+            return _message_def;
         }
 
         public bool Contains(string dtype)

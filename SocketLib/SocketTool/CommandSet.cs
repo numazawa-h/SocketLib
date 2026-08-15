@@ -16,9 +16,9 @@ namespace SocketTool
         {
         }
 
-        public CommandSet(Node node, WorkingArea workarea)
+        public CommandSet(Node node, RuntimeWorkingArea runtime)
         {
-            _workarea = workarea;
+            _runtime = runtime;
             CommandId = node["id"].Required();
             _ivalues.Clear();
             _bvalues.Clear();
@@ -34,14 +34,14 @@ namespace SocketTool
                 switch (value.GetValueKind())
                 {
                     case System.Text.Json.JsonValueKind.Number:
-                        if (_workarea.ContainsKeyIntValue(key)==false)
+                        if (_runtime.Working.ContainsKeyIntValue(key)==false)
                         {
                             throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
                         }
                         _ivalues.Add(key, value.GetValue<int>());
                         break;
                     case System.Text.Json.JsonValueKind.String:
-                        if (_workarea.ContainsKeyByteValue(key) == false)
+                        if (_runtime.Working.ContainsKeyByteValue(key) == false)
                         {
                             throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
                         }
@@ -63,11 +63,11 @@ namespace SocketTool
         {
             foreach (var pair in _ivalues)
             {
-                _workarea.SetIntValue(pair.Key, pair.Value);
+                _runtime.Working.SetIntValue(pair.Key, pair.Value);
             }
             foreach (var pair in _bvalues)
             {
-                _workarea.SetByteValue(pair.Key, pair.Value);
+                _runtime.Working.SetByteValue(pair.Key, pair.Value);
             }
         }
     }

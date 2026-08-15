@@ -20,7 +20,7 @@ namespace SocketTool
         {
         }
 
-        public CommandSend(Node node, WorkingArea workarea) : base(node, workarea)
+        public CommandSend(Node node, RuntimeWorkingArea runtime) : base(node, runtime)
         { 
             // ひな形読み込み
             string dtype = node["dtype"].Required();
@@ -97,11 +97,11 @@ namespace SocketTool
             CommMessage msg = new CommMessage(_msg);
             foreach (var pair in _ivalues_runtime)
             {
-                msg.SetFldValue(pair.Key, (ulong)_workarea.GetIntValue(pair.Value));
+                msg.SetFldValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                msg.SetFldValue(pair.Key, _workarea.GetByteValue(pair.Value));
+                msg.SetFldValue(pair.Key, _runtime.Working.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {

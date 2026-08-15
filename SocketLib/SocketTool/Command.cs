@@ -22,7 +22,7 @@ namespace SocketTool
 
     public abstract class Command
     {
-        protected WorkingArea _workarea;
+        protected RuntimeWorkingArea _runtime;
         public string CommandId { get; protected set; }
         protected Dictionary<string, int> _ivalues = new Dictionary<string, int>();
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
@@ -39,7 +39,7 @@ namespace SocketTool
 
         protected Command Copy(Command other)
         {
-            other._workarea = _workarea;
+            other._runtime = _runtime;
             other.CommandId = CommandId;
             other._ivalues = _ivalues;
             other._bvalues = _bvalues;
@@ -57,9 +57,9 @@ namespace SocketTool
 
         }
 
-        protected Command(Node node, WorkingArea workarea)
+        protected Command(Node node, RuntimeWorkingArea runtime)
         {
-            _workarea = workarea;
+            _runtime = runtime;
             CommandId = node["id"].Required();
             _ivalues.Clear();
             _bvalues.Clear();
@@ -114,11 +114,11 @@ namespace SocketTool
                         else
                         {
                             // ScriptDefineの Working-area定義項目の時の処理
-                            if (_workarea.ContainsKeyIntValue(sval))
+                            if (_runtime.Working.ContainsKeyIntValue(sval))
                             {
                                 _ivalues_runtime.Add(key, sval);
                             }
-                            else if (_workarea.ContainsKeyByteValue(sval))
+                            else if (_runtime.Working.ContainsKeyByteValue(sval))
                             {
                                 _bvalues_runtime.Add(key, sval);
                             }
@@ -215,7 +215,7 @@ namespace SocketTool
             _bvalues.Add(key, ByteArray.ParseHex(sval));
         }
 
-        public static Command ReadJson(Node node, WorkingArea workarea)
+        public static Command ReadJson(Node node, RuntimeWorkingArea runtime)
         {
             Command cmd = null;
             string cmdid = node["id"].Required();
@@ -223,43 +223,43 @@ namespace SocketTool
             switch (cmdtype)
             {
                 case "head":
-                    cmd = new CommandHead(node, workarea);
+                    cmd = new CommandHead(node, runtime);
                     break;
                 case "set":
                     if (node.ContainsKey("msg"))
                     {
                         if (node.ContainsKey("select"))
                         {
-                            cmd = new CommandSetWorkingMsgConditional(node, workarea, cmdid);
+                            cmd = new CommandSetWorkingMsgConditional(node, runtime, cmdid);
                         }
                         else
                         {
-                            cmd = new CommandSetWorkingMsg(node, workarea);
+                            cmd = new CommandSetWorkingMsg(node, runtime);
                         }
                     }
                     else
                     {
-                        cmd = new CommandSet(node,workarea);
+                        cmd = new CommandSet(node,runtime);
                     }
                     break;
                 case "send":
                     if (node.ContainsKey("msg"))
                     {
-                        cmd = new CommandSendWorkingMsg(node, workarea);
+                        cmd = new CommandSendWorkingMsg(node, runtime);
                     }
                     else
                     {
-                        cmd = new CommandSend(node, workarea);
+                        cmd = new CommandSend(node, runtime);
                     }
                     break;
                 case "timer":
                     if (node.ContainsKey("select"))
                     {
-                        cmd = new CommandTimerConditional(node, cmdid);
+                        cmd = new CommandTimerConditional(node, runtime, cmdid);
                     }
                     else
                     {
-                        cmd = new CommandTimer(node);
+                        cmd = new CommandTimer(node, runtime);
                     }
                     break;
                 default:

@@ -19,7 +19,7 @@ namespace SocketTool
         protected Dictionary<string, CommMessage> _commMessagesInit = new Dictionary<string, CommMessage>();
         protected Dictionary<string, string> _commMessagesDisp = new Dictionary<string, string>();
 
-        public void ReadJson(string path)
+        public void ReadJson(string path, RuntimeWorkingArea runtime)
         {
             RootNode root = JsonConfig.ReadJson(path);
 
@@ -68,7 +68,7 @@ namespace SocketTool
                 {
                     // valuesやtmpで初期化したmsgを得るためにCommandSendを使う
                     node.AddValue("id", id);      // Commandクラスが'id'必須なので追加しておく
-                    CommandSend cmd = new CommandSend(node, this);
+                    CommandSend cmd = new CommandSend(node, runtime);
                     CommMessage msg = cmd.GetMessage();
                     _commMessages.Add(id, msg);
                     _commMessagesInit.Add(id, new CommMessage(msg));

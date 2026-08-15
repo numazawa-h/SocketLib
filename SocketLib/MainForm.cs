@@ -46,7 +46,10 @@ namespace SampleMain
             {
                 listensocket.Close();
             }
-            listensocket = new CommSocket();
+            string name = (string)cbx_NetworkName.SelectedItem;
+            string config = NetworkDefine.GetInstance().GetConfig(name);
+            RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+            listensocket = new CommSocket(runtime);
             listensocket.OnExceptionEvent += OnException;
             listensocket.OnAcceptEvent += OnAccept;
             listensocket.OnDisConnectEvent += OnDisConnect;
@@ -67,7 +70,10 @@ namespace SampleMain
 
         private void btn_connect_Click(object sender, EventArgs e)
         {
-            CommSocket socket = new CommSocket();
+            string name = (string)cbx_NetworkName.SelectedItem;
+            string config = NetworkDefine.GetInstance().GetConfig(name);
+            RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+            CommSocket socket = new CommSocket(runtime);
             socket.OnExceptionEvent += OnException;
             socket.OnConnectEvent += OnConnect;
             socket.OnDisConnectEvent += OnDisConnect;
@@ -137,10 +143,7 @@ namespace SampleMain
             {
                 title = cbx_NetworkName.Text;
             }
-            string name = (string)cbx_NetworkName.SelectedItem;
-            string config = NetworkDefine.GetInstance().GetConfig(name);
-            RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
-            var frm = new SocketForm(runtime, socket, title);
+            var frm = new SocketForm(socket, title);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);
@@ -174,10 +177,7 @@ namespace SampleMain
             {
                 title = cbx_NetworkName.Text;
             }
-            string name = (string)cbx_NetworkName.SelectedItem;
-            string config = NetworkDefine.GetInstance().GetConfig(name);
-            RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
-            var frm = new SocketForm(runtime, (CommSocket)args.Socket, title);
+            var frm = new SocketForm((CommSocket)args.Socket, title);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);

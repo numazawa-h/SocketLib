@@ -21,27 +21,26 @@ namespace SampleMain
 {
     public partial class SocketForm : Form
     {
-        RuntimeWorkingArea _RuntimeWorkingArea;
         CommSocket _Socket;
         List<CheckBox> _checkBoxes = new List<CheckBox>();
         CommMessageEditor _CommMessageEditor;
         int _display_limit = -1;
         int _display_line = 0;
 
-        public SocketForm(RuntimeWorkingArea working, CommSocket socket, string title =null)
+        public SocketForm(CommSocket socket, string title =null)
         {
-            _RuntimeWorkingArea = working;
             _Socket = socket;
             _Socket.OnDisConnectEvent += OnDisConnect;
             _Socket.OnRecvCommEvent += OnReceive;
             _Socket.OnPreSendCommEvent += OnPreSend;
             _Socket.OnSendCommEvent += OnSend;
 
+            WorkingArea working = socket.GeRuntime().Working;
             InitializeComponent();
 
-            if (working.Working.ContainsKeyIntValue("display_limit"))
+            if (working.ContainsKeyIntValue("display_limit"))
             {
-                _display_limit = working.Working.GetIntValue("display_limit");
+                _display_limit = working.GetIntValue("display_limit");
             }
 
             txt_ipAddr1.Text = socket.LocalIPAddress?.ToString();
@@ -71,7 +70,7 @@ namespace SampleMain
             // 電文表示指定チェックボックスセットアップ
             int cmdidx =0;
             int dispidx = 8;
-            foreach (ScriptGroup script in working.Scripts.GetScriptListOnDisplay())
+            foreach (ScriptGroup script in _Socket.GeRuntime().Scripts.GetScriptListOnDisplay())
             {
                 if (script.Display)
                 {
@@ -101,10 +100,10 @@ namespace SampleMain
             }
 
             // 電文編集タブのセットアップ
-            foreach ( string id in working.Working.GetValueMsgKeyList())
+            foreach ( string id in working.GetValueMsgKeyList())
             {
-                CommMessage msg= working.Working.GetValueMsg(id);
-                string disp = working.Working.GetValueMsgDisp(id);
+                CommMessage msg= working.GetValueMsg(id);
+                string disp = working.GetValueMsgDisp(id);
                 cbx_MessageType.AddItem(disp, msg);
             }
             _CommMessageEditor= new CommMessageEditor(pnl_commMessage, btn_001, cbx_001, lbl_001, cbx_MessageType.Width - 20, cbx_001.Height + 4);
@@ -163,7 +162,7 @@ namespace SampleMain
                     DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
                 }
                 Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
-                _RuntimeWorkingArea.Scripts.ExecOnRecv(_Socket, msg);
+                _Socket.GeRuntime().Scripts.ExecOnRecv(_Socket, msg);
                 _CommMessageEditor.refresh();
             }
             catch (Exception ex)
@@ -184,7 +183,7 @@ namespace SampleMain
             CommMessage msg = (args.CommMsg);
             try
             {
-                _RuntimeWorkingArea.Scripts.ExecOnSend(_Socket, msg);
+                _Socket.GeRuntime().Scripts.ExecOnSend(_Socket, msg);
             }
             catch (Exception ex)
             {
@@ -233,7 +232,7 @@ namespace SampleMain
         private void SocketForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _Socket.Close();
-            _RuntimeWorkingArea.Scripts.ExecOnDisconnect();
+            _Socket.GeRuntime().Scripts.ExecOnDisconnect();
         }
 
         private void btn_clear_Click(object sender, EventArgs e)
@@ -246,7 +245,7 @@ namespace SampleMain
         {
             try
             {
-                _RuntimeWorkingArea.Scripts.ExecOnConnect(_Socket);
+                _Socket.GeRuntime().Scripts.ExecOnConnect(_Socket);
             }
             catch (Exception ex)
             {
@@ -306,7 +305,7 @@ namespace SampleMain
                         JsonConfig.RootNode root = JsonConfig.ReadJson(path);
                         foreach (Node def in root["Commands"])
                         {
-                            Command.ReadJson(def, _RuntimeWorkingArea.Working).Exec(_Socket);
+                            Command.ReadJson(def, _Socket.GeRuntime()).Exec(_Socket);
                         }
                     }
                 }
@@ -326,7 +325,7 @@ namespace SampleMain
 
         private void Btn_init_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.InitCommMessage(_RuntimeWorkingArea.Working);
+            _CommMessageEditor.InitCommMessage(_Socket.GeRuntime().Working);
         }
 
         private void Btn_send_Click(object sender, EventArgs e)
@@ -341,7 +340,7 @@ namespace SampleMain
 
         private void Btn_load_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.Load(_RuntimeWorkingArea.Working);
+            _CommMessageEditor.Load(_Socket.GeRuntime().Working);
         }
     }
 }

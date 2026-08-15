@@ -17,8 +17,9 @@ namespace SocketTool
         {
         }
 
-        public CommandTimerConditional(Node node, string owner_id)
+        public CommandTimerConditional(Node node, RuntimeWorkingArea runtime, string owner_id)
         {
+            _runtime = runtime;
             _owner_id = owner_id;
             string id = node["id"];
             foreach (Node node1 in node["select"].Required())
@@ -28,7 +29,7 @@ namespace SocketTool
                 {
                     _caselist.Add(case1);
                     node1.AddValue("id", node1._name);      // Commandクラスが'id'必須なので追加しておく
-                    _commands.Add(new CommandTimer(node1));
+                    _commands.Add(new CommandTimer(node1, _runtime));
                 }
                 else
                 {
@@ -39,7 +40,7 @@ namespace SocketTool
                         {
                             _caselist.Add(case2);
                             node2.AddValue("id", node2._name);      // Commandクラスが'id'必須なので追加しておく
-                            _commands.Add(new CommandTimer(node2));
+                            _commands.Add(new CommandTimer(node2, _runtime));
                         }
                         else
                         {
@@ -50,7 +51,7 @@ namespace SocketTool
                                 {
                                     _caselist.Add(case3);
                                     node3.AddValue("id", node3._name);      // Commandクラスが'id'必須なので追加しておく
-                                    _commands.Add(new CommandTimer(node3));
+                                    _commands.Add(new CommandTimer(node3, _runtime));
                                 }
                                 else
                                 {
@@ -61,7 +62,7 @@ namespace SocketTool
                                         {
                                             _caselist.Add(case4);
                                             node4.AddValue("id", node4._name);      // Commandクラスが'id'必須なので追加しておく
-                                            _commands.Add(new CommandTimer(node4));
+                                            _commands.Add(new CommandTimer(node4, _runtime));
                                         }
                                         else
                                         {
@@ -72,7 +73,7 @@ namespace SocketTool
                                                 {
                                                     _caselist.Add(case5);
                                                     node5.AddValue("id", node5._name);      // Commandクラスが'id'必須なので追加しておく
-                                                    _commands.Add(new CommandTimer(node5));
+                                                    _commands.Add(new CommandTimer(node5, _runtime));
                                                 }
                                                 else
                                                 {
@@ -117,7 +118,7 @@ namespace SocketTool
             int idx = 0;
             foreach (CaseList caselist in _caselist)
             {
-                if (caselist.isTarget(resmsg, _workarea))
+                if (caselist.isTarget(resmsg, _runtime.Working))
                 {
                     _commands[idx].Exec(socket, resmsg);
                     break;

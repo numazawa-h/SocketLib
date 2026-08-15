@@ -24,18 +24,15 @@ namespace SocketTool
 {
     public class ScriptDefine
     {
-        static public (WorkingArea, ScriptGroupDefine) ReadJson(string path)
+        static public ScriptGroupDefine ReadJson(string path, RuntimeWorkingArea runtime)
         {
-            WorkingArea working = new WorkingArea();
-            working.ReadJson(path);
-
             RootNode root = JsonConfig.ReadJson(path);
             Dictionary<string, Command> comands = new Dictionary<string, Command>();
             foreach (Node def in root["Commands"])
             {
                 try
                 {
-                    comands.Add(def["id"].Required(), Command.ReadJson(def, working));
+                    comands.Add(def["id"].Required(), Command.ReadJson(def, runtime));
                 }
                 catch (Exception ex)
                 {
@@ -44,9 +41,9 @@ namespace SocketTool
             }
 
             ScriptGroupDefine scripts = new ScriptGroupDefine();
-            scripts.ReadJson(path, comands, working);
+            scripts.ReadJson(path, comands, runtime);
 
-            return (working, scripts);
+            return scripts;
         }
     }
 }

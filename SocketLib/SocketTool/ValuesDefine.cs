@@ -28,6 +28,27 @@ namespace SocketTool
         List<(string, string)> _valuesLDefist = new List<(string, string)>();
         List<string> _notdisp = new List<string>();
 
+        static public Dictionary<string, ValuesDefine> ReadJson(string path)
+        {
+            RootNode root = JsonConfig.ReadJson(path);
+
+            Dictionary<string, ValuesDefine> values_def = new Dictionary<string, ValuesDefine>();
+            foreach (Node def in root["values-def"])
+            {
+                try
+                {
+                    string id = def["id"].Required();
+                    values_def.Add(id, new ValuesDefine(def));
+                }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException($"CommMessageDefineで読み込みエラー({def.PropertyNames}) in {path}", ex);
+                }
+            }
+
+            return values_def;
+        }
+
         public ValuesDefine(Node def)
         {
             FldId = def["id"].Required();
@@ -133,7 +154,6 @@ namespace SocketTool
         {
             return _value_format_def;
         }
-
 
         public abstract string GetDescription(byte[] value);
     }

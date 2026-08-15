@@ -18,7 +18,7 @@ namespace SocketTool
         {
         }
 
-        public CommandHead(Node node, WorkingArea workarea) : base(node, workarea)
+        public CommandHead(Node node, RuntimeWorkingArea runtime) : base(node, runtime)
         {
         }
 
@@ -48,11 +48,11 @@ namespace SocketTool
 
             foreach (var pair in _ivalues_runtime)
             {
-                msg.SetHedValue(pair.Key, (ulong)_workarea.GetIntValue(pair.Value));
+                msg.SetHedValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                msg.SetHedValue(pair.Key, _workarea.GetByteValue(pair.Value));
+                msg.SetHedValue(pair.Key, _runtime.Working.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {
