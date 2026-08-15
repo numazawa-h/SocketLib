@@ -18,53 +18,24 @@ namespace SocketTool
 {
     public class CommMessageDefine
     {
-        // シングルトン
-        static private CommMessageDefine _instance = null;
-        static public CommMessageDefine GetInstance()
-        {
-            if (_instance == null)
-            {
-                _instance = new CommMessageDefine();
-            }
-            return _instance;
-        }
-        private CommMessageDefine() : base()
-        {
-        }
-
-        // 通信メッセージ定義
-        protected Dictionary<string, MessageDefine> _message_def = new Dictionary<string, MessageDefine>();
-
-        // データの値の説明定義
-        protected Dictionary<string, ValuesDefine> _values_def = new Dictionary<string, ValuesDefine>();
-
-        public Dictionary<string, MessageDefine> ReadJson(string path, Dictionary<string, ValuesDefine> values_def)
+        public static Dictionary<string, MessageDefine> ReadJson(string path, RuntimeWorkingArea runtime)
         {
             RootNode root = JsonConfig.ReadJson(path);
 
             // メッセージ定義読み込み
-            _message_def.Clear();
+            Dictionary<string, MessageDefine> message_def = new Dictionary<string, MessageDefine>();
             foreach (Node def in root["message-def"])
             {
                 try
                 {
-                    _message_def.Add(((string)def["id"]).ToLower(), new MessageDefine(def));
+                    message_def.Add(((string)def["id"]).ToLower(), new MessageDefine(def, runtime));
                 }
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException($"CommMessageDefineで読み込みエラー({def.PropertyNames}) in {path}", ex);
                 }
             }
-            return _message_def;
-        }
-
-        public ValuesDefine GetValuesDefine(string id)
-        {
-            if ( _values_def.ContainsKey(id) == false)
-            {
-                return null;
-            }
-            return _values_def[id];
+            return message_def;
         }
     }
 }

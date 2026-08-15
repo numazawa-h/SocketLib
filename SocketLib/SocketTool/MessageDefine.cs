@@ -36,7 +36,7 @@ namespace SocketTool
         /// コンストラクタ
         /// </summary>
         /// <param name="def">Json定義</param>
-        public MessageDefine(Node def)
+        public MessageDefine(Node def, RuntimeWorkingArea runtime)
         {
             DType = def["id"].Required();
             DName = def["name"].Required();
@@ -48,11 +48,11 @@ namespace SocketTool
             {
                 if (node.ContainsKey("block"))
                 {
-                    readBlock(BlockDefine, node);
+                    readBlock(BlockDefine, node, runtime);
                 }
                 else
                 {
-                    FieldDefine fld = new FieldDefine(node);
+                    FieldDefine fld = new FieldDefine(node, runtime);
                     _fields_def.Add(node["id"], fld);
                     BlockDefine.AddField(fld);
                 }
@@ -62,7 +62,7 @@ namespace SocketTool
             SetDefaultValue();
         }
 
-        private void readBlock(BlockDefine block, Node def, int offset = 0)
+        private void readBlock(BlockDefine block, Node def, RuntimeWorkingArea runtime, int offset = 0)
         {
             int blkofs = def["ofs"].Required();
             int len = (int?)def["len"] is int v1 ? v1 : -1;
@@ -82,11 +82,11 @@ namespace SocketTool
                     {
                         if (node.ContainsKey("block"))
                         {
-                            readBlock(blk, node, ofs);
+                            readBlock(blk, node, runtime, ofs);
                         }
                         else
                         {
-                            FieldDefine fld = new FieldDefine(node, ofs, blk);
+                            FieldDefine fld = new FieldDefine(node, runtime, ofs, blk);
                             _fields_def.Add(fld.FldId, fld);
                             blk.AddField(fld);
                         }
@@ -101,11 +101,11 @@ namespace SocketTool
                 {
                     if (node.ContainsKey("block"))
                     {
-                        readBlock(blk, node, ofs);
+                        readBlock(blk, node, runtime, ofs);
                     }
                     else
                     {
-                        FieldDefine fld = new FieldDefine(node, ofs, blk);
+                        FieldDefine fld = new FieldDefine(node, runtime, ofs, blk);
                         _fields_def.Add(fld.FldId, fld);
                         blk.AddField(fld);
                     }
@@ -341,7 +341,7 @@ namespace SocketTool
 
         public byte[] Default { get; private set; } = null;
 
-        public FieldDefine(Node def, int ofs, BlockDefine blk) : this(def)
+        public FieldDefine(Node def, RuntimeWorkingArea runtime, int ofs, BlockDefine blk) : this(def, runtime)
         {
             OwnerBlock = blk;
             Offset += ofs;
@@ -363,7 +363,7 @@ namespace SocketTool
             }
         }
 
-        public FieldDefine(Node def)
+        public FieldDefine(Node def, RuntimeWorkingArea runtime)
         {
             OwnerBlock = null;
             FldId = def["id"].Required();
@@ -390,7 +390,7 @@ namespace SocketTool
                 // フィールド名に"_"があれば、"_"より前の部分を項目値IDとする
                 valid = valid.Substring(0, valid.IndexOf("_"));
             }
-            _valuesDefine = CommMessageDefine.GetInstance().GetValuesDefine(valid);
+            _valuesDefine = runtime.GetValuesDefine(valid);
             if (_valuesDefine != null)
             {
                 _valuesDefList = _valuesDefine.ValuesDefList;

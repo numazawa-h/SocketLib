@@ -26,7 +26,7 @@ namespace SocketTool
         public RuntimeWorkingArea(string config) { 
             _message_path = NetworkDefine.GetInstance().GetMessagePath(config);
             _values_def = ValuesDefine.ReadJson(_message_path);
-            _message_def = CommMessageDefine.GetInstance().ReadJson(_message_path, _values_def);
+            _message_def = CommMessageDefine.ReadJson(_message_path, this);
 
             _script_path = NetworkDefine.GetInstance().GetScriptPath(config);
             _workarea = new WorkingArea();
