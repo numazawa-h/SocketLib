@@ -93,9 +93,9 @@ namespace SocketTool
                         break;
                     case System.Text.Json.JsonValueKind.String:
                         string sval = value.ToString();
-                        CommMessageDefine.Format fmtdef = CommMessageDefine.GetInstance().GetValuesDefine(key)?.FormatDef;
+                        Format fmtdef = CommMessageDefine.GetInstance().GetValuesDefine(key)?.FormatDef;
                         string fmt = fmtdef?.GetValueFormat();
-                        if (fmtdef is CommMessageDefine.FormatDateTime)
+                        if (fmtdef is FormatDateTime)
                         {
                             if (fmt == null)
                             {

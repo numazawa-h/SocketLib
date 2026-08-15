@@ -89,6 +89,7 @@
     <Compile Include="SocketTool\CommandSetWorkingMsgConditional.cs" />
     <Compile Include="SocketTool\CommandTimer.cs" />
     <Compile Include="SocketTool\CommandTimerConditional.cs" />
+    <Compile Include="SocketTool\MessageDefine.cs" />
     <Compile Include="SocketTool\NetworkDefine.cs" />
     <Compile Include="SocketTool\RuntimeWorkingArea.cs" />
     <Compile Include="SocketTool\Script.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="SocketTool\ScriptDefine.cs" />
     <Compile Include="SocketTool\ScriptGroup.cs" />
     <Compile Include="SocketTool\ScriptGroupDefine.cs" />
+    <Compile Include="SocketTool\ValuesDefine.cs" />
     <Compile Include="SocketTool\WorkingArea.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
