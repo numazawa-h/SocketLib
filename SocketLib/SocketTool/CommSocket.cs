@@ -92,7 +92,7 @@ namespace SocketTool
         }
         protected override void OnRecvEx()
         {
-            CommMessage msg = new CommMessage(_comm_header, _comm_data);
+            CommMessage msg = new CommMessage(_runtime, _comm_header, _comm_data);
             OnRecvCommEvent?.Invoke(this, new CommMessageEventArgs(this, msg));
         }
 

@@ -292,12 +292,12 @@ namespace SampleMain
                     string file_ext = Path.GetExtension(path);
                     if (file_ext == ".txt")
                     {
-                        CommMessage msg = CommMessage.LoadFileText(path);
+                        CommMessage msg = CommMessage.LoadFileText(_Socket.GeRuntime(), path);
                         _Socket.Send(msg);
                     }
                     else if (file_ext == ".bin")
                     {
-                        CommMessage msg = CommMessage.LoadFileBinary(path);
+                        CommMessage msg = CommMessage.LoadFileBinary(_Socket.GeRuntime(), path);
                         _Socket.Send(msg);
                     }
                     else if (file_ext == ".json")
@@ -340,7 +340,7 @@ namespace SampleMain
 
         private void Btn_load_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.Load(_Socket.GeRuntime().Working);
+            _CommMessageEditor.Load(_Socket.GeRuntime());
         }
     }
 }

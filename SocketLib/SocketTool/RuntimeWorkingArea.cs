@@ -33,6 +33,10 @@ namespace SocketTool
             _workarea.ReadJson(_script_path, this);
             _scripts = ScriptDefine.ReadJson(_script_path, this);
         }
+        public bool ContainsMessageDefine(string name)
+        {
+            return _message_def.ContainsKey(name);
+        }
         public MessageDefine GetMessageDefine(string name) {
             if (_message_def.ContainsKey(name) == false)
             {

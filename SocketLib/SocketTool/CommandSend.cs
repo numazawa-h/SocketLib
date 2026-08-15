@@ -68,11 +68,11 @@ namespace SocketTool
                 string file_ext = Path.GetExtension(path);
                 if (file_ext == ".txt")
                 {
-                    msg = CommMessage.LoadFileText(path);
+                    msg = CommMessage.LoadFileText(_runtime, path);
                 }
                 else if (file_ext == ".bin")
                 {
-                    msg = CommMessage.LoadFileBinary(path);
+                    msg = CommMessage.LoadFileBinary(_runtime, path);
                 }
                 else
                 {
@@ -83,7 +83,7 @@ namespace SocketTool
             }
             else
             {
-                return new CommMessage(dtype);
+                return new CommMessage(_runtime, dtype);
             }
         }
 
