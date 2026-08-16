@@ -1,0 +1,23 @@
+{
+  "message-def":[
+		{ "id":"head", "name":"ヘッダ", "len": 16,"flds":[
+				{ "id":"dst",  "name": "相手装置",  "ofs": 0, "len": 1 },
+				{ "id":"src",  "name": "自装置",    "ofs": 1, "len": 1 },
+				{ "id":"seqno","name": "送信通番",  "ofs": 2, "len": 4 },
+				{ "id":"hdatm","name": "送信日時",  "ofs": 6, "len": 7 },		// BCD形式("values-def"の"valfmt"定義が必須)
+				{ "id":"dtype","name": "データ種別","ofs":13, "len": 2 },		// dtype必須
+				{ "id":"dlen", "name": "データ長",  "ofs":15, "len": 1 },		// dlen,plenどちらか必須
+	//			{ "id":"plen", "name": "パケット長","ofs":14, "len": 2 },
+			]
+		},
+		{ "id":"0091", "name":"肯定応答", "len":  0,"flds":[] },
+		{ "id":"0092", "name":"否定応答", "len": 32,"flds":[{ "id":"reson-nak", "ofs": 0, "len":2, "disp":true, },] },
+		{ "id":"0001", "name":"情報要求(イニシャライズ)", "len": 0,"flds":[] },
+		{ "id":"0002", "name":"情報要求(リフレッシュ)", "len": 0,"flds":[] },
+		{ "id":"0022", "name":"ヘルスチェック", "len":  0,"flds":[] },
+	],
+	"values-def":[
+		{ "id":"hdatm", "name":"ヘッダ日時", "format":{ "type":"datetime", "valfmt":"yyyyMMddHHmmss", "fmt":"yyyy/MM/dd-HH:mm:ss" } },
+		{ "id":"reson-nak", "name":"否定理由", "values":{"0001":"busy", "0002":"disconnect", "0008":"unknown" } },
+	],
+}
