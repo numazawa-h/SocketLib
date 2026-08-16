@@ -37,6 +37,13 @@ namespace SocketLib
                 //            JsonTest();
                 // ByteArrayTest("[ 1234 5678 9abc def0 ]");
                 NetworkDefine.GetInstance().ReadJson(".\\config\\NetworkDefine.json");
+
+                // 起動時に空読みして定義エラーがないか確認する
+                foreach (string name in NetworkDefine.GetInstance().GetNames())
+                {
+                    string config = NetworkDefine.GetInstance().GetConfig(name);
+                    RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+                }
             }
             catch (Exception ex)
             {
