@@ -18,7 +18,7 @@ namespace SocketTool
         {
         }
 
-        public CommandHead(Node node): base(node)
+        public CommandHead(Node node, RuntimeWorkingArea runtime) : base(node, runtime)
         {
         }
 
@@ -46,14 +46,13 @@ namespace SocketTool
                 msg.SetHedValue(pair.Key, pair.Value);
             }
 
-            ScriptDefine scdef = ScriptDefine.GetInstance();
             foreach (var pair in _ivalues_runtime)
             {
-                msg.SetHedValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
+                msg.SetHedValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                msg.SetHedValue(pair.Key, scdef.GetByteValue(pair.Value));
+                msg.SetHedValue(pair.Key, _runtime.Working.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {

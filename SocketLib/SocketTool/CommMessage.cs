@@ -45,25 +45,25 @@ namespace SocketTool
             Buffer.BlockCopy(other._head, 0, _head, 0, _head.Length);
         }
 
-        public CommMessage(string dtype, byte[] dat = null)
+        public CommMessage(RuntimeWorkingArea runtime, string dtype, byte[] dat = null)
         {
-            _head_def = CommMessageDefine.GetInstance().GetMessageDefine("head");
+            _head_def = runtime.GetMessageDefine("head");
             _head = new byte[_head_def.DLength];
             SetHedValue("dtype", ByteArray.ParseHex(dtype));
 
-            _data_def = CommMessageDefine.GetInstance().GetMessageDefine(dtype);
+            _data_def = runtime.GetMessageDefine(dtype);
             InitData(dat);
             SetHedDataLength(_data.Length);
         }
 
-        public CommMessage(byte[] hed, byte[] dat)
+        public CommMessage(RuntimeWorkingArea runtime, byte[] hed, byte[] dat)
         {
-            _head_def = CommMessageDefine.GetInstance().GetMessageDefine("head");
+            _head_def = runtime.GetMessageDefine("head");
             _head = new byte[_head_def.DLength];
             Buffer.BlockCopy(hed, 0, _head, 0, Math.Min(_head_def.DLength, hed.Length));
             string dtype = GetHedValue("dtype").to_hex();
 
-            _data_def = CommMessageDefine.GetInstance().GetMessageDefine(dtype);
+            _data_def = runtime.GetMessageDefine(dtype);
             _data = new byte[dat.Length];
             Buffer.BlockCopy(dat, 0, _data, 0, dat.Length);
         }
@@ -264,13 +264,13 @@ namespace SocketTool
             SetFldValue(fldid, fldvalue);
         }
 
-        public static CommMessage LoadFileBinary(string path)
+        public static CommMessage LoadFileBinary(RuntimeWorkingArea runtime, string path)
         {
             CommMessage msg = null;
             string fname = System.IO.Path.GetFileName(path);
-            int dtypelen = CommMessageDefine.GetInstance().GetMessageDefine("head").GetFldDefine("dtype").Length;
+            int dtypelen = runtime.GetMessageDefine("head").GetFldDefine("dtype").Length;
             string dtype = fname.Substring(0, dtypelen * 2);
-            if (CommMessageDefine.GetInstance().Contains(dtype) == false)
+            if (runtime.ContainsMessageDefine(dtype) == false)
             {
                 throw new Exception($"dtype'{dtype}'が定義されていません");
             }
@@ -278,13 +278,13 @@ namespace SocketTool
             {
                 byte[] dat = new byte[fs.Length];
                 fs.Read(dat, 0, dat.Length);
-                msg = new CommMessage(dtype, dat);
+                msg = new CommMessage(runtime, dtype, dat);
             }
 
             return msg;
         }
 
-        public static CommMessage LoadFileText(string path)
+        public static CommMessage LoadFileText(RuntimeWorkingArea runtime, string path)
         {
             CommMessage msg = null;
 
@@ -310,20 +310,20 @@ namespace SocketTool
                 Regex r = new Regex("[\\[\\] \\t]");
                 string hed_hex = r.Replace(matchs[0].Value, "");
                 string dat_hex = r.Replace(matchs[1].Value, "");
-                int dtypelen = CommMessageDefine.GetInstance().GetMessageDefine("head").GetFldDefine("dtype").Length;
+                int dtypelen = runtime.GetMessageDefine("head").GetFldDefine("dtype").Length;
                 if (hed_hex.Length == (dtypelen * 2))
                 {
                     // データ種別指定の時
                     string dtype = hed_hex;
                     dat = ByteArray.ParseHex(dat_hex);
-                    msg = new CommMessage(dtype, dat);
+                    msg = new CommMessage(runtime, dtype, dat);
                 }
                 else
                 {
                     // ヘッダ全体指定の時
                     hed = ByteArray.ParseHex(hed_hex);
                     dat = ByteArray.ParseHex(dat_hex);
-                    msg = new CommMessage(hed, dat);
+                    msg = new CommMessage(runtime, hed, dat);
                 }
             }
 

@@ -1,0 +1,80 @@
+﻿{
+  "config": [
+    {
+      "name": "server",
+      "script": ".\\config\\ScriptDefine.json",
+      "message": ".\\config\\CommMessageDefine.json"
+    },
+    {
+      "name": "client",
+      "script": ".\\config\\ScriptDefine.json",
+      "message": ".\\config\\CommMessageDefine.json"
+    },
+    {
+      "name": "testserver",
+      "script": ".\\config\\ScriptDefine_testserver.json",
+      "message": ".\\config\\CommMessageDefine_test.json"
+    },
+    {
+      "name": "testclient",
+      "script": ".\\config\\ScriptDefine_testclient.json",
+      "message": ".\\config\\CommMessageDefine_test.json"
+    },
+  ],
+  "listen_addr": [
+    {
+      "desc": "サーバー1",
+      "config": "server",
+      "ip": "localhost",
+      "port": 901,
+      "remote-ip": "localhost",
+      "remote-port": 801
+    },
+    {
+      "desc": "サーバー2",
+      "config": "server",
+      "ip": "localhost",
+      "port": 902
+    },
+    {
+      "desc": "testサーバー",
+      "config": "testserver",
+      "ip": "localhost",
+      "port": 909
+    },
+  ],
+  "connect_addr": [
+    {
+      "desc": "クライアント1",
+      "config": "client",
+      "ip": "localhost",
+      "port": 901,
+      "local-ip": "localhost",
+      "local-port": 801
+    },
+    {
+      "desc": "クライアント2",
+      "config": "client",
+      "ip": "localhost",
+      "port": 902,
+      "local-ip": "localhost",
+      "local-port": 802
+    },
+    {
+      "desc": "testクライアント1",
+      "config": "testclient",
+      "ip": "localhost",
+      "port": 909,
+      "local-ip": "localhost",
+      "local-port": 881
+    },
+    {
+      "desc": "testクライアント2",
+      "config": "testclient",
+      "ip": "localhost",
+      "port": 909,
+      "local-ip": "localhost",
+      "local-port": 882
+    },
+  ]
+}

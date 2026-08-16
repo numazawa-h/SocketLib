@@ -27,7 +27,7 @@ namespace SampleMain
         int _display_limit = -1;
         int _display_line = 0;
 
-        public SocketForm(CommSocket socket, string title=null)
+        public SocketForm(CommSocket socket, string title =null)
         {
             _Socket = socket;
             _Socket.OnDisConnectEvent += OnDisConnect;
@@ -35,12 +35,12 @@ namespace SampleMain
             _Socket.OnPreSendCommEvent += OnPreSend;
             _Socket.OnSendCommEvent += OnSend;
 
+            WorkingArea working = socket.GeRuntime().Working;
             InitializeComponent();
 
-            ScriptDefine scd = ScriptDefine.GetInstance();
-            if (scd.ContainsKeyIntValue("display_limit"))
+            if (working.ContainsKeyIntValue("display_limit"))
             {
-                _display_limit = scd.GetIntValue("display_limit");
+                _display_limit = working.GetIntValue("display_limit");
             }
 
             txt_ipAddr1.Text = socket.LocalIPAddress?.ToString();
@@ -70,7 +70,7 @@ namespace SampleMain
             // 電文表示指定チェックボックスセットアップ
             int cmdidx =0;
             int dispidx = 8;
-            foreach (ScriptList script in ScriptDefine.GetInstance().GetScriptListOnDisplay())
+            foreach (ScriptGroup script in _Socket.GeRuntime().Scripts.GetScriptListOnDisplay())
             {
                 if (script.Display)
                 {
@@ -100,10 +100,10 @@ namespace SampleMain
             }
 
             // 電文編集タブのセットアップ
-            foreach ( string id in ScriptDefine.GetInstance().GetValueMsgKeyList())
+            foreach ( string id in working.GetValueMsgKeyList())
             {
-                CommMessage msg= ScriptDefine.GetInstance().GetValueMsg(id);
-                string disp = ScriptDefine.GetInstance().GetValueMsgDisp(id);
+                CommMessage msg= working.GetValueMsg(id);
+                string disp = working.GetValueMsgDisp(id);
                 cbx_MessageType.AddItem(disp, msg);
             }
             _CommMessageEditor= new CommMessageEditor(pnl_commMessage, btn_001, cbx_001, lbl_001, cbx_MessageType.Width - 20, cbx_001.Height + 4);
@@ -162,7 +162,7 @@ namespace SampleMain
                     DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
                 }
                 Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
-                ScriptDefine.GetInstance().ExecOnRecv(_Socket, msg);
+                _Socket.GeRuntime().Scripts.ExecOnRecv(_Socket, msg);
                 _CommMessageEditor.refresh();
             }
             catch (Exception ex)
@@ -183,7 +183,7 @@ namespace SampleMain
             CommMessage msg = (args.CommMsg);
             try
             {
-                ScriptDefine.GetInstance().ExecOnSend(_Socket, msg);
+                _Socket.GeRuntime().Scripts.ExecOnSend(_Socket, msg);
             }
             catch (Exception ex)
             {
@@ -221,7 +221,7 @@ namespace SampleMain
             for (int i = 8; i < 12; i++)
             {
                 CheckBox cb = this._checkBoxes[i];
-                ScriptList scr = (ScriptList)cb.Tag;
+                ScriptGroup scr = (ScriptGroup)cb.Tag;
                 if(scr!=null && scr.Exec(_Socket, msg) == true)
                 {
                     return cb.Checked;
@@ -232,7 +232,7 @@ namespace SampleMain
         private void SocketForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _Socket.Close();
-            ScriptDefine.GetInstance().ExecOnDisconnect();
+            _Socket.GeRuntime().Scripts.ExecOnDisconnect();
         }
 
         private void btn_clear_Click(object sender, EventArgs e)
@@ -245,7 +245,7 @@ namespace SampleMain
         {
             try
             {
-                ScriptDefine.GetInstance().ExecOnConnect(_Socket);
+                _Socket.GeRuntime().Scripts.ExecOnConnect(_Socket);
             }
             catch (Exception ex)
             {
@@ -259,7 +259,7 @@ namespace SampleMain
         private void checkBox_CheckedChanged(object sender, EventArgs e)
         {
             CheckBox cb =(CheckBox)sender;
-            ((ScriptList)cb.Tag).Enabled = cb.Checked;
+            ((ScriptGroup)cb.Tag).Enabled = cb.Checked;
         }
 
 
@@ -292,12 +292,12 @@ namespace SampleMain
                     string file_ext = Path.GetExtension(path);
                     if (file_ext == ".txt")
                     {
-                        CommMessage msg = CommMessage.LoadFileText(path);
+                        CommMessage msg = CommMessage.LoadFileText(_Socket.GeRuntime(), path);
                         _Socket.Send(msg);
                     }
                     else if (file_ext == ".bin")
                     {
-                        CommMessage msg = CommMessage.LoadFileBinary(path);
+                        CommMessage msg = CommMessage.LoadFileBinary(_Socket.GeRuntime(), path);
                         _Socket.Send(msg);
                     }
                     else if (file_ext == ".json")
@@ -305,7 +305,7 @@ namespace SampleMain
                         JsonConfig.RootNode root = JsonConfig.ReadJson(path);
                         foreach (Node def in root["Commands"])
                         {
-                            Command.ReadJson(def).Exec(_Socket);
+                            Command.ReadJson(def, _Socket.GeRuntime()).Exec(_Socket);
                         }
                     }
                 }
@@ -325,7 +325,7 @@ namespace SampleMain
 
         private void Btn_init_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.InitCommMessage();
+            _CommMessageEditor.InitCommMessage(_Socket.GeRuntime().Working);
         }
 
         private void Btn_send_Click(object sender, EventArgs e)
@@ -340,7 +340,7 @@ namespace SampleMain
 
         private void Btn_load_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.Load();
+            _CommMessageEditor.Load(_Socket.GeRuntime());
         }
     }
 }

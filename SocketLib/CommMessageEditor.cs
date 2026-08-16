@@ -155,9 +155,9 @@ namespace SocketLib
             socket.Send(_commMsg);
         }
 
-        public void InitCommMessage()
+        public void InitCommMessage(WorkingArea workarea)
         {
-            _commMsg = ScriptDefine.GetInstance().InitMessage(_commMsgName);
+            _commMsg = workarea.InitMessage(_commMsgName);
             refresh();
         }
 
@@ -659,7 +659,7 @@ namespace SocketLib
             }
         }
 
-        public void Load()
+        public void Load(RuntimeWorkingArea runtime)
         {
             try
             {
@@ -671,11 +671,11 @@ namespace SocketLib
                     if (dlg.ShowDialog() == DialogResult.OK)
                     {
                         string path = dlg.FileName;
-                        CommMessage msg = CommMessage.LoadFileText(path);
+                        CommMessage msg = CommMessage.LoadFileText(runtime, path);
                         if (msg.DType != _commMsg.DType){
                             throw new Exception($"データ種別が異なります");
                         }
-                        _commMsg = ScriptDefine.GetInstance().LoadMessage(_commMsgName, msg);
+                        _commMsg = runtime.Working.LoadMessage(_commMsgName, msg);
                         refresh();
                     }
                 }

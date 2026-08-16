@@ -20,8 +20,8 @@ namespace SocketTool
         {
         }
 
-        public CommandSend(Node node) : base(node)
-        {
+        public CommandSend(Node node, RuntimeWorkingArea runtime) : base(node, runtime)
+        { 
             // ひな形読み込み
             string dtype = node["dtype"].Required();
             string tmpl = node["tmpl"];
@@ -68,11 +68,11 @@ namespace SocketTool
                 string file_ext = Path.GetExtension(path);
                 if (file_ext == ".txt")
                 {
-                    msg = CommMessage.LoadFileText(path);
+                    msg = CommMessage.LoadFileText(_runtime, path);
                 }
                 else if (file_ext == ".bin")
                 {
-                    msg = CommMessage.LoadFileBinary(path);
+                    msg = CommMessage.LoadFileBinary(_runtime, path);
                 }
                 else
                 {
@@ -83,7 +83,7 @@ namespace SocketTool
             }
             else
             {
-                return new CommMessage(dtype);
+                return new CommMessage(_runtime, dtype);
             }
         }
 
@@ -95,14 +95,13 @@ namespace SocketTool
         public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
             CommMessage msg = new CommMessage(_msg);
-            ScriptDefine scdef = ScriptDefine.GetInstance();
             foreach (var pair in _ivalues_runtime)
             {
-                msg.SetFldValue(pair.Key, (ulong)scdef.GetIntValue(pair.Value));
+                msg.SetFldValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));
             }
             foreach (var pair in _bvalues_runtime)
             {
-                msg.SetFldValue(pair.Key, scdef.GetByteValue(pair.Value));
+                msg.SetFldValue(pair.Key, _runtime.Working.GetByteValue(pair.Value));
             }
             foreach (var pair in _datetime_runtime)
             {

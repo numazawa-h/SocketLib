@@ -16,33 +16,32 @@ namespace SocketTool
         {
         }
 
-        public CommandSet(Node node)
+        public CommandSet(Node node, RuntimeWorkingArea runtime)
         {
+            _runtime = runtime;
             CommandId = node["id"].Required();
             _ivalues.Clear();
             _bvalues.Clear();
-            _ivalues_runtime.Clear();
-            _bvalues_runtime.Clear();
-            _datetime_runtime.Clear();
+            _ivalues_runtime.Clear();   // 未使用
+            _bvalues_runtime.Clear();   // 未使用
+            _datetime_runtime.Clear();  // 未使用
 
             Dictionary<string, JsonValue> values = node["values"].GetPropertyValues();
             foreach (var pair in values)
             {
                 string key = pair.Key;
                 JsonValue value = pair.Value;
-                // ScriptDefineの values定義項目を対象とする
-                ScriptDefine scdef = ScriptDefine.GetInstance();
                 switch (value.GetValueKind())
                 {
                     case System.Text.Json.JsonValueKind.Number:
-                        if (scdef.ContainsKeyIntValue(key)==false)
+                        if (_runtime.Working.ContainsKeyIntValue(key)==false)
                         {
                             throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
                         }
                         _ivalues.Add(key, value.GetValue<int>());
                         break;
                     case System.Text.Json.JsonValueKind.String:
-                        if (scdef.ContainsKeyByteValue(key) == false)
+                        if (_runtime.Working.ContainsKeyByteValue(key) == false)
                         {
                             throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
                         }
@@ -62,14 +61,13 @@ namespace SocketTool
 
         public override void Exec(CommSocket socket, /* 未使用*/ CommMessage msg = null)
         {
-            ScriptDefine scdef = ScriptDefine.GetInstance();
             foreach (var pair in _ivalues)
             {
-                scdef.SetIntValue(pair.Key, pair.Value);
+                _runtime.Working.SetIntValue(pair.Key, pair.Value);
             }
             foreach (var pair in _bvalues)
             {
-                scdef.SetByteValue(pair.Key, pair.Value);
+                _runtime.Working.SetByteValue(pair.Key, pair.Value);
             }
         }
     }

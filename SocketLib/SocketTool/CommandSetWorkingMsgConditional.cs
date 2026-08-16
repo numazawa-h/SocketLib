@@ -23,8 +23,9 @@ namespace SocketTool
         {
         }
 
-        public CommandSetWorkingMsgConditional(Node node, string owner_id)
+        public CommandSetWorkingMsgConditional(Node node, RuntimeWorkingArea runtime, string owner_id)
         {
+            _runtime = runtime;
             _owner_id = owner_id;
             _msgname = node["msg"];
             string id = node["id"];
@@ -35,7 +36,7 @@ namespace SocketTool
                 {
                     _caselist.Add(case1);
                     node1.AddValue("id", node1._name);      // Commandクラスが'id'必須なので追加しておく
-                    _commands.Add(new CommandSetWorkingMsg(node1, _msgname));
+                    _commands.Add(new CommandSetWorkingMsg(node1, runtime, _msgname));
                 }
                 else
                 {
@@ -46,7 +47,7 @@ namespace SocketTool
                         {
                             _caselist.Add(case2);
                             node2.AddValue("id", node2._name);      // Commandクラスが'id'必須なので追加しておく
-                            _commands.Add(new CommandSetWorkingMsg(node2, _msgname));
+                            _commands.Add(new CommandSetWorkingMsg(node2, runtime, _msgname));
                         }
                         else
                         {
@@ -57,7 +58,7 @@ namespace SocketTool
                                 {
                                     _caselist.Add(case3);
                                     node3.AddValue("id", node3._name);      // Commandクラスが'id'必須なので追加しておく
-                                    _commands.Add(new CommandSetWorkingMsg(node3, _msgname));
+                                    _commands.Add(new CommandSetWorkingMsg(node3, runtime, _msgname));
                                 }
                                 else
                                 {
@@ -68,7 +69,7 @@ namespace SocketTool
                                         {
                                             _caselist.Add(case4);
                                             node4.AddValue("id", node4._name);      // Commandクラスが'id'必須なので追加しておく
-                                            _commands.Add(new CommandSetWorkingMsg(node4, _msgname));
+                                            _commands.Add(new CommandSetWorkingMsg(node4, runtime, _msgname));
                                         }
                                         else
                                         {
@@ -79,7 +80,7 @@ namespace SocketTool
                                                 {
                                                     _caselist.Add(case5);
                                                     node5.AddValue("id", node5._name);      // Commandクラスが'id'必須なので追加しておく
-                                                    _commands.Add(new CommandSetWorkingMsg(node5, _msgname));
+                                                    _commands.Add(new CommandSetWorkingMsg(node5, runtime, _msgname));
                                                 }
                                                 else
                                                 {
@@ -115,7 +116,7 @@ namespace SocketTool
             int idx = 0;
             foreach (CaseList caselist in _caselist)
             {
-                if (caselist.isTarget(resmsg))
+                if (caselist.isTarget(resmsg, _runtime.Working))
                 {
                     _commands[idx].Exec(socket, resmsg);
                     break;

@@ -29,19 +29,23 @@ namespace SocketTool
         public event CommMessageEventHandler OnPreSendCommEvent;
         public event CommMessageEventHandler OnRecvCommEvent;
 
-        public CommSocket() : base() 
+        private RuntimeWorkingArea _runtime;
+        public RuntimeWorkingArea GeRuntime() { return _runtime; }
+
+        public CommSocket(RuntimeWorkingArea runtime) : base() 
         {
-            init();
+            init(runtime);
         }
 
-        public CommSocket(Socket soc) : base(soc)
+        public CommSocket(Socket soc, RuntimeWorkingArea runtime) : base(soc)
         {
-            init();
+            init(runtime);
         }
 
-        private void init()
+        private void init(RuntimeWorkingArea runtime)
         {
-            MessageDefine def = CommMessageDefine.GetInstance().GetMessageDefine("head");
+            _runtime = runtime;
+            MessageDefine def = _runtime.GetMessageDefine("head");
             int ofs = -1;
             int len = -1;
             bool bPacket = false;
@@ -78,7 +82,7 @@ namespace SocketTool
             try
             {
                 Socket soc = socket._soc.EndAccept(ar);
-                OnAccept(new CommSocket(soc));
+                OnAccept(new CommSocket(soc, _runtime));
             }
             catch (Exception ex)
             {
@@ -88,7 +92,7 @@ namespace SocketTool
         }
         protected override void OnRecvEx()
         {
-            CommMessage msg = new CommMessage(_comm_header, _comm_data);
+            CommMessage msg = new CommMessage(_runtime, _comm_header, _comm_data);
             OnRecvCommEvent?.Invoke(this, new CommMessageEventArgs(this, msg));
         }
 

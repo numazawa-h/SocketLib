@@ -12,15 +12,16 @@ namespace SocketTool
     {
         private HashSet<string> _timer_on_name = new HashSet<string>();
         private HashSet<string> _timer_off_name = new HashSet<string>();
-        private List<ScriptTimer> _timer_on = new List<ScriptTimer>();
-        private List<ScriptTimer> _timer_off = new List<ScriptTimer>();
+        private List<ScriptGroupOnTimer> _timer_on = new List<ScriptGroupOnTimer>();
+        private List<ScriptGroupOnTimer> _timer_off = new List<ScriptGroupOnTimer>();
 
         private CommandTimer()
         {
         }
 
-        public CommandTimer(Node node) : base(node)
+        public CommandTimer(Node node, RuntimeWorkingArea runtime)
         {
+            _runtime = runtime;
             if (node.ContainsKey("timer-on")==false && node.ContainsKey("timer-off")==false)
             {
                 throw new Exception($"Timerコマンド'{CommandId}'には'timer-on'または'timer-off'が必要です");
@@ -42,16 +43,14 @@ namespace SocketTool
             base.Copy(cmd);
             cmd._timer_on_name = new HashSet<string>(_timer_on_name);
             cmd._timer_off_name = new HashSet<string>(_timer_off_name);
-            cmd._timer_on = new List<ScriptTimer>(_timer_on);
-            cmd._timer_off = new List<ScriptTimer>(_timer_off);
+            cmd._timer_on = new List<ScriptGroupOnTimer>(_timer_on);
+            cmd._timer_off = new List<ScriptGroupOnTimer>(_timer_off);
 
             return cmd;
         }
 
-        public void SetTimerScript()
+        public void SetTimerScript(ScriptGroupDefine scr)
         {
-            ScriptDefine scr = ScriptDefine.GetInstance();
-
             _timer_on.Clear();
             foreach (string name in _timer_on_name)
             {
@@ -80,11 +79,11 @@ namespace SocketTool
 
         public override void Exec(CommSocket socket, CommMessage msg = null)
         {
-            foreach(ScriptTimer timer in _timer_off)
+            foreach(ScriptGroupOnTimer timer in _timer_off)
             {
                 timer.Reset(false);
             }
-            foreach (ScriptTimer timer in _timer_on)
+            foreach (ScriptGroupOnTimer timer in _timer_on)
             {
                 timer.Reset(true);
             }

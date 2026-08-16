@@ -12,31 +12,23 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using NCommonUtility;
 using SocketTool;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using static SocketLib.Program;
 
 namespace SampleMain
 {
     public partial class MainForm : Form
     {
-        CommSocket listensocket = new CommSocket();
+        CommSocket listensocket = null;
         Point SocketFormLocation = new Point(-1, -1);
 
         public MainForm()
         {
             InitializeComponent();
-            listensocket.OnExceptionEvent += OnException;
-            listensocket.OnAcceptEvent += OnAccept;
-            listensocket.OnDisConnectEvent += OnDisConnect;
 
-            (string desc, IPEndPoint epoint, HashSet<string>remote)[] local = ScriptDefine.GetInstance().GetLocalAddr();
-            foreach (var item in local)
+            foreach (var item in NetworkDefine.GetInstance().GetNames())
             {
-               this.cbx_addr1.AddItem(item.desc, (item.epoint, item.remote));
-            }
-            (string desc, IPEndPoint epoint)[] remote = ScriptDefine.GetInstance().GetRemoteAddr();
-            foreach (var item in remote)
-            {
-                this.cbx_addr2.AddItem(item.desc, item.epoint);
+               this.cbx_NetworkName.Items.Add(item);
             }
         }
 
@@ -55,6 +47,13 @@ namespace SampleMain
                 return;
             }
             DisplayLog($"listen [{iaddr1} Port#{portno1}]");
+            string name = (string)cbx_NetworkName.SelectedItem;
+            string config = NetworkDefine.GetInstance().GetConfig(name);
+            RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+            listensocket = new CommSocket(runtime);
+            listensocket.OnExceptionEvent += OnException;
+            listensocket.OnAcceptEvent += OnAccept;
+            listensocket.OnDisConnectEvent += OnDisConnect;
             try
             {
                 listensocket.Listen(iaddr1, portno1);
@@ -79,7 +78,10 @@ namespace SampleMain
 
         private void btn_connect_Click(object sender, EventArgs e)
         {
-            CommSocket socket = new CommSocket();
+            string name = (string)cbx_NetworkName.SelectedItem;
+            string config = NetworkDefine.GetInstance().GetConfig(name);
+            RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+            CommSocket socket = new CommSocket(runtime);
             socket.OnExceptionEvent += OnException;
             socket.OnConnectEvent += OnConnect;
             socket.OnDisConnectEvent += OnDisConnect;
@@ -159,7 +161,12 @@ namespace SampleMain
             socket.OnDisConnectEvent += OnDisConnect;
 
             DisplayLog($"OnAccept {socket.RemoteIPAddress}:{socket.RemotePortno}");
-            var frm = new SocketForm(socket, this.cbx_addr1.Text);
+            string title = "サーバー";
+            if (cbx_NetworkName.SelectedIndex >= 0)
+            {
+                title = cbx_NetworkName.Text;
+            }
+            var frm = new SocketForm(socket, title);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);
@@ -188,7 +195,12 @@ namespace SampleMain
                 return;
             }
             DisplayLog($"OnConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
-            var frm = new SocketForm((CommSocket)args.Socket, this.cbx_addr1.Text);
+            string title = "クライアント";
+            if (cbx_NetworkName.SelectedIndex >= 0)
+            {
+                title = cbx_NetworkName.Text;
+            }
+            var frm = new SocketForm((CommSocket)args.Socket, title);
             if (SocketFormLocation.X < 0)
             {
                 SocketFormLocation = new Point(this.Location.X, this.Location.Y);
@@ -199,38 +211,68 @@ namespace SampleMain
             frm.Show();
         }
 
-        private void cbx_addr1_SelectedIndexChanged(object sender, EventArgs e)
+        private void Cbx_NetworkName_SelectedIndexChanged(object sender, EventArgs e)
         {
-            (IPEndPoint ep, HashSet<string> remote) val = ((IPEndPoint, HashSet<string>))cbx_addr1.SelectedValue;
-            txt_ipAddr1.Text = val.ep.Address.ToString();
-            txt_portNo1.Text = val.ep.Port.ToString();
-            ScriptDefine.GetInstance().OnSelectLocal(cbx_addr1.Text);
-            (string desc, IPEndPoint epoint)[] remote = ScriptDefine.GetInstance().GetRemoteAddr();
-            cbx_addr2.ClearItems();
-            cbx_addr2.Text = "";
-            foreach (var item in remote)
+            if(cbx_NetworkName.SelectedIndex < 0)
             {
-                if (val.remote.Count == 0 || val.remote.Contains(item.desc))
-                {
-                    this.cbx_addr2.AddItem(item.desc, item.epoint);
-                }
-            }
-            if (cbx_addr2.SelectedIndex < 0 && cbx_addr2.Items.Count >0)
-            {
-                cbx_addr2.SelectedItem = cbx_addr2.Items[0];
-            }
-        }
-        private void cbx_addr2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            IPEndPoint val = (IPEndPoint)cbx_addr2.SelectedValue;
-            if (val==null)
-            {
+                btn_listen.Enabled = true;
+                btn_stopListen.Enabled = true;
+                btn_connect.Enabled = true;
                 return;
             }
-            txt_ipAddr2.Text = val.Address.ToString();
-            txt_portNo2.Text = val.Port.ToString();
-            ScriptDefine.GetInstance().OnSelectRemote(cbx_addr2.Text);
+
+            string name = this.cbx_NetworkName.Text;
+            IPEndPoint local = NetworkDefine.GetInstance().GetLocalEndPoint(name);
+            if (local == null)
+            {
+                this.txt_ipAddr1.Text = "";
+                this.txt_portNo1.Text = "";
+            }
+            else
+            {
+                this.txt_ipAddr1.Text = local.Address.ToString();
+                this.txt_portNo1.Text = local.Port.ToString();
+            }
+
+            IPEndPoint remote = NetworkDefine.GetInstance().GetRemoteEndPoint(name);
+            if (remote == null)
+            {
+                this.txt_ipAddr2.Text = "";
+                this.txt_portNo2.Text = "";
+            }
+            else
+            {
+                this.txt_ipAddr2.Text = remote.Address.ToString();
+                this.txt_portNo2.Text = remote.Port.ToString();
+            }
+
+            if (NetworkDefine.GetInstance().isListenAddr(name))
+            {
+                btn_listen.Enabled = true;
+                btn_stopListen.Enabled = true;
+                btn_connect.Enabled = false;
+            }
+            else if (NetworkDefine.GetInstance().isConnectAddr(name))
+            {
+                btn_listen.Enabled = false;
+                btn_stopListen.Enabled = false;
+                btn_connect.Enabled = true;
+            }
+            else
+            {
+                btn_listen.Enabled = true;
+                btn_stopListen.Enabled = true;
+                btn_connect.Enabled = true;
+            }
         }
 
+        private void Cbx_NetworkName_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+            {
+                cbx_NetworkName.SelectedIndex = -1;
+                cbx_NetworkName.Text = "";
+            }
+        }
     }
 }

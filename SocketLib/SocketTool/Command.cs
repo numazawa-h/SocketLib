@@ -22,6 +22,7 @@ namespace SocketTool
 
     public abstract class Command
     {
+        protected RuntimeWorkingArea _runtime;
         public string CommandId { get; protected set; }
         protected Dictionary<string, int> _ivalues = new Dictionary<string, int>();
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
@@ -38,6 +39,7 @@ namespace SocketTool
 
         protected Command Copy(Command other)
         {
+            other._runtime = _runtime;
             other.CommandId = CommandId;
             other._ivalues = _ivalues;
             other._bvalues = _bvalues;
@@ -55,8 +57,9 @@ namespace SocketTool
 
         }
 
-        protected Command(Node node)
+        protected Command(Node node, RuntimeWorkingArea runtime)
         {
+            _runtime = runtime;
             CommandId = node["id"].Required();
             _ivalues.Clear();
             _bvalues.Clear();
@@ -90,9 +93,9 @@ namespace SocketTool
                         break;
                     case System.Text.Json.JsonValueKind.String:
                         string sval = value.ToString();
-                        CommMessageDefine.Format fmtdef = CommMessageDefine.GetInstance().GetValuesDefine(key)?.FormatDef;
+                        Format fmtdef = runtime.GetValuesDefine(key)?.FormatDef;
                         string fmt = fmtdef?.GetValueFormat();
-                        if (fmtdef is CommMessageDefine.FormatDateTime)
+                        if (fmtdef is FormatDateTime)
                         {
                             if (fmt == null)
                             {
@@ -111,12 +114,11 @@ namespace SocketTool
                         else
                         {
                             // ScriptDefineの Working-area定義項目の時の処理
-                            ScriptDefine scdef = ScriptDefine.GetInstance();
-                            if (scdef.ContainsKeyIntValue(sval))
+                            if (_runtime.Working.ContainsKeyIntValue(sval))
                             {
                                 _ivalues_runtime.Add(key, sval);
                             }
-                            else if (scdef.ContainsKeyByteValue(sval))
+                            else if (_runtime.Working.ContainsKeyByteValue(sval))
                             {
                                 _bvalues_runtime.Add(key, sval);
                             }
@@ -213,7 +215,7 @@ namespace SocketTool
             _bvalues.Add(key, ByteArray.ParseHex(sval));
         }
 
-        public static Command ReadJson(Node node)
+        public static Command ReadJson(Node node, RuntimeWorkingArea runtime)
         {
             Command cmd = null;
             string cmdid = node["id"].Required();
@@ -221,43 +223,43 @@ namespace SocketTool
             switch (cmdtype)
             {
                 case "head":
-                    cmd = new CommandHead(node);
+                    cmd = new CommandHead(node, runtime);
                     break;
                 case "set":
                     if (node.ContainsKey("msg"))
                     {
                         if (node.ContainsKey("select"))
                         {
-                            cmd = new CommandSetWorkingMsgConditional(node, cmdid);
+                            cmd = new CommandSetWorkingMsgConditional(node, runtime, cmdid);
                         }
                         else
                         {
-                            cmd = new CommandSetWorkingMsg(node);
+                            cmd = new CommandSetWorkingMsg(node, runtime);
                         }
                     }
                     else
                     {
-                        cmd = new CommandSet(node);
+                        cmd = new CommandSet(node,runtime);
                     }
                     break;
                 case "send":
                     if (node.ContainsKey("msg"))
                     {
-                        cmd = new CommandSendWorkingMsg(node);
+                        cmd = new CommandSendWorkingMsg(node, runtime);
                     }
                     else
                     {
-                        cmd = new CommandSend(node);
+                        cmd = new CommandSend(node, runtime);
                     }
                     break;
                 case "timer":
                     if (node.ContainsKey("select"))
                     {
-                        cmd = new CommandTimerConditional(node, cmdid);
+                        cmd = new CommandTimerConditional(node, runtime, cmdid);
                     }
                     else
                     {
-                        cmd = new CommandTimer(node);
+                        cmd = new CommandTimer(node, runtime);
                     }
                     break;
                 default:
