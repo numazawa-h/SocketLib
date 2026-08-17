@@ -59,7 +59,12 @@ namespace SocketTool
                     throw new InvalidOperationException($"ScriptDefineのvalues('{key}')で読み込みエラー in {path}", ex);
                 }
             }
+            return working;
+        }
 
+        public void ReadJsonMsg(string path, RuntimeWorkingArea runtime)
+        {
+            RootNode root = JsonConfig.ReadJson(path);
             foreach (Node node in root["Working-area"].GetPropertyObjects())
             {
                 string id = node._name;
@@ -69,21 +74,20 @@ namespace SocketTool
                     node.AddValue("id", id);      // Commandクラスが'id'必須なので追加しておく
                     CommandSend cmd = new CommandSend(node, runtime);
                     CommMessage msg = cmd.GetMessage();
-                    working._commMessages.Add(id, msg);
-                    working._commMessagesInit.Add(id, new CommMessage(msg));
+                    this._commMessages.Add(id, msg);
+                    this._commMessagesInit.Add(id, new CommMessage(msg));
                     string display = node["name"];
                     if (display == null)
                     {
                         display = msg.DName;
                     }
-                    working._commMessagesDisp.Add(display, id);
+                    this._commMessagesDisp.Add(display, id);
                 }
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException($"ScriptDefineのvalues('{id}')で読み込みエラー in {path}", ex);
                 }
             }
-            return working;
         }
 
         public string[] GetValueMsgKeyList()

@@ -56,8 +56,8 @@ namespace SocketTool
                 {
                     throw new Exception($"listen_addr({desc})で指定された{config}が定義されていません({path})");
                 }
-                string iaddr = node["ip"].Required();
-                int portno = node["port"].Required();
+                string iaddr = node["local-ip"].Required();
+                int portno = node["local-port"].Required();
                 IPEndPoint local_addr = NSocket.GetIPEndPoint(iaddr, portno);
                 IPEndPoint remote_addr = null;
                 iaddr = node["remote-ip"];
@@ -78,8 +78,8 @@ namespace SocketTool
                 {
                     throw new Exception($"connect_addr({desc})で指定された{config}が定義されていません({path})");
                 }
-                string iaddr = node["ip"].Required();
-                int portno = node["port"].Required();
+                string iaddr = node["remote-ip"].Required();
+                int portno = node["remote-port"].Required();
                 IPEndPoint remote_addr = NSocket.GetIPEndPoint(iaddr, portno);
                 IPEndPoint local_addr = null;
                 iaddr = node["local-ip"];

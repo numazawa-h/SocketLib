@@ -13,7 +13,7 @@
   "Working-area":{	
     "++seqno":123,
     "status":{"name":"状態送信電文", "dtype":"14", "values":{
-    	"blk[0].b02_3":0,
+    	"blk[0].b02_3":0, "sts001":"99",
     }},
     "control":{"dtype":"30",},
 

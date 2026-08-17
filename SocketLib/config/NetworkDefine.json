@@ -25,56 +25,56 @@
     {
       "desc": "サーバー1",
       "config": "server",
-      "ip": "localhost",
-      "port": 901,
+      "local-ip": "localhost",
+      "local-port": 901,
       "remote-ip": "localhost",
-      "remote-port": 801
+      "remote-port": 801,
     },
     {
       "desc": "サーバー2",
       "config": "server",
-      "ip": "localhost",
-      "port": 902
+      "local-ip": "localhost",
+      "local-port": 902,
     },
     {
       "desc": "testサーバー",
       "config": "testserver",
-      "ip": "localhost",
-      "port": 909
+      "local-ip": "localhost",
+      "local-port": 909,
     },
   ],
   "connect_addr": [
     {
       "desc": "クライアント1",
       "config": "client",
-      "ip": "localhost",
-      "port": 901,
       "local-ip": "localhost",
-      "local-port": 801
+      "local-port": 801,
+      "remote-ip": "localhost",
+      "remote-port": 901,
     },
     {
       "desc": "クライアント2",
       "config": "client",
-      "ip": "localhost",
-      "port": 902,
       "local-ip": "localhost",
-      "local-port": 802
+      "local-port": 802,
+      "remote-ip": "localhost",
+      "remote-port": 902,
     },
     {
       "desc": "testクライアント1",
       "config": "testclient",
-      "ip": "localhost",
-      "port": 909,
       "local-ip": "localhost",
-      "local-port": 881
+      "local-port": 881,
+      "remote-ip": "localhost",
+      "remote-port": 909,
     },
     {
       "desc": "testクライアント2",
       "config": "testclient",
-      "ip": "localhost",
-      "port": 909,
       "local-ip": "localhost",
-      "local-port": 882
+      "local-port": 882,
+      "remote-ip": "localhost",
+      "remote-port": 909,
     },
   ]
 }
