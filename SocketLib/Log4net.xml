@@ -33,7 +33,7 @@
       
       <!-- ログの出力書式 -->
       <layout type="log4net.Layout.PatternLayout">
-        <ConversionPattern value="%date %level [%thread] [%-8method] %message%n" />
+        <ConversionPattern value="%date %level [%thread] [%-10method] %message%n" />
       </layout>
     </appender>
     <root>

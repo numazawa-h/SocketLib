@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -27,6 +28,8 @@ namespace SampleMain
         CommMessageEditor _CommMessageEditor;
         int _display_limit = -1;
         int _display_line = 0;
+        string _logname = string.Empty;
+        NLog _log = null;
 
         public SocketForm(CommSocket socket, string title =null)
         {
@@ -149,6 +152,33 @@ namespace SampleMain
                     this.Text = "クライアントソケット" + ipaddress;
                 }
             }
+
+            // SocketFormごとにログファイルを作る
+            _logname = this.Text;
+            _log = Log.GetLogger(_logname);
+            var assembly = Assembly.GetExecutingAssembly().GetName();
+            var ver = assembly.Version;
+            _log.Info($"{assembly.Name} (version{ver.Major}.{ver.Minor}.{ver.Build}) Started(SocketForm)*******************************************");
+        }
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <remarks>
+        /// NLogの解放を含めるためにSocketForm.Designer.csから移動
+        /// </remarks>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+                Log.RemoveLogger(_logname);
+            }
+            base.Dispose(disposing);
         }
 
         private void DisplayLog(string message)
@@ -186,14 +216,14 @@ namespace SampleMain
                 {
                     DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
                 }
-                Log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
+                _log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
                 _Socket.GeRuntime().Scripts.ExecOnRecv(_Socket, msg);
                 _CommMessageEditor.refresh();
             }
             catch (Exception ex)
             {
                 string errmsg = $"OnReceiveイベントハンドラで例外発生({msg.DName})";
-                Log.Warn(errmsg, ex);
+                _log.Warn(errmsg, ex);
                 DisplayLog(errmsg);
             }
         }
@@ -213,7 +243,7 @@ namespace SampleMain
             catch (Exception ex)
             {
                 string errmsg = $"OnPreSendイベントハンドラで例外発生({msg.DName})";
-                Log.Warn(errmsg, ex);
+                _log.Warn(errmsg, ex);
                 DisplayLog(errmsg);
             }
         }
@@ -231,12 +261,12 @@ namespace SampleMain
                 {
                     DisplayLog($"SEND {msg.DName}{msg.GetDescription()}");
                 }
-                Log.Info($"SEND {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
+                _log.Info($"SEND {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
             }
             catch (Exception ex)
             {
                 string errmsg = $"OnSendイベントハンドラで例外発生({msg.DName})";
-                Log.Warn(errmsg, ex);
+                _log.Warn(errmsg, ex);
                 DisplayLog(errmsg);
             }
         }
@@ -275,7 +305,7 @@ namespace SampleMain
             catch (Exception ex)
             {
                 string errmsg = $"SocketForm_Loadイベントハンドラで例外発生)";
-                Log.Warn(errmsg, ex);
+                _log.Warn(errmsg, ex);
                 DisplayLog(errmsg);
             }
         }
@@ -336,7 +366,7 @@ namespace SampleMain
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn($"ドラッグドロップ'{path}'読み込みで例外", ex);
+                    _log.Warn($"ドラッグドロップ'{path}'読み込みで例外", ex);
                 }
             }
         }
