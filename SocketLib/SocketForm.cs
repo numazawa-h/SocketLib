@@ -8,6 +8,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -109,19 +110,43 @@ namespace SampleMain
             _CommMessageEditor= new CommMessageEditor(pnl_commMessage, btn_001, cbx_001, lbl_001, cbx_MessageType.Width - 20, cbx_001.Height + 4);
 
             // タイトル設定
+            IPAddress ip = null;
+            int? portno = null;
+            if (socket.isServer)
+            {
+                // listen-acceptなら相手先アドレス
+                ip = socket.RemoteIPAddress;
+                portno = socket.RemotePortno;
+            }
+            if (socket.isClient)
+            {
+                // connectなら自アドレス
+                ip = socket.LocalIPAddress;
+                portno = socket.LocalPortno;
+            }
+            string ipaddress = "";
+            if (ip != null)
+            {
+                ipaddress = $"[{ip.ToString()}";
+                if (portno != null)
+                {
+                    ipaddress += "-" + portno;
+                }
+                ipaddress += "]";
+            }
             if (title != null)
             {
-                this.Text = title;
+                this.Text = title + ipaddress;
             }
             else
             {
                 if (socket.isServer)
                 {
-                    this.Text = "サーバーソケット";
+                    this.Text = "サーバーソケット" + ipaddress;
                 }
                 if (socket.isClient)
                 {
-                    this.Text = "クライアントソケット";
+                    this.Text = "クライアントソケット" + ipaddress;
                 }
             }
         }
