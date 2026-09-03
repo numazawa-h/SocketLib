@@ -6,18 +6,24 @@
       <param name="File" value=".\log\Log_" />
       <!-- ファイル名の日付部分 -->
       <param name="DatePattern" value='yyyyMMdd".log"' />
-      <!-- 日付ごとにファイルを作成することを指定 -->
+      <!-- 日付ごとにファイルを作成することを指定(date:日替わり, size:容量, Composite:日替わり&容量) -->
       <param name="RollingStyle" value="date" />
       <!-- ログ・ファイル名が固定ではないので“false”を指定 -->
       <param name="StaticLogFileName" value="false" />
       <!-- 追加書き込み -->
       <param name="AppendToFile" value="true" />
-      <lockingModel type="log4net.Appender.FileAppender+MinimalLock" />
-      
+
+      <!-- ファイル書き込み時のロック方法 -->
+      <!-- 
+        <lockingModel type="log4net.Appender.FileAppender+ExclusiveLock" />     排他ロック(default) 
+        <lockingModel type="log4net.Appender.FileAppender+MinimalLock" />       書き込みのたびにファイルをオープン
+        <lockingModel type="log4net.Appender.FileAppender+InterProcessLock" />  名前付きMutexロック
+      -->
+
       <!-- 全てのログ・レベルとする -->
       <filter type="log4net.Filter.LevelRangeFilter">
          <param name="LevelMax" value="FATAL" />
-         <param name="LevelMin" value="DEBUG" />
+         <param name="LevelMin" value="TRACE" />
       </filter>
       
       <!-- rollingStyle がSizeまたはCompositeの時の最大ファイルサイズ -->
@@ -27,11 +33,11 @@
       
       <!-- ログの出力書式 -->
       <layout type="log4net.Layout.PatternLayout">
-        <ConversionPattern value="%date [%thread] [%-5method] %message%n" />
+        <ConversionPattern value="%date %level [%thread] [%-8method] %message%n" />
       </layout>
     </appender>
     <root>
-      <!-- デバッグ以上のログを出力したい場合 -->
+      <!-- 最低出力レベル -->
       <level value="Trace" />
       <!-- どのログ出力先を使用するか -->
       <appender-ref ref="DebugLogDailyAppender" />

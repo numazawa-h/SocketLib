@@ -30,7 +30,7 @@ namespace SocketLib
             Application.SetCompatibleTextRenderingDefault(false);
             try
             {
-                Log.Init(0);
+                Log.Init();
                 var assembly = Assembly.GetExecutingAssembly().GetName();
                 var ver = assembly.Version;
                 Log.Info($"{assembly.Name} (version{ver.Major}.{ver.Minor}.{ver.Build}) Started*******************************************");
