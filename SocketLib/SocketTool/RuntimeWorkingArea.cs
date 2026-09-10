@@ -10,6 +10,7 @@ namespace SocketTool
 {
     public class RuntimeWorkingArea
     {
+        public string NetWorkName = null;
         private string _message_path;
         private string _script_path;
         // 作業域定義

@@ -50,6 +50,7 @@ namespace SampleMain
             string name = (string)cbx_NetworkName.SelectedItem;
             string config = NetworkDefine.GetInstance().GetConfig(name);
             RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+            runtime.NetWorkName = name;
             listensocket = new CommSocket(runtime);
             listensocket.OnExceptionEvent += OnException;
             listensocket.OnAcceptEvent += OnAccept;
@@ -81,6 +82,7 @@ namespace SampleMain
             string name = (string)cbx_NetworkName.SelectedItem;
             string config = NetworkDefine.GetInstance().GetConfig(name);
             RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
+            runtime.NetWorkName = name;
             CommSocket socket = new CommSocket(runtime);
             socket.OnExceptionEvent += OnException;
             socket.OnConnectEvent += OnConnect;
@@ -161,11 +163,7 @@ namespace SampleMain
             socket.OnDisConnectEvent += OnDisConnect;
 
             DisplayLog($"OnAccept {socket.RemoteIPAddress}:{socket.RemotePortno}");
-            string title = "サーバー";
-            if (cbx_NetworkName.SelectedIndex >= 0)
-            {
-                title = cbx_NetworkName.Text;
-            }
+            string title = socket.GetRuntime().NetWorkName ?? "サーバー";
             var frm = new SocketForm(socket, title);
             if (SocketFormLocation.X < 0)
             {
@@ -194,12 +192,9 @@ namespace SampleMain
                 this.Invoke(new NSocketEventHandler(OnConnect), new object[] { sender, args });
                 return;
             }
-            DisplayLog($"OnConnect {args.Socket.RemoteIPAddress}:{args.Socket.RemotePortno}");
-            string title = "クライアント";
-            if (cbx_NetworkName.SelectedIndex >= 0)
-            {
-                title = cbx_NetworkName.Text;
-            }
+            CommSocket socket = (CommSocket)args.Socket;
+            DisplayLog($"OnConnect {socket.RemoteIPAddress}:{socket.RemotePortno}");
+            string title = socket.GetRuntime().NetWorkName ?? "クライアント";
             var frm = new SocketForm((CommSocket)args.Socket, title);
             if (SocketFormLocation.X < 0)
             {
