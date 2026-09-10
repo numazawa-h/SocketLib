@@ -39,7 +39,7 @@ namespace SampleMain
             _Socket.OnPreSendCommEvent += OnPreSend;
             _Socket.OnSendCommEvent += OnSend;
 
-            WorkingArea working = socket.GeRuntime().Working;
+            WorkingArea working = socket.GetRuntime().Working;
             InitializeComponent();
 
             if (working.ContainsKeyIntValue("display_limit"))
@@ -74,7 +74,7 @@ namespace SampleMain
             // 電文表示指定チェックボックスセットアップ
             int cmdidx =0;
             int dispidx = 8;
-            foreach (ScriptGroup script in _Socket.GeRuntime().Scripts.GetScriptListOnDisplay())
+            foreach (ScriptGroup script in _Socket.GetRuntime().Scripts.GetScriptListOnDisplay())
             {
                 if (script.Display)
                 {
@@ -217,7 +217,7 @@ namespace SampleMain
                     DisplayLog($"RECV {msg.DName}{msg.GetDescription()}");
                 }
                 _log.Info($"RECV {msg.DName} [{new ByteArray(msg.GetHead()).to_hex(0, 0, " ")}] [{new ByteArray(msg.GetData()).to_hex(0, 0, " ")}]");
-                _Socket.GeRuntime().Scripts.ExecOnRecv(_Socket, msg);
+                _Socket.GetRuntime().Scripts.ExecOnRecv(_Socket, msg);
                 _CommMessageEditor.refresh();
             }
             catch (Exception ex)
@@ -238,7 +238,7 @@ namespace SampleMain
             CommMessage msg = (args.CommMsg);
             try
             {
-                _Socket.GeRuntime().Scripts.ExecOnSend(_Socket, msg);
+                _Socket.GetRuntime().Scripts.ExecOnSend(_Socket, msg);
             }
             catch (Exception ex)
             {
@@ -287,7 +287,7 @@ namespace SampleMain
         private void SocketForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _Socket.Close();
-            _Socket.GeRuntime().Scripts.ExecOnDisconnect();
+            _Socket.GetRuntime().Scripts.ExecOnDisconnect();
         }
 
         private void btn_clear_Click(object sender, EventArgs e)
@@ -300,7 +300,7 @@ namespace SampleMain
         {
             try
             {
-                _Socket.GeRuntime().Scripts.ExecOnConnect(_Socket);
+                _Socket.GetRuntime().Scripts.ExecOnConnect(_Socket);
             }
             catch (Exception ex)
             {
@@ -347,12 +347,12 @@ namespace SampleMain
                     string file_ext = Path.GetExtension(path);
                     if (file_ext == ".txt")
                     {
-                        CommMessage msg = CommMessage.LoadFileText(_Socket.GeRuntime(), path);
+                        CommMessage msg = CommMessage.LoadFileText(_Socket.GetRuntime(), path);
                         _Socket.Send(msg);
                     }
                     else if (file_ext == ".bin")
                     {
-                        CommMessage msg = CommMessage.LoadFileBinary(_Socket.GeRuntime(), path);
+                        CommMessage msg = CommMessage.LoadFileBinary(_Socket.GetRuntime(), path);
                         _Socket.Send(msg);
                     }
                     else if (file_ext == ".json")
@@ -360,7 +360,7 @@ namespace SampleMain
                         JsonConfig.RootNode root = JsonConfig.ReadJson(path);
                         foreach (Node def in root["Commands"])
                         {
-                            Command.ReadJson(def, _Socket.GeRuntime()).Exec(_Socket);
+                            Command.ReadJson(def, _Socket.GetRuntime()).Exec(_Socket);
                         }
                     }
                 }
@@ -380,7 +380,7 @@ namespace SampleMain
 
         private void Btn_init_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.InitCommMessage(_Socket.GeRuntime().Working);
+            _CommMessageEditor.InitCommMessage(_Socket.GetRuntime().Working);
         }
 
         private void Btn_send_Click(object sender, EventArgs e)
@@ -395,7 +395,7 @@ namespace SampleMain
 
         private void Btn_load_Click(object sender, EventArgs e)
         {
-            _CommMessageEditor.Load(_Socket.GeRuntime());
+            _CommMessageEditor.Load(_Socket.GetRuntime());
         }
     }
 }

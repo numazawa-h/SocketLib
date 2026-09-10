@@ -30,7 +30,7 @@ namespace SocketTool
         public event CommMessageEventHandler OnRecvCommEvent;
 
         private RuntimeWorkingArea _runtime;
-        public RuntimeWorkingArea GeRuntime() { return _runtime; }
+        public RuntimeWorkingArea GetRuntime() { return _runtime; }
 
         public CommSocket(RuntimeWorkingArea runtime) : base() 
         {
