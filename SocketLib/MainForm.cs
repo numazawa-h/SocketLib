@@ -80,6 +80,15 @@ namespace SampleMain
         private void btn_connect_Click(object sender, EventArgs e)
         {
             string name = (string)cbx_NetworkName.SelectedItem;
+            string iaddr1 = txt_ipAddr1.Text.Trim();
+            string portno1 = txt_portNo1.Text.Trim();
+            string iaddr2 = txt_ipAddr2.Text.Trim();
+            string portno2 = txt_portNo2.Text.Trim();
+            connect_exec(name, iaddr1, portno1, iaddr2, portno2);
+        }
+
+        private void connect_exec(string name, string iaddr1, string portno1, string iaddr2, string portno2)
+        {
             string config = NetworkDefine.GetInstance().GetConfig(name);
             RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
             runtime.NetWorkName = name;
@@ -88,8 +97,6 @@ namespace SampleMain
             socket.OnConnectEvent += OnConnect;
             socket.OnDisConnectEvent += OnDisConnect;
 
-            string iaddr1 = txt_ipAddr1.Text.Trim();
-            string portno1 = txt_portNo1.Text.Trim();
             if (iaddr1.Length > 0)
             {
                 try
@@ -103,8 +110,6 @@ namespace SampleMain
                     return;
                 }
             }
-            string iaddr2 = txt_ipAddr2.Text.Trim();
-            string portno2 = txt_portNo2.Text.Trim();
             if (iaddr2.Length == 0)
             {
                 OnException(this, new ThreadExceptionEventArgs(new Exception("Remote ipアドレスが指定されていません。")));
@@ -120,6 +125,26 @@ namespace SampleMain
                 OnException(this, new ThreadExceptionEventArgs(new Exception("Remote ipアドレスの指定が不正です。", ex)));
                 socket.Close();
                 return;
+            }
+        }
+
+        private void btn_auto_Click(object sender, EventArgs e)
+        {
+            NetworkDefine def = NetworkDefine.GetInstance();
+            foreach (string name in def.GetNames())
+            {
+                if (def.isAutoConnect(name))
+                {
+                    IPEndPoint local = def.GetLocalEndPoint(name);
+                    IPEndPoint remote = def.GetRemoteEndPoint(name);
+
+                    string iaddr1 = (local != null) ? local.Address.ToString() : "";
+                    string portno1 = (local != null) ? local.Port.ToString() : "";
+                    string iaddr2 = (remote != null) ? remote.Address.ToString() : "";
+                    string portno2 = (remote != null) ? remote.Port.ToString() : "";
+
+                    connect_exec(name, iaddr1, portno1, iaddr2, portno2);
+                }
             }
         }
 

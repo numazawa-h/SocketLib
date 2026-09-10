@@ -45,6 +45,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.btn_auto = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -85,6 +86,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btn_auto);
             this.panel1.Controls.Add(this.cbx_NetworkName);
             this.panel1.Controls.Add(this.btn_stopListen);
             this.panel1.Controls.Add(this.groupBox1);
@@ -228,6 +230,17 @@
             this.panel2.Size = new System.Drawing.Size(810, 445);
             this.panel2.TabIndex = 8;
             // 
+            // btn_auto
+            // 
+            this.btn_auto.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btn_auto.Location = new System.Drawing.Point(507, 125);
+            this.btn_auto.Name = "btn_auto";
+            this.btn_auto.Size = new System.Drawing.Size(122, 38);
+            this.btn_auto.TabIndex = 12;
+            this.btn_auto.Text = "auto";
+            this.btn_auto.UseVisualStyleBackColor = true;
+            this.btn_auto.Click += new System.EventHandler(this.btn_auto_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 24F);
@@ -266,6 +279,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox cbx_NetworkName;
+        private System.Windows.Forms.Button btn_auto;
     }
 }
 

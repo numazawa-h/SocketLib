@@ -30,8 +30,8 @@ namespace SocketTool
         protected Dictionary<string, (string script_path, string message_path)> _config = new Dictionary<string, (string, string)>();
         protected Dictionary<string, (string desc, string config, IPEndPoint local_addr, IPEndPoint remote_addr)> _listen_addr = new Dictionary<string, (string, string, IPEndPoint, IPEndPoint)>();
         protected Dictionary<string, (string desc, string config, IPEndPoint local_addr, IPEndPoint remote_addr)> _connect_addr = new Dictionary<string, (string, string, IPEndPoint, IPEndPoint)>();
+        protected Dictionary<string, bool> _auto_connect = new Dictionary<string, bool>();
         protected List<string> _names = new List<string>();
-
 
         public void ReadJson(string path)
         {
@@ -39,6 +39,7 @@ namespace SocketTool
             _config.Clear();
             _listen_addr.Clear();
             _connect_addr.Clear();
+            _auto_connect.Clear();
             _names.Clear();
 
             foreach (Node node in root["config"])
@@ -89,6 +90,8 @@ namespace SocketTool
                     local_addr = NSocket.GetIPEndPoint(iaddr, portno);
                 }
                 _connect_addr.Add(desc, (desc, config, local_addr, remote_addr));
+                bool auto = ((bool?)node["auto-connect"] is bool v) ? v : false;
+                _auto_connect.Add(desc, auto);
                 _names.Add(desc);
             }
         }
@@ -106,6 +109,11 @@ namespace SocketTool
         public bool isConnectAddr(string name)
         {
             return _connect_addr.ContainsKey(name);
+        }
+
+        public bool isAutoConnect(string name)
+        {
+            return (_auto_connect.ContainsKey(name))? _auto_connect[name]: false;
         }
 
         public IPEndPoint GetLocalEndPoint(string name)
