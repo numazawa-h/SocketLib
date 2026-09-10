@@ -284,6 +284,46 @@ namespace SampleMain
             }
             return true;
         }
+
+        private void SocketForm_Shown(object sender, EventArgs e)
+        {
+            // Form位置復元処理を行う
+            var pos = FormPosition.GetPosition(_Socket.GetRuntime().NetWorkName);
+            if (pos != null)
+            {
+                Point savedLocation = new Point(pos.X, pos.Y);
+
+                // 手動での位置指定を有効にする
+                this.StartPosition = FormStartPosition.Manual;
+
+                // 位置とサイズを復元
+                this.Location = savedLocation;
+                this.Size = new Size(pos.Width, pos.Height);
+            }
+        }
+
+        private void SocketForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // 最小化（Minimized）されている場合は位置がおかしくなるので保存をスキップ
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                return;
+            }
+
+            Rectangle rect;
+            if (this.WindowState == FormWindowState.Maximized)
+            {
+                // 最大化されている時は、通常状態に戻ったときの位置（RestoreBounds）を取得
+                rect = this.RestoreBounds;
+            }
+            else
+            {
+                // 通常状態（Normal）の時は、現在の位置（Location）とサイズ（Size）をそのまま取得
+                rect = new Rectangle(this.Location, this.Size);
+            }
+            FormPosition.PutPosition(_Socket.GetRuntime().NetWorkName, rect);
+        }
+
         private void SocketForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             _Socket.Close();

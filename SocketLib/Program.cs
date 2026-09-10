@@ -42,6 +42,7 @@ namespace SocketLib
                     string config = NetworkDefine.GetInstance().GetConfig(name);
                     RuntimeWorkingArea runtime = new RuntimeWorkingArea(config);
                 }
+                FormPosition.LoadPosition();
             }
             catch (Exception ex)
             {
@@ -49,8 +50,16 @@ namespace SocketLib
                 Environment.Exit(1);
             }
             Application.Run(new MainForm());
-
-
+            DialogResult result = MessageBox.Show(
+                "フォームの位置を保存しますか？",
+                "確認",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+            if (result == DialogResult.Yes)
+            {
+                FormPosition.SavePosition();
+            }
         }
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {

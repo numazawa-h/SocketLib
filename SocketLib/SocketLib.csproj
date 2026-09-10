@@ -80,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommMessageEditor.cs" />
+    <Compile Include="FormPosition.cs" />
     <Compile Include="NCommonUtility\NComboBox.cs">
       <SubType>Component</SubType>
     </Compile>

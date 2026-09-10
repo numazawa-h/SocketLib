@@ -47,7 +47,6 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.panel4 = new System.Windows.Forms.Panel();
             this.pnl_commMessage = new System.Windows.Forms.Panel();
-            this.cbx_001 = new NCommonUtility.NComboBox();
             this.lbl_001 = new System.Windows.Forms.Label();
             this.btn_001 = new System.Windows.Forms.Button();
             this.panel6 = new System.Windows.Forms.Panel();
@@ -55,6 +54,7 @@
             this.btn_save = new System.Windows.Forms.Button();
             this.btn_init = new System.Windows.Forms.Button();
             this.btn_send = new System.Windows.Forms.Button();
+            this.cbx_001 = new NCommonUtility.NComboBox();
             this.cbx_MessageType = new NCommonUtility.NComboBox();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -415,17 +415,6 @@
             this.pnl_commMessage.Size = new System.Drawing.Size(907, 444);
             this.pnl_commMessage.TabIndex = 56;
             // 
-            // cbx_001
-            // 
-            this.cbx_001.AllowEdit = true;
-            this.cbx_001.DisplayMember = "display";
-            this.cbx_001.FormattingEnabled = true;
-            this.cbx_001.Location = new System.Drawing.Point(49, 13);
-            this.cbx_001.Name = "cbx_001";
-            this.cbx_001.Size = new System.Drawing.Size(549, 32);
-            this.cbx_001.TabIndex = 61;
-            this.cbx_001.ValueMember = "value";
-            // 
             // lbl_001
             // 
             this.lbl_001.AutoSize = true;
@@ -502,6 +491,17 @@
             this.btn_send.UseVisualStyleBackColor = true;
             this.btn_send.Click += new System.EventHandler(this.Btn_send_Click);
             // 
+            // cbx_001
+            // 
+            this.cbx_001.AllowEdit = true;
+            this.cbx_001.DisplayMember = "display";
+            this.cbx_001.FormattingEnabled = true;
+            this.cbx_001.Location = new System.Drawing.Point(49, 13);
+            this.cbx_001.Name = "cbx_001";
+            this.cbx_001.Size = new System.Drawing.Size(549, 32);
+            this.cbx_001.TabIndex = 61;
+            this.cbx_001.ValueMember = "value";
+            // 
             // cbx_MessageType
             // 
             this.cbx_MessageType.AllowEdit = true;
@@ -524,8 +524,10 @@
             this.Controls.Add(this.tab1);
             this.Name = "SocketForm";
             this.Text = "送受信";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SocketForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SocketForm_FormClosed);
             this.Load += new System.EventHandler(this.SocketForm_Load);
+            this.Shown += new System.EventHandler(this.SocketForm_Shown);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.FormMain_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.FormMain_DragEnter);
             this.panel1.ResumeLayout(false);
