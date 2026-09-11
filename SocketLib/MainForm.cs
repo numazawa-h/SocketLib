@@ -128,7 +128,7 @@ namespace SampleMain
             }
         }
 
-        private void btn_auto_Click(object sender, EventArgs e)
+        private async void btn_auto_Click(object sender, EventArgs e)
         {
             NetworkDefine def = NetworkDefine.GetInstance();
             foreach (string name in def.GetNames())
@@ -144,6 +144,7 @@ namespace SampleMain
                     string portno2 = (remote != null) ? remote.Port.ToString() : "";
 
                     connect_exec(name, iaddr1, portno1, iaddr2, portno2);
+                    await Task.Delay(1);
                 }
             }
         }
