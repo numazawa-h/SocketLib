@@ -14,7 +14,6 @@ namespace SocketTool
     {
         protected Dictionary<string, int> _ivalues = new Dictionary<string, int>();
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
-        protected HashSet<string> _incriment_values = new HashSet<string>();
         protected Dictionary<string, CommMessage> _commMessages = new Dictionary<string, CommMessage>();
         protected Dictionary<string, CommMessage> _commMessagesInit = new Dictionary<string, CommMessage>();
         protected Dictionary<string, string> _commMessagesDisp = new Dictionary<string, string>();
@@ -42,12 +41,6 @@ namespace SocketTool
                             break;
                         case JsonValueKind.Number:
                             int ival = value.GetValue<int>();
-                            if (key.Substring(0, 2) == "++")
-                            {
-                                // インクリメント処理サポート(取得するたびにカウントアップする)
-                                key = key.Substring(2);
-                                working._incriment_values.Add(key);
-                            }
                             working._ivalues.Add(key, ival);
                             break;
                         default:
@@ -121,10 +114,15 @@ namespace SocketTool
             {
                 throw new Exception($"ScriptDefineに定義されていないvalues('{name}')を参照しました");
             }
-            if (_incriment_values.Contains(name))
+            return _ivalues[name];
+        }
+        public int GetIntValueIncriment(string name)
+        {
+            if (_ivalues.ContainsKey(name) == false)
             {
-                _ivalues[name] = _ivalues[name] + 1;
+                throw new Exception($"ScriptDefineに定義されていないvalues('{name}')を参照しました");
             }
+            _ivalues[name] = _ivalues[name] + 1;
             return _ivalues[name];
         }
         public void SetIntValue(string name, int val)

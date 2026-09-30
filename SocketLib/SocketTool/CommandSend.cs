@@ -95,6 +95,10 @@ namespace SocketTool
         public override void Exec(CommSocket socket, CommMessage resmsg = null)
         {
             CommMessage msg = new CommMessage(_msg);
+            foreach (var pair in _ivalues_runtime_incriment)
+            {
+                msg.SetFldValue(pair.Key, (ulong)_runtime.Working.GetIntValueIncriment(pair.Value));
+            }
             foreach (var pair in _ivalues_runtime)
             {
                 msg.SetFldValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));

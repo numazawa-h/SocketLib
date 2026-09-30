@@ -46,6 +46,10 @@ namespace SocketTool
                 msg.SetHedValue(pair.Key, pair.Value);
             }
 
+            foreach (var pair in _ivalues_runtime_incriment)
+            {
+                msg.SetHedValue(pair.Key, (ulong)_runtime.Working.GetIntValueIncriment(pair.Value));
+            }
             foreach (var pair in _ivalues_runtime)
             {
                 msg.SetHedValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));

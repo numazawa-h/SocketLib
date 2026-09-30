@@ -27,6 +27,7 @@ namespace SocketTool
         protected Dictionary<string, int> _ivalues = new Dictionary<string, int>();
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
         protected Dictionary<string, string> _ivalues_runtime = new Dictionary<string, string>();
+        protected Dictionary<string, string> _ivalues_runtime_incriment = new Dictionary<string, string>();
         protected Dictionary<string, string> _bvalues_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _datetime_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _msgcopy_runtime = new Dictionary<string, string>();
@@ -44,6 +45,7 @@ namespace SocketTool
             other._ivalues = _ivalues;
             other._bvalues = _bvalues;
             other._ivalues_runtime = _ivalues_runtime;
+            other._ivalues_runtime_incriment = _ivalues_runtime_incriment;
             other._bvalues_runtime = _bvalues_runtime;
             other._datetime_runtime = _datetime_runtime;
             other._msgcopy_runtime = _msgcopy_runtime;
@@ -64,6 +66,7 @@ namespace SocketTool
             _ivalues.Clear();
             _bvalues.Clear();
             _ivalues_runtime.Clear();
+            _ivalues_runtime_incriment.Clear();
             _bvalues_runtime.Clear();
             _datetime_runtime.Clear();
             _ivariable.Clear();
@@ -88,6 +91,7 @@ namespace SocketTool
                 switch (value.GetValueKind())
                 {
                     case System.Text.Json.JsonValueKind.Number:
+                        // 直値数字項目
                         int ival = value.GetValue<int>();
                         _ivalues.Add(key, ival);
                         break;
@@ -108,22 +112,35 @@ namespace SocketTool
                             }
                             else
                             {
+                                // 直値文字項目(日時形式)
                                 SetDateTimeValue(key, sval, fmt);
                             }
                         }
                         else
                         {
-                            // ScriptDefineの Working-area定義項目の時の処理
-                            if (_runtime.Working.ContainsKeyIntValue(sval))
+                            if (sval.StartsWith("++"))
                             {
+                                sval = sval.Substring(2);
+                                if (_runtime.Working.ContainsKeyIntValue(sval) == false)
+                                {
+                                    throw new Exception($"インクリメント指定するためにはWorking-areaに数値項目としての定義が必要です");
+                                }
+                                // ScriptDefineの Working-area数値項目
+                                _ivalues_runtime_incriment.Add(key, sval);
+                            }
+                            else if (_runtime.Working.ContainsKeyIntValue(sval))
+                            {
+                                // ScriptDefineの Working-area数値項目
                                 _ivalues_runtime.Add(key, sval);
                             }
                             else if (_runtime.Working.ContainsKeyByteValue(sval))
                             {
+                                // ScriptDefineの Working-area文字項目
                                 _bvalues_runtime.Add(key, sval);
                             }
                             else
                             {
+                                // 直値文字項目
                                 _bvalues.Add(key, ByteArray.StrToByte(sval));
                             }
                         }

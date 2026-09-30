@@ -11,8 +11,8 @@
   //   値にオブジェクトを指定する時は'dtype'の電文が「CommMessageDefine.config」に定義されていなければならない
   //   値にオブジェクトを指定する時はvaluesで初期値を指定できる
   "Working-area":{	
-    "++seqno":123,
-    "++carno": 100,
+    "seqno":123,
+    "carno": 123,
 
     "status":{"name":"状態送信電文", "dtype":"14", "values":{
     	"blk[0].b02_3":0, "sts001":"99",
@@ -29,7 +29,8 @@
   
   // Working-areaの電文をコレクション化する
   //   
-  "Working-collection":{	
+  "Working-collection":{
+    "Queue":"cardata",		// Add, Pop, Peekが使える
   },
 
   // 実行するコマンドを定義する
@@ -45,8 +46,8 @@
   //   reqcopyは要求電文の項目を応答電文の同一項目にコピーする
   //   msgcopyは受信電文の任意の項目をコピーする（項目名:受信電文項目名）
   "Commands":[	
-    { "id":"set-head", "cmd":"head", "values":{"dst":"mtype_dst","src":"mtype_src", "hdatm":"now", "seqno":"seqno" }},
-    { "id":"set-init", "cmd":"set", "values":{"seqno":0, } },
+    { "id":"set-head", "cmd":"head", "values":{"dst":"mtype_dst","src":"mtype_src", "hdatm":"now", "seqno":"++seqno" }},
+    { "id":"set-init", "cmd":"set", "values":{"seqno":0,"carno":100 } },
     { "id":"send-ack", "cmd":"send", "dtype":"91" },
     { "id":"send-nak", "cmd":"send", "dtype":"92", "values":{"reson-nak":1}},
     { "id":"send-health", "cmd":"send", "dtype":"22", },
@@ -70,7 +71,7 @@
 		]
 	},
 
-    { "id":"send-cardata", "cmd":"send", "msg":"cardata", "values":{"carno":"carno", "sdatm":"now", }},
+    { "id":"send-cardata", "cmd":"send", "msg":"cardata", "values":{"carno":"++carno", "sdatm":"now", }},
 
     { "id":"send-resend", "cmd":"send", "dtype":"40" , "values":{"send-id":18, "carno":255 }},
     { "id":"response-resend", "cmd":"send", "dtype":"4f", "reqcopy":["send-id", "carno"], "values":{"reason-4f":9}},
