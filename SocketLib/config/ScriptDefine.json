@@ -71,7 +71,11 @@
 		]
 	},
 
-    { "id":"send-cardata", "cmd":"send", "msg":"cardata", "values":{"carno":"++carno", "sdatm":"now", }},
+    { "id":"send-cardata", "cmd":"sequence", "cmds":[
+    		{"cmd":"send", "msg":"cardata", "values":{"carno":"++carno", "sdatm":"now", "carpos":"01", }},
+    		{"cmd":"send", "msg":"cardata", "values":{"carno":"++carno", "sdatm":"now", "carpos":"02", }},
+    	]
+    },
 
     { "id":"send-resend", "cmd":"send", "dtype":"40" , "values":{"send-id":18, "carno":255 }},
     { "id":"response-resend", "cmd":"send", "dtype":"4f", "reqcopy":["send-id", "carno"], "values":{"reason-4f":9}},

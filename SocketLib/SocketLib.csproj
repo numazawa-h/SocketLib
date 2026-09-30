@@ -86,6 +86,7 @@
     </Compile>
     <Compile Include="SocketTool\CaseList.cs" />
     <Compile Include="SocketTool\CommandSendWorkingMsg.cs" />
+    <Compile Include="SocketTool\CommandSeq.cs" />
     <Compile Include="SocketTool\CommandSetWorkingMsg.cs" />
     <Compile Include="SocketTool\CommandSetWorkingMsgConditional.cs" />
     <Compile Include="SocketTool\CommandTimer.cs" />

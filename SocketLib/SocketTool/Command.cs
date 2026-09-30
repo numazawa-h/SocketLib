@@ -242,6 +242,9 @@ namespace SocketTool
                 case "head":
                     cmd = new CommandHead(node, runtime);
                     break;
+                case "sequence":
+                    cmd = new CommandSeq(node, runtime);
+                    break;
                 case "set":
                     if (node.ContainsKey("msg"))
                     {
