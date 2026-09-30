@@ -12,16 +12,24 @@
   //   値にオブジェクトを指定する時はvaluesで初期値を指定できる
   "Working-area":{	
     "++seqno":123,
+    "++carno": 100,
+
     "status":{"name":"状態送信電文", "dtype":"14", "values":{
     	"blk[0].b02_3":0, "sts001":"99",
     }},
     "control":{"dtype":"30",},
+    "cardata":{"dtype":"31", "values":{"judgm":"01", "carpos":"01", } },
 
     "stsa":["a1","a2","a3",],
 
     "mtype_src":"00",	// 自装置タイプlocal_addrを選択した時に設定される
     "mtype_dst":"00",	// 相手装置タイプremote_addrを選択した時に設定される
     //"display_limit":5,	// 画面に表示する最大行数
+  },
+  
+  // Working-areaの電文をコレクション化する
+  //   
+  "Working-collection":{	
   },
 
   // 実行するコマンドを定義する
@@ -61,6 +69,8 @@
 	    	}
 		]
 	},
+
+    { "id":"send-cardata", "cmd":"send", "msg":"cardata", "values":{"carno":"carno", "sdatm":"now", }},
 
     { "id":"send-resend", "cmd":"send", "dtype":"40" , "values":{"send-id":18, "carno":255 }},
     { "id":"response-resend", "cmd":"send", "dtype":"4f", "reqcopy":["send-id", "carno"], "values":{"reason-4f":9}},
@@ -135,7 +145,8 @@
     { "id":"auto-connect","when":"connect", "cmd":[ "set-init", "send-init"] },
     { "id":"auto-ack", "checked":false, "when":"recv", "without":["91","92","22"], "cmd":"send-ack" },
     { "id":"health-check", "checked":false, "when":"timer", "start":2000, "interval":5000, "cmd":"send-health" },
-    { "id":"send-resend", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":"send-resend" },
+    { "id":"send-resend", "checked":false, "when":"timer", "start":0, "interval":1000, "cmd":"send-resend" },
+    { "id":"send-cardata", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":"send-cardata" },
     { "id":"send-control", "checked":false, "when":"timer", "start":0, "interval":200, 
     	"phaseCnt":30,"scripts":[
         	{ "phase":0, "cmd":["set-control1", "send-control", ] },

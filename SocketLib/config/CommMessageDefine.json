@@ -26,6 +26,13 @@
 			{ "id":"reason-4f", "ofs": 8, "len":4, "disp":true, },
 		  ] 
 		},
+		{ "id":"31", "name":"車両データ", "len":  16,"flds":[
+			{ "id":"carno", "ofs": 0, "len":4, "disp":true, },
+			{ "id":"sdatm", "ofs": 4, "len":7,  },
+			{ "id":"judgm", "ofs": 11, "len":1, "disp":true, },
+			{ "id":"carpos", "ofs": 12, "len":1, "disp":true, },
+		  ] 
+		},
 		{ "id":"30", "name":"個別制御", "len":  64,"flds":[
 			{ "id":"control-type", "ofs": 0, "len":2, "disp":true, },
 			// control-typeが"0001"の時
