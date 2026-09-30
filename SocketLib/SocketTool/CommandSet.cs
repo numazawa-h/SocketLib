@@ -16,39 +16,8 @@ namespace SocketTool
         {
         }
 
-        public CommandSet(Node node, RuntimeWorkingArea runtime)
+        public CommandSet(Node node, RuntimeWorkingArea runtime): base(node, runtime) 
         {
-            _runtime = runtime;
-            CommandId = node["id"].Required();
-            _ivalues.Clear();
-            _bvalues.Clear();
-            _ivalues_runtime.Clear();   // 未使用
-            _bvalues_runtime.Clear();   // 未使用
-            _datetime_runtime.Clear();  // 未使用
-
-            Dictionary<string, JsonValue> values = node["values"].GetPropertyValues();
-            foreach (var pair in values)
-            {
-                string key = pair.Key;
-                JsonValue value = pair.Value;
-                switch (value.GetValueKind())
-                {
-                    case System.Text.Json.JsonValueKind.Number:
-                        if (_runtime.Working.ContainsKeyIntValue(key)==false)
-                        {
-                            throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
-                        }
-                        _ivalues.Add(key, value.GetValue<int>());
-                        break;
-                    case System.Text.Json.JsonValueKind.String:
-                        if (_runtime.Working.ContainsKeyByteValue(key) == false)
-                        {
-                            throw new Exception($"'{CommandId}'のvalues指定('{key}')が'values'に定義されていません");
-                        }
-                        _bvalues.Add(key, ByteArray.StrToByte(value.ToString()));
-                        break;
-                }
-            }
         }
 
         public override Command Copy()
