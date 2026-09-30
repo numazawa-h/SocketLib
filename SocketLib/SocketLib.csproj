@@ -85,6 +85,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="SocketTool\CaseList.cs" />
+    <Compile Include="SocketTool\CommandCollection.cs" />
     <Compile Include="SocketTool\CommandSendWorkingMsg.cs" />
     <Compile Include="SocketTool\CommandSeq.cs" />
     <Compile Include="SocketTool\CommandSetWorkingMsg.cs" />

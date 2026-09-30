@@ -235,8 +235,8 @@ namespace SocketTool
         public static Command ReadJson(Node node, RuntimeWorkingArea runtime)
         {
             Command cmd = null;
-            string cmdid = node["id"].Required();
-            string cmdtype = node["cmd"].Required();
+            string cmdid = ((string)node["id"].Required()).ToLower();
+            string cmdtype = ((string)node["cmd"].Required()).ToLower();
             switch (cmdtype)
             {
                 case "head":
@@ -244,6 +244,10 @@ namespace SocketTool
                     break;
                 case "sequence":
                     cmd = new CommandSeq(node, runtime);
+                    break;
+                case "enqueue":
+                case "dequeue":
+                    cmd = new CommandCollection(node, runtime, cmdtype);
                     break;
                 case "set":
                     if (node.ContainsKey("msg"))

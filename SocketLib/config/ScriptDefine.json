@@ -30,7 +30,7 @@
   // Working-areaの電文をコレクション化する
   //   
   "Working-collection":{
-    "Queue":"cardata",		// Add, Pop, Peekが使える
+    "Queue":"cardata",		// enqueue, dequeue が使えるようにする
   },
 
   // 実行するコマンドを定義する
@@ -71,9 +71,15 @@
 		]
 	},
 
-    { "id":"send-cardata", "cmd":"sequence", "cmds":[
+    { "id":"send-S2", "cmd":"sequence", "cmds":[
     		{"cmd":"send", "msg":"cardata", "values":{"carno":"++carno", "sdatm":"now", "carpos":"01", }},
-    		{"cmd":"send", "msg":"cardata", "values":{"carno":"++carno", "sdatm":"now", "carpos":"02", }},
+    		{"cmd":"enqueue", "msg":"cardata", },
+    	]
+    },
+
+    { "id":"send-S4", "cmd":"sequence", "cmds":[
+    		{"cmd":"dequeue", "msg":"cardata", },
+    		{"cmd":"send", "msg":"cardata", "values":{ "carpos":"02", }},
     	]
     },
 
@@ -151,11 +157,18 @@
     { "id":"auto-ack", "checked":false, "when":"recv", "without":["91","92","22"], "cmd":"send-ack" },
     { "id":"health-check", "checked":false, "when":"timer", "start":2000, "interval":5000, "cmd":"send-health" },
     { "id":"send-resend", "checked":false, "when":"timer", "start":0, "interval":1000, "cmd":"send-resend" },
-    { "id":"send-cardata", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":"send-cardata" },
+    { "id":"send-cardata", "checked":false, "when":"timer", "start":0, "interval":1000, 
+    	"phaseCnt":5,"scripts":[
+        	{ "phase":0, "cmd":"send-S2"},
+        	{ "phase":1, "cmd":"send-S2"},
+        	{ "phase":2, "cmd":"send-S4"},
+        	{ "phase":3, "cmd":"send-S4"},
+    	]
+    },
     { "id":"send-control", "checked":false, "when":"timer", "start":0, "interval":200, 
     	"phaseCnt":30,"scripts":[
         	{ "phase":0, "cmd":["set-control1", "send-control", ] },
-        	{ "phase":[2,4, {"<":3}, {">=":10, "<":15}, {">":20 }],"msg":"control", "cmd":["set-control2", "send-control", ] },
+        	{ "phase":[2,4, {"<":3}, {">=":10, "<":15}, {">":20 }],"msg":"control", "cmd":["set-control2", "send-S2", ] },
     	]
     },
     { "id":"timer-ack", "when":"timer", "start":0, "interval":1000, "repeatCnt":1,

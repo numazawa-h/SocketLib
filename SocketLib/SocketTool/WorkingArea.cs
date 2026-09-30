@@ -17,6 +17,8 @@ namespace SocketTool
         protected Dictionary<string, CommMessage> _commMessages = new Dictionary<string, CommMessage>();
         protected Dictionary<string, CommMessage> _commMessagesInit = new Dictionary<string, CommMessage>();
         protected Dictionary<string, string> _commMessagesDisp = new Dictionary<string, string>();
+        protected Dictionary<string, string[]> _commMessagesCollection = new Dictionary<string, string[]>();
+        protected Dictionary<string, Queue<CommMessage>> _commMessagesQue = new Dictionary<string, Queue<CommMessage>>();
 
         private WorkingArea()
         {
@@ -52,6 +54,34 @@ namespace SocketTool
                     throw new InvalidOperationException($"ScriptDefineのvalues('{key}')で読み込みエラー in {path}", ex);
                 }
             }
+
+            // Collection
+            if (root.ContainsKey("Working-collection"))
+            {
+                Node node = root["Working-collection"];
+                // Queue
+                List<string> que_list = new List<string>();
+                foreach (string key in new string[] { "Queue", "queue" })
+                {
+                    foreach (var name in node.GetStringValues(key))
+                    {
+                        que_list.Add(name);
+                    }
+                }
+                working._commMessagesCollection.Add("queue", que_list.ToArray());
+
+                // Stack
+                List<string> stk_list = new List<string>();
+                foreach (string key in new string[] { "Stack", "stack" })
+                {
+                    foreach (var name in node.GetStringValues(key))
+                    {
+                        stk_list.Add(name);
+                    }
+                }
+                working._commMessagesCollection.Add("stack", stk_list.ToArray());
+            }
+
             return working;
         }
 
@@ -75,6 +105,14 @@ namespace SocketTool
                         display = msg.DName;
                     }
                     this._commMessagesDisp.Add(display, id);
+
+                    if (this._commMessagesCollection.ContainsKey("queue")){
+                        if (this._commMessagesCollection["queue"].Contains<string>(id))
+                        {
+                            Queue<CommMessage> que = new Queue<CommMessage>();
+                            this._commMessagesQue.Add(id, que);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -104,6 +142,22 @@ namespace SocketTool
             }
             return disp;
         }
+
+        public bool ContainsQue(string name)
+        {
+            return _commMessagesCollection["queue"].Contains<string>(name);
+        }
+        public void EnqueuMessage(string id)
+        {
+            CommMessage msg = new CommMessage(_commMessages[id]);
+            _commMessagesQue[id].Enqueue(msg);
+        }
+        public void DequeuMessage(string id)
+        {
+            CommMessage msg = _commMessagesQue[id].Dequeue();
+            _commMessages[id] = msg;
+        }
+
         public bool ContainsKeyIntValue(string name)
         {
             return _ivalues.ContainsKey(name);
