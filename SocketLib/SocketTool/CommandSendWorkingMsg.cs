@@ -33,6 +33,14 @@ namespace SocketTool
         {
             CommMessage msg = _runtime.Working.GetValueMsg(_name);
 
+            foreach (var pair in _ivalues)
+            {
+                msg.SetFldValue(pair.Key, (ulong)pair.Value);
+            }
+            foreach (var pair in _bvalues)
+            {
+                msg.SetFldValue(pair.Key, pair.Value);
+            }
             foreach (var pair in _ivalues_runtime)
             {
                 msg.SetFldValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));
