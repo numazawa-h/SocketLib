@@ -179,6 +179,15 @@ namespace SocketTool
             _ivalues[name] = _ivalues[name] + 1;
             return _ivalues[name];
         }
+        public int GetIntValueDecriment(string name)
+        {
+            if (_ivalues.ContainsKey(name) == false)
+            {
+                throw new Exception($"ScriptDefineに定義されていないvalues('{name}')を参照しました");
+            }
+            _ivalues[name] = _ivalues[name] - 1;
+            return _ivalues[name];
+        }
         public void SetIntValue(string name, int val)
         {
             _ivalues[name] = val;

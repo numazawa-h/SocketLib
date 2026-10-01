@@ -28,6 +28,7 @@ namespace SocketTool
         protected Dictionary<string, byte[]> _bvalues = new Dictionary<string, byte[]>();
         protected Dictionary<string, string> _ivalues_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _ivalues_runtime_incriment = new Dictionary<string, string>();
+        protected Dictionary<string, string> _ivalues_runtime_decriment = new Dictionary<string, string>();
         protected Dictionary<string, string> _bvalues_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _datetime_runtime = new Dictionary<string, string>();
         protected Dictionary<string, string> _msgcopy_runtime = new Dictionary<string, string>();
@@ -46,6 +47,7 @@ namespace SocketTool
             other._bvalues = _bvalues;
             other._ivalues_runtime = _ivalues_runtime;
             other._ivalues_runtime_incriment = _ivalues_runtime_incriment;
+            other._ivalues_runtime_decriment = _ivalues_runtime_decriment;
             other._bvalues_runtime = _bvalues_runtime;
             other._datetime_runtime = _datetime_runtime;
             other._msgcopy_runtime = _msgcopy_runtime;
@@ -67,6 +69,7 @@ namespace SocketTool
             _bvalues.Clear();
             _ivalues_runtime.Clear();
             _ivalues_runtime_incriment.Clear();
+            _ivalues_runtime_decriment.Clear();
             _bvalues_runtime.Clear();
             _datetime_runtime.Clear();
             _ivariable.Clear();
@@ -127,6 +130,16 @@ namespace SocketTool
                                 }
                                 // ScriptDefineの Working-area数値項目
                                 _ivalues_runtime_incriment.Add(key, sval);
+                            }
+                            else if (sval.StartsWith("--"))
+                            {
+                                sval = sval.Substring(2);
+                                if (_runtime.Working.ContainsKeyIntValue(sval) == false)
+                                {
+                                    throw new Exception($"デクリメント指定するためにはWorking-areaに数値項目としての定義が必要です");
+                                }
+                                // ScriptDefineの Working-area数値項目
+                                _ivalues_runtime_decriment.Add(key, sval);
                             }
                             else if (_runtime.Working.ContainsKeyIntValue(sval))
                             {

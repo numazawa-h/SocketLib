@@ -50,6 +50,10 @@ namespace SocketTool
             {
                 msg.SetHedValue(pair.Key, (ulong)_runtime.Working.GetIntValueIncriment(pair.Value));
             }
+            foreach (var pair in _ivalues_runtime_decriment)
+            {
+                msg.SetHedValue(pair.Key, (ulong)_runtime.Working.GetIntValueDecriment(pair.Value));
+            }
             foreach (var pair in _ivalues_runtime)
             {
                 msg.SetHedValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));
