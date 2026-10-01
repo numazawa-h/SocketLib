@@ -183,6 +183,10 @@ namespace SampleMain
 
         private void DisplayLog(string message)
         {
+            if (_display_limit < 0 )
+            {
+                return;
+            }
             ++_display_line;
             if (_display_limit>=0 && _display_line > _display_limit)
             {
