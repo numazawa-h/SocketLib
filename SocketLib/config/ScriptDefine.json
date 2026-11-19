@@ -11,17 +11,26 @@
   //   値にオブジェクトを指定する時は'dtype'の電文が「CommMessageDefine.config」に定義されていなければならない
   //   値にオブジェクトを指定する時はvaluesで初期値を指定できる
   "Working-area":{	
-    "++seqno":123,
+    "seqno":123,
+    "carno": 123,
+
     "status":{"name":"状態送信電文", "dtype":"14", "values":{
     	"blk[0].b02_3":0, "sts001":"99",
     }},
     "control":{"dtype":"30",},
+    "cardata":{"dtype":"31", "values":{"judgm":"01", "carpos":"01", } },
 
     "stsa":["a1","a2","a3",],
 
     "mtype_src":"00",	// 自装置タイプlocal_addrを選択した時に設定される
     "mtype_dst":"00",	// 相手装置タイプremote_addrを選択した時に設定される
     "display_limit":0,	// 画面に表示する最大行数 -1:表示抑制、0:無制限
+  },
+  
+  // Working-areaの電文をコレクション化する
+  //   
+  "Working-collection":{
+    "Queue":"cardata",		// enqueue, dequeue が使えるようにする
   },
 
   // 実行するコマンドを定義する
@@ -37,8 +46,8 @@
   //   reqcopyは要求電文の項目を応答電文の同一項目にコピーする
   //   msgcopyは受信電文の任意の項目をコピーする（項目名:受信電文項目名）
   "Commands":[	
-    { "id":"set-head", "cmd":"head", "values":{"dst":"mtype_dst","src":"mtype_src", "hdatm":"now", "seqno":"seqno" }},
-    { "id":"set-init", "cmd":"set", "values":{"seqno":0, } },
+    { "id":"set-head", "cmd":"head", "values":{"dst":"mtype_dst","src":"mtype_src", "hdatm":"now", "seqno":"++seqno" }},
+    { "id":"set-init", "cmd":"set", "values":{"seqno":0,"carno":100 } },
     { "id":"send-ack", "cmd":"send", "dtype":"91" },
     { "id":"send-nak", "cmd":"send", "dtype":"92", "values":{"reson-nak":1}},
     { "id":"send-health", "cmd":"send", "dtype":"22", },
@@ -61,6 +70,18 @@
 	    	}
 		]
 	},
+
+    { "id":"send-S2", "cmd":"sequence", "cmds":[
+    		{"cmd":"send", "msg":"cardata", "values":{"carno":"++carno", "sdatm":"now", "carpos":"01", }},
+    		{"cmd":"enqueue", "msg":"cardata", },
+    	]
+    },
+
+    { "id":"send-S4", "cmd":"sequence", "cmds":[
+    		{"cmd":"dequeue", "msg":"cardata", },
+    		{"cmd":"send", "msg":"cardata", "values":{ "carpos":"02", }},
+    	]
+    },
 
     { "id":"send-resend", "cmd":"send", "dtype":"40" , "values":{"send-id":18, "carno":255 }},
     { "id":"response-resend", "cmd":"send", "dtype":"4f", "reqcopy":["send-id", "carno"], "values":{"reason-4f":9}},
@@ -135,11 +156,19 @@
     { "id":"auto-connect","when":"connect", "cmd":[ "set-init", "send-init"] },
     { "id":"auto-ack", "checked":false, "when":"recv", "without":["91","92","22"], "cmd":"send-ack" },
     { "id":"health-check", "checked":false, "when":"timer", "start":2000, "interval":5000, "cmd":"send-health" },
-    { "id":"send-resend", "checked":false, "when":"timer", "start":0, "interval":5000, "cmd":"send-resend" },
+    { "id":"send-resend", "checked":false, "when":"timer", "start":0, "interval":1000, "cmd":"send-resend" },
+    { "id":"send-cardata", "checked":false, "when":"timer", "start":0, "interval":1000, 
+    	"phaseCnt":5,"scripts":[
+        	{ "phase":0, "cmd":"send-S2"},
+        	{ "phase":1, "cmd":"send-S2"},
+        	{ "phase":2, "cmd":"send-S4"},
+        	{ "phase":3, "cmd":"send-S4"},
+    	]
+    },
     { "id":"send-control", "checked":false, "when":"timer", "start":0, "interval":200, 
     	"phaseCnt":30,"scripts":[
         	{ "phase":0, "cmd":["set-control1", "send-control", ] },
-        	{ "phase":[2,4, {"<":3}, {">=":10, "<":15}, {">":20 }],"msg":"control", "cmd":["set-control2", "send-control", ] },
+        	{ "phase":[2,4, {"<":3}, {">=":10, "<":15}, {">":20 }],"msg":"control", "cmd":["set-control2", "send-S2", ] },
     	]
     },
     { "id":"timer-ack", "when":"timer", "start":0, "interval":1000, "repeatCnt":1,

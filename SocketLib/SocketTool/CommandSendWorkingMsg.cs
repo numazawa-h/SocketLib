@@ -41,6 +41,14 @@ namespace SocketTool
             {
                 msg.SetFldValue(pair.Key, pair.Value);
             }
+            foreach (var pair in _ivalues_runtime_incriment)
+            {
+                msg.SetFldValue(pair.Key, (ulong)_runtime.Working.GetIntValueIncriment(pair.Value));
+            }
+            foreach (var pair in _ivalues_runtime_decriment)
+            {
+                msg.SetFldValue(pair.Key, (ulong)_runtime.Working.GetIntValueDecriment(pair.Value));
+            }
             foreach (var pair in _ivalues_runtime)
             {
                 msg.SetFldValue(pair.Key, (ulong)_runtime.Working.GetIntValue(pair.Value));
