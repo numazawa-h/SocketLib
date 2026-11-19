@@ -85,6 +85,7 @@ namespace SocketTool
         private int _repeat = 0;
         private Timer _timer = null;
         CommSocket _socket = null;
+        private bool _OnExcuting = false;
 
         public ScriptGroupOnTimer(Node def, Dictionary<string, Command> comands, RuntimeWorkingArea runtime) : base(def, comands, runtime)
         {
@@ -131,19 +132,36 @@ namespace SocketTool
             }
             if (Enabled == false || _socket == null)
             {
+                _phase = 0;
+                _repeat = 0;
                 return;
             }
             if (_repeatCnt > 0 && _repeat >= _repeatCnt)
             {
+                _phase = 0;
+                _repeat = 0;
                 return;
             }
 
+            lock (this)
+            {
+                if(_OnExcuting == true)
+                {
+                    // 前回タイマー処理中なら処理しない
+                    return;
+                }
+                _OnExcuting = true;　
+            }
             foreach (var script in _scripts)
             {
                 if (script.OnPhase(_phase))
                 {
                     script.Exec(_socket);
                 }
+            }
+            lock (this)
+            {
+                _OnExcuting = false;
             }
 
             if (_phase < _phaseCnt)
