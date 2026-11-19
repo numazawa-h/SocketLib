@@ -130,9 +130,9 @@ namespace NCommonUtility
             }
 
             int rcnt = _soc.Receive(_comm_header, _head_recv_cnt, HeaderSize - _head_recv_cnt, SocketFlags.None);
-            if (rcnt <= 0)
+            if (rcnt == 0)
             {
-                throw new Exception($"socket receive error({rcnt})");
+                throw new Exception($"Socket is closed normally by another");
             }
             _head_recv_cnt += rcnt;
         }
