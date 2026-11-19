@@ -91,7 +91,7 @@ namespace SocketTool
             _dueTime = (int?)def["start"] is int v1 ? v1 : 0;
             _period = def["interval"].Required();
             _phaseCnt = (int?)def["phaseCnt"] is int v2 ? v2 : 0;
-            _repeatCnt = (int?)def["repeatCnt"] is int v3 ? v3 : 0;
+            _repeatCnt = (int?)def["repeatCnt"] is int v3 ? v3 : 1;
         }
 
         public void Start(CommSocket socket)
