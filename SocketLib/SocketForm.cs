@@ -159,6 +159,13 @@ namespace SampleMain
             var assembly = Assembly.GetExecutingAssembly().GetName();
             var ver = assembly.Version;
             _log.Info($"{assembly.Name} (version{ver.Major}.{ver.Minor}.{ver.Build}) Started(SocketForm)*******************************************");
+        
+            // 画面ログ表示制御
+            if( _display_limit < 0 )
+            {
+                // マイナスなら表示しない
+                txt_log.Enabled = false;
+            }
         }
 
         /// <summary>
@@ -187,12 +194,12 @@ namespace SampleMain
             {
                 return;
             }
-            ++_display_line;
-            if (_display_limit>=0 && _display_line > _display_limit)
+            if (_display_limit > 0 && _display_line > _display_limit)
             {
                 // 指定の表示行数を超えていたら表示しない
                 return;
             }
+            ++_display_line;
             txt_log.Text += $"{DateTime.Now} {message}\r\n";
         }
 
